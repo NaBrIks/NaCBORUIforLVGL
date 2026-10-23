@@ -1,0 +1,85 @@
+{
+  "format": "lvgl-screen-draft-1",
+  "id": "screen_1",
+  "name": "Экран 1",
+  "size": {
+    "width": 800,
+    "height": 480
+  },
+  "styles": {},
+  "root": {
+    "id": "root",
+    "type": "obj",
+    "props": {},
+    "style": {
+      "bg_color": "#17252d",
+      "bg_opa": 255,
+      "pad_all": 24,
+      "layout": "LV_LAYOUT_FLEX",
+      "flex_flow": "LV_FLEX_FLOW_COLUMN",
+      "pad_row": 16
+    },
+    "children": [
+      {
+        "id": "title",
+        "type": "label",
+        "props": {
+          "text": "New screen"
+        },
+        "style": {
+          "text_color": "#ffffff",
+          "text_font": "montserrat_28"
+        },
+        "children": []
+      },
+      {
+        "id": "content",
+        "type": "obj",
+        "props": {},
+        "style": {
+          "width": {
+            "pct": 100
+          },
+          "height": 260,
+          "bg_color": "#253b47",
+          "bg_opa": 255,
+          "radius": 8,
+          "pad_all": 16,
+          "layout": "LV_LAYOUT_FLEX",
+          "flex_flow": "LV_FLEX_FLOW_ROW",
+          "pad_column": 16
+        },
+        "children": [
+          {
+            "id": "value",
+            "type": "label",
+            "props": {
+              "text": "65 %"
+            },
+            "style": {
+              "text_color": "#80dfb0",
+              "text_font": "montserrat_28"
+            },
+            "children": []
+          },
+          {
+            "id": "level",
+            "type": "bar",
+            "props": {
+              "min": 0,
+              "max": 100,
+              "value": 65
+            },
+            "style": {
+              "width": 280,
+              "height": 24,
+              "bg_color": "#10212c",
+              "bg_opa": 255
+            },
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+}

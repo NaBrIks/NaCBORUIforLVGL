@@ -1,0 +1,25 @@
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {assertAbiCompatible} from './style-abi.mjs';
+import {generateStyleDispatch} from './style_dispatch_generator.mjs';
+const check=process.argv.includes('--check');
+if(check&&process.argv.some(arg=>['--init','--update'].includes(arg)))throw Error('--check cannot mutate a contract');
+async function writeGenerated(path,source){if(check){if(await readFile(path,'utf8')!==source)throw Error('Stale generated file: '+path);}else await writeFile(path,source);}
+const root=new URL('../',import.meta.url);
+const path=new URL('contracts/style-api-v2.json',root);
+if(process.argv.includes('--init')||process.argv.includes('--update'))throw Error('Edit the v2 contract explicitly, then regenerate; v1 is historical.');
+const raw=await readFile(path,'utf8'),contract=JSON.parse(raw);
+assertAbiCompatible(JSON.parse(await readFile(new URL('contracts/style-abi-v2.lock.json',root),'utf8')),contract);
+const hash=createHash('sha256').update(raw).digest('hex');
+await writeGenerated(new URL('src/style_methods.inc',root),generateStyleDispatch(contract));
+if(!process.argv.includes('--check'))await mkdir(new URL('packages/style-codec/',root),{recursive:true});
+await writeGenerated(new URL('packages/style-codec/contract.js',root),'// Generated; source: contracts/style-api-v2.json\nexport const contract='+JSON.stringify({...contract,sha256:hash})+';\n');
+await writeGenerated(new URL('include/lvgl_cbor/contract.hpp',root),`#pragma once\n#include <cstddef>\nnamespace lvgl_cbor {inline constexpr const char *contract_sha256="${hash}";\ninline constexpr unsigned style_contract_version=2;
+inline constexpr size_t style_packet_bytes=${contract.maxPacketBytes}, global_style_capacity=${contract.maxStylesPerScope};\ninline constexpr size_t style_grid_max_tracks=${contract.valueRules.grid.maxTracks}, style_storage_values=${contract.valueRules.grid.maxStoredValues};\ninline constexpr int style_grid_max_pixels=${contract.valueRules.grid.maxPixels}, style_grid_max_fraction=${contract.valueRules.grid.maxFraction};\n}\n`);
+const indices=`# Индексы общего стиля: ABI v2\n\nСгенерировано из [контракта](../contracts/style-api-v2.json); вручную не менять. Семейство: shared, LVGL ${contract.lvgl}. Старший байт числа — сигнатура, младший — индекс метода внутри выбранной сигнатуры. Номера других семейств независимы.\n\nSHA256 исходного файла: \`${hash}\`.\n\n## Сигнатуры\n\nКоличество аргументов здесь не включает получателя lv_style_t *. В HTML-матрице колонка «Парам.» считает полную C-сигнатуру, включая получателя.\n\n| № сигн. | Аргументов в CBOR | Сигнатура C |\n|---:|---:|---|\n${contract.signatures.map(s=>`| ${s.id} | ${s.parameters.length} | \`${s.c}\` |`).join('\n')}\n\n## Методы\n\n| Индекс | № сигн. | Opcode hex | Opcode uint | Имя JSON | Функция |\n|---:|---:|---:|---:|---|---|\n${contract.methods.map(m=>`| ${m.index} | ${m.signature} | 0x${m.opcode.toString(16).padStart(4,'0')} | ${m.opcode} | ${m.alias} | ${m.name} |`).join('\n')}\n`;
+await writeGenerated(new URL('docs/readme_style_indices_ru.md',root),indices);
+const matrix=JSON.parse(await readFile(new URL('docs/style_matrix_lvgl_9_6.data.json',root),'utf8'));
+const labels={x:'Координата X',y:'Координата Y',width:'Ширина',height:'Высота',bg_color:'Фон',text_color:'Текст',border_color:'Граница',text_font:'Шрифт',bg_opa:'Непрозрачность фона',border_width:'Толщина границы',radius:'Радиус углов'};
+if(!process.argv.includes('--check'))await mkdir(new URL('frontend/src/generated/',root),{recursive:true});
+await writeGenerated(new URL('frontend/src/generated/style-fields.js',root),'// Generated from the LVGL 9.6 style matrix.\nexport const styleGroups='+JSON.stringify(matrix.groups)+';\nexport const styleFields='+JSON.stringify(matrix.properties.map(p=>({...p,label:labels[p.name]??p.name})))+';\n');
+console.log(`Style ABI v2: ${contract.methods.length} methods, ${contract.signatures.length} signatures; SHA256 ${hash}`);

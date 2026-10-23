@@ -1,0 +1,85 @@
+{
+  "format": "lvgl-screen-draft-1",
+  "id": "component",
+  "name": "MVP · независимый компонент",
+  "theme": "none",
+  "size": {
+    "width": 240,
+    "height": 120
+  },
+  "styles": {},
+  "root": {
+    "id": "root",
+    "type": "obj",
+    "style": {
+      "bg_color": "#204050",
+      "bg_opa": 255,
+      "pad_all": 8,
+      "radius": 8
+    },
+    "props": {},
+    "flags": {
+      "SCROLLABLE": false
+    },
+    "children": [
+      {
+        "id": "caption",
+        "type": "label",
+        "style": {
+          "text_color": "#ffffff",
+          "x": 8,
+          "y": 8,
+          "text_font": "montserrat_20"
+        },
+        "props": {
+          "text": "Repeated component"
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      },
+      {
+        "id": "trace",
+        "type": "line",
+        "style": {
+          "x": 8,
+          "y": 44,
+          "width": 200,
+          "height": 50,
+          "line_color": "#3dbb91",
+          "line_width": 3
+        },
+        "props": {
+          "points": [
+            [
+              0,
+              40
+            ],
+            [
+              50,
+              10
+            ],
+            [
+              100,
+              30
+            ],
+            [
+              150,
+              0
+            ],
+            [
+              200,
+              25
+            ]
+          ]
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      }
+    ]
+  },
+  "bindings": []
+}

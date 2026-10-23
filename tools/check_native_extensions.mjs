@@ -1,0 +1,15 @@
+import {readFile} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import {decodeScreen,encodeScreen} from '../packages/screen-codec/index.js';
+const root=new URL('../local/screen-fixtures/',import.meta.url);
+const caps=JSON.parse(await readFile(new URL('runtime-extension-capabilities.json',root)));
+const bytes=new Uint8Array(await readFile(new URL('extension.cbor',root)));
+assert(caps.availableWidgets.includes(256));
+assert.deepEqual(encodeScreen(decodeScreen(bytes,caps),'extension',caps),bytes);
+console.log('Native runtime registration -> actual capabilities -> PC compiler roundtrip passed.');
+const demoRoot=new URL('../local/native-widget-fixtures/',import.meta.url);
+const nativeCaps=JSON.parse(await readFile(new URL('native-capabilities.json',demoRoot)));
+const nativeBytes=new Uint8Array(await readFile(new URL('demo.cbor',demoRoot)));
+assert.equal(nativeCaps.extensions.length,3);
+assert.deepEqual(encodeScreen(decodeScreen(nativeBytes,nativeCaps),'native-demo',nativeCaps),nativeBytes);
+console.log('Three native handlers -> actual published metadata -> PC compiler roundtrip passed.');

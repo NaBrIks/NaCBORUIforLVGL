@@ -1,0 +1,167 @@
+{
+  "format": "lvgl-screen-draft-1",
+  "id": "grid",
+  "name": "MVP · Grid",
+  "theme": "none",
+  "size": {
+    "width": 800,
+    "height": 480
+  },
+  "styles": {},
+  "root": {
+    "id": "root",
+    "type": "obj",
+    "style": {
+      "bg_color": "#101820",
+      "bg_opa": 255,
+      "layout": "LV_LAYOUT_GRID",
+      "grid_column_dsc_array": [
+        180,
+        {
+          "fr": 1
+        },
+        {
+          "fr": 1
+        }
+      ],
+      "grid_row_dsc_array": [
+        50,
+        "content",
+        {
+          "fr": 1
+        }
+      ],
+      "pad_all": 16,
+      "pad_row": 12,
+      "pad_column": 12
+    },
+    "props": {},
+    "flags": {
+      "SCROLLABLE": false
+    },
+    "children": [
+      {
+        "id": "title",
+        "type": "label",
+        "style": {
+          "text_color": "#ffffff",
+          "grid_cell_column_pos": 0,
+          "grid_cell_column_span": 3,
+          "grid_cell_x_align": "LV_GRID_ALIGN_STRETCH",
+          "grid_cell_row_pos": 0,
+          "text_font": "montserrat_28"
+        },
+        "props": {
+          "text": "Grid / content / FR / span"
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      },
+      {
+        "id": "side",
+        "type": "obj",
+        "style": {
+          "grid_cell_column_pos": 0,
+          "grid_cell_row_pos": 1,
+          "grid_cell_row_span": 2,
+          "grid_cell_x_align": "LV_GRID_ALIGN_STRETCH",
+          "grid_cell_y_align": "LV_GRID_ALIGN_STRETCH",
+          "bg_color": "#204050",
+          "bg_opa": 255,
+          "pad_all": 10
+        },
+        "props": {},
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": [
+          {
+            "id": "side_text",
+            "type": "label",
+            "style": {
+              "text_color": "#ffffff",
+              "x": 8,
+              "y": 8,
+              "text_font": "montserrat_20"
+            },
+            "props": {
+              "text": "Sidebar"
+            },
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "value",
+        "type": "label",
+        "style": {
+          "text_color": "#ffffff",
+          "grid_cell_column_pos": 1,
+          "grid_cell_row_pos": 1,
+          "text_font": "montserrat_28"
+        },
+        "props": {
+          "text": "65 %"
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      },
+      {
+        "id": "level",
+        "type": "bar",
+        "style": {
+          "grid_cell_column_pos": 2,
+          "grid_cell_row_pos": 1,
+          "grid_cell_x_align": "LV_GRID_ALIGN_STRETCH",
+          "height": 28,
+          "bg_color": "#324652",
+          "bg_opa": 255
+        },
+        "props": {
+          "value": 65,
+          "min": 0,
+          "max": 100
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": [],
+        "styleRules": [
+          {
+            "part": "INDICATOR",
+            "props": {
+              "bg_color": "#3dbb91",
+              "bg_opa": 255
+            }
+          }
+        ]
+      },
+      {
+        "id": "body",
+        "type": "obj",
+        "style": {
+          "grid_cell_column_pos": 1,
+          "grid_cell_column_span": 2,
+          "grid_cell_row_pos": 2,
+          "grid_cell_x_align": "LV_GRID_ALIGN_STRETCH",
+          "grid_cell_y_align": "LV_GRID_ALIGN_STRETCH",
+          "bg_color": "#283c48",
+          "bg_opa": 255
+        },
+        "props": {},
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      }
+    ]
+  },
+  "bindings": []
+}

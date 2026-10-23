@@ -1,0 +1,851 @@
+{
+  "format": "lvgl-cbor-screen",
+  "version": 2,
+  "lvgl": "9.6.0",
+  "status": "PC-validated ordered execution",
+  "limits": {
+    "packetBytes": 32768,
+    "nodes": 128,
+    "depth": 12,
+    "styles": 256,
+    "textBytes": 16384
+  },
+  "common": {
+    "signatures": [
+      {
+        "id": 0,
+        "parameters": [
+          "lv_obj_flag_t"
+        ]
+      },
+      {
+        "id": 1,
+        "parameters": [
+          "lv_state_t"
+        ]
+      },
+      {
+        "id": 2,
+        "parameters": [
+          "lv_scrollbar_mode_t"
+        ]
+      },
+      {
+        "id": 3,
+        "parameters": [
+          "lv_dir_t"
+        ]
+      }
+    ],
+    "methods": [
+      {
+        "alias": "add_flags",
+        "c": "lv_obj_add_flag",
+        "parameters": [
+          "lv_obj_flag_t"
+        ],
+        "min": 0,
+        "max": 2147483647,
+        "index": 0,
+        "signature": 0,
+        "opcode": 0
+      },
+      {
+        "alias": "remove_flags",
+        "c": "lv_obj_remove_flag",
+        "parameters": [
+          "lv_obj_flag_t"
+        ],
+        "min": 0,
+        "max": 2147483647,
+        "index": 1,
+        "signature": 0,
+        "opcode": 1
+      },
+      {
+        "alias": "add_state",
+        "c": "lv_obj_add_state",
+        "parameters": [
+          "lv_state_t"
+        ],
+        "mask": 62461,
+        "index": 0,
+        "signature": 1,
+        "opcode": 256
+      },
+      {
+        "alias": "remove_state",
+        "c": "lv_obj_remove_state",
+        "parameters": [
+          "lv_state_t"
+        ],
+        "mask": 62461,
+        "index": 1,
+        "signature": 1,
+        "opcode": 257
+      },
+      {
+        "alias": "scrollbar_mode",
+        "c": "lv_obj_set_scrollbar_mode",
+        "parameters": [
+          "lv_scrollbar_mode_t"
+        ],
+        "values": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "index": 0,
+        "signature": 2,
+        "opcode": 512
+      },
+      {
+        "alias": "scroll_dir",
+        "c": "lv_obj_set_scroll_dir",
+        "parameters": [
+          "lv_dir_t"
+        ],
+        "min": 0,
+        "max": 15,
+        "index": 0,
+        "signature": 3,
+        "opcode": 768
+      }
+    ]
+  },
+  "widgets": [
+    {
+      "id": 0,
+      "name": "obj",
+      "create": "lv_obj_create",
+      "feature": null,
+      "signatures": [],
+      "methods": []
+    },
+    {
+      "id": 1,
+      "name": "label",
+      "create": "lv_label_create",
+      "feature": "LV_USE_LABEL",
+      "signatures": [
+        {
+          "id": 4,
+          "parameters": [
+            "text"
+          ]
+        },
+        {
+          "id": 5,
+          "parameters": [
+            "lv_label_long_mode_t"
+          ]
+        },
+        {
+          "id": 6,
+          "parameters": [
+            "int32_t"
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "alias": "text",
+          "c": "lv_label_set_text",
+          "parameters": [
+            "text"
+          ],
+          "index": 0,
+          "signature": 4,
+          "opcode": 1024
+        },
+        {
+          "alias": "long_mode",
+          "c": "lv_label_set_long_mode",
+          "parameters": [
+            "lv_label_long_mode_t"
+          ],
+          "values": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "index": 0,
+          "signature": 5,
+          "opcode": 1280
+        },
+        {
+          "alias": "max_lines",
+          "c": "lv_label_set_max_lines",
+          "parameters": [
+            "int32_t"
+          ],
+          "min": 0,
+          "max": 32767,
+          "index": 0,
+          "signature": 6,
+          "opcode": 1536
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "button",
+      "create": "lv_button_create",
+      "feature": "LV_USE_BUTTON",
+      "signatures": [],
+      "methods": []
+    },
+    {
+      "id": 3,
+      "name": "bar",
+      "create": "lv_bar_create",
+      "feature": "LV_USE_BAR",
+      "signatures": [
+        {
+          "id": 6,
+          "parameters": [
+            "int32_t"
+          ]
+        },
+        {
+          "id": 7,
+          "parameters": [
+            "int32_t",
+            "int32_t"
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "alias": "range",
+          "c": "lv_bar_set_range",
+          "parameters": [
+            "int32_t",
+            "int32_t"
+          ],
+          "phase": 0,
+          "constraint": "ascending",
+          "index": 0,
+          "signature": 7,
+          "opcode": 1792
+        },
+        {
+          "alias": "value",
+          "c": "lv_bar_set_value",
+          "parameters": [
+            "int32_t"
+          ],
+          "phase": 2,
+          "fixed": [
+            "LV_ANIM_OFF"
+          ],
+          "index": 1,
+          "signature": 6,
+          "opcode": 1537
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "slider",
+      "create": "lv_slider_create",
+      "feature": "LV_USE_SLIDER",
+      "signatures": [
+        {
+          "id": 6,
+          "parameters": [
+            "int32_t"
+          ]
+        },
+        {
+          "id": 7,
+          "parameters": [
+            "int32_t",
+            "int32_t"
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "alias": "range",
+          "c": "lv_slider_set_range",
+          "parameters": [
+            "int32_t",
+            "int32_t"
+          ],
+          "phase": 0,
+          "constraint": "ascending",
+          "index": 1,
+          "signature": 7,
+          "opcode": 1793
+        },
+        {
+          "alias": "value",
+          "c": "lv_slider_set_value",
+          "parameters": [
+            "int32_t"
+          ],
+          "phase": 2,
+          "fixed": [
+            "LV_ANIM_OFF"
+          ],
+          "index": 2,
+          "signature": 6,
+          "opcode": 1538
+        },
+        {
+          "alias": "start_value",
+          "c": "lv_slider_set_start_value",
+          "parameters": [
+            "int32_t"
+          ],
+          "phase": 2,
+          "fixed": [
+            "LV_ANIM_OFF"
+          ],
+          "index": 3,
+          "signature": 6,
+          "opcode": 1539
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "arc",
+      "create": "lv_arc_create",
+      "feature": "LV_USE_ARC",
+      "signatures": [
+        {
+          "id": 6,
+          "parameters": [
+            "int32_t"
+          ]
+        },
+        {
+          "id": 7,
+          "parameters": [
+            "int32_t",
+            "int32_t"
+          ]
+        },
+        {
+          "id": 8,
+          "parameters": [
+            "lv_value_precise_t",
+            "lv_value_precise_t"
+          ]
+        },
+        {
+          "id": 9,
+          "parameters": [
+            "lv_arc_mode_t"
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "alias": "range",
+          "c": "lv_arc_set_range",
+          "parameters": [
+            "int32_t",
+            "int32_t"
+          ],
+          "phase": 0,
+          "constraint": "ascending",
+          "index": 2,
+          "signature": 7,
+          "opcode": 1794
+        },
+        {
+          "alias": "value",
+          "c": "lv_arc_set_value",
+          "parameters": [
+            "int32_t"
+          ],
+          "phase": 2,
+          "index": 4,
+          "signature": 6,
+          "opcode": 1540
+        },
+        {
+          "alias": "angles",
+          "c": "lv_arc_set_angles",
+          "parameters": [
+            "lv_value_precise_t",
+            "lv_value_precise_t"
+          ],
+          "min": 0,
+          "max": 360,
+          "index": 0,
+          "signature": 8,
+          "opcode": 2048
+        },
+        {
+          "alias": "bg_angles",
+          "c": "lv_arc_set_bg_angles",
+          "parameters": [
+            "lv_value_precise_t",
+            "lv_value_precise_t"
+          ],
+          "min": 0,
+          "max": 360,
+          "index": 1,
+          "signature": 8,
+          "opcode": 2049
+        },
+        {
+          "alias": "rotation",
+          "c": "lv_arc_set_rotation",
+          "parameters": [
+            "int32_t"
+          ],
+          "min": 0,
+          "max": 360,
+          "index": 5,
+          "signature": 6,
+          "opcode": 1541
+        },
+        {
+          "alias": "mode",
+          "c": "lv_arc_set_mode",
+          "parameters": [
+            "lv_arc_mode_t"
+          ],
+          "values": [
+            0,
+            1,
+            2
+          ],
+          "index": 0,
+          "signature": 9,
+          "opcode": 2304
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "line",
+      "create": "lv_line_create",
+      "feature": "LV_USE_LINE",
+      "signatures": [
+        {
+          "id": 10,
+          "parameters": [
+            "points"
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "alias": "points",
+          "c": "set_line_points",
+          "parameters": [
+            "points"
+          ],
+          "special": true,
+          "index": 0,
+          "signature": 10,
+          "opcode": 2560
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "image",
+      "create": "lv_image_create",
+      "feature": "LV_USE_IMAGE",
+      "signatures": [
+        {
+          "id": 6,
+          "parameters": [
+            "int32_t"
+          ]
+        },
+        {
+          "id": 11,
+          "parameters": [
+            "resource"
+          ]
+        },
+        {
+          "id": 12,
+          "parameters": [
+            "uint32_t"
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "alias": "src",
+          "c": "lv_image_set_src",
+          "parameters": [
+            "resource"
+          ],
+          "index": 0,
+          "signature": 11,
+          "opcode": 2816
+        },
+        {
+          "alias": "scale",
+          "c": "lv_image_set_scale",
+          "parameters": [
+            "uint32_t"
+          ],
+          "min": 1,
+          "max": 65535,
+          "index": 0,
+          "signature": 12,
+          "opcode": 3072
+        },
+        {
+          "alias": "rotation",
+          "c": "lv_image_set_rotation",
+          "parameters": [
+            "int32_t"
+          ],
+          "min": -3600,
+          "max": 3600,
+          "index": 6,
+          "signature": 6,
+          "opcode": 1542
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "checkbox",
+      "create": "lv_checkbox_create",
+      "feature": "LV_USE_CHECKBOX",
+      "signatures": [
+        {
+          "id": 4,
+          "parameters": [
+            "text"
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "alias": "text",
+          "c": "lv_checkbox_set_text",
+          "parameters": [
+            "text"
+          ],
+          "index": 1,
+          "signature": 4,
+          "opcode": 1025
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "switch",
+      "create": "lv_switch_create",
+      "feature": "LV_USE_SWITCH",
+      "signatures": [],
+      "methods": []
+    },
+    {
+      "id": 10,
+      "name": "textarea",
+      "create": "lv_textarea_create",
+      "feature": "LV_USE_TEXTAREA",
+      "signatures": [
+        {
+          "id": 4,
+          "parameters": [
+            "text"
+          ]
+        },
+        {
+          "id": 12,
+          "parameters": [
+            "uint32_t"
+          ]
+        },
+        {
+          "id": 13,
+          "parameters": [
+            "bool"
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "alias": "text",
+          "c": "lv_textarea_set_text",
+          "parameters": [
+            "text"
+          ],
+          "phase": 2,
+          "index": 2,
+          "signature": 4,
+          "opcode": 1026
+        },
+        {
+          "alias": "max_length",
+          "c": "lv_textarea_set_max_length",
+          "parameters": [
+            "uint32_t"
+          ],
+          "max": 65535,
+          "phase": 0,
+          "index": 1,
+          "signature": 12,
+          "opcode": 3073
+        },
+        {
+          "alias": "one_line",
+          "c": "lv_textarea_set_one_line",
+          "parameters": [
+            "bool"
+          ],
+          "index": 0,
+          "signature": 13,
+          "opcode": 3328
+        },
+        {
+          "alias": "password_mode",
+          "c": "lv_textarea_set_password_mode",
+          "parameters": [
+            "bool"
+          ],
+          "index": 1,
+          "signature": 13,
+          "opcode": 3329
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "dropdown",
+      "create": "lv_dropdown_create",
+      "feature": "LV_USE_DROPDOWN",
+      "signatures": [
+        {
+          "id": 3,
+          "parameters": [
+            "lv_dir_t"
+          ]
+        },
+        {
+          "id": 4,
+          "parameters": [
+            "text"
+          ]
+        },
+        {
+          "id": 12,
+          "parameters": [
+            "uint32_t"
+          ]
+        }
+      ],
+      "methods": [
+        {
+          "alias": "options",
+          "c": "lv_dropdown_set_options",
+          "parameters": [
+            "text"
+          ],
+          "phase": 0,
+          "index": 3,
+          "signature": 4,
+          "opcode": 1027
+        },
+        {
+          "alias": "selected",
+          "c": "lv_dropdown_set_selected",
+          "parameters": [
+            "uint32_t"
+          ],
+          "max": 65535,
+          "phase": 2,
+          "index": 2,
+          "signature": 12,
+          "opcode": 3074
+        },
+        {
+          "alias": "direction",
+          "c": "lv_dropdown_set_dir",
+          "parameters": [
+            "lv_dir_t"
+          ],
+          "values": [
+            1,
+            2,
+            4,
+            8
+          ],
+          "index": 1,
+          "signature": 3,
+          "opcode": 769
+        }
+      ]
+    }
+  ],
+  "parts": {
+    "MAIN": 0,
+    "SCROLLBAR": 65536,
+    "INDICATOR": 131072,
+    "KNOB": 196608,
+    "SELECTED": 262144,
+    "ITEMS": 327680,
+    "CURSOR": 393216
+  },
+  "states": {
+    "ALT": 1,
+    "CHECKED": 4,
+    "FOCUSED": 8,
+    "FOCUS_KEY": 16,
+    "EDITED": 32,
+    "HOVERED": 64,
+    "PRESSED": 128,
+    "SCROLLED": 256,
+    "DISABLED": 512,
+    "USER_1": 4096,
+    "USER_2": 8192,
+    "USER_3": 16384,
+    "USER_4": 32768
+  },
+  "flags": {
+    "HIDDEN": 1,
+    "CLICKABLE": 2,
+    "CLICK_FOCUSABLE": 4,
+    "CHECKABLE": 8,
+    "SCROLLABLE": 16,
+    "SCROLL_ELASTIC": 32,
+    "SCROLL_MOMENTUM": 64,
+    "SCROLL_ONE": 128,
+    "SCROLL_CHAIN_HOR": 256,
+    "SCROLL_CHAIN_VER": 512,
+    "SCROLL_ON_FOCUS": 1024,
+    "SCROLL_WITH_ARROW": 2048,
+    "SNAPPABLE": 4096,
+    "PRESS_LOCK": 8192,
+    "EVENT_BUBBLE": 16384,
+    "GESTURE_BUBBLE": 32768,
+    "ADV_HITTEST": 65536,
+    "IGNORE_LAYOUT": 131072,
+    "FLOATING": 262144,
+    "SEND_DRAW_TASK_EVENTS": 524288,
+    "OVERFLOW_VISIBLE": 1048576,
+    "EVENT_TRICKLE": 2097152,
+    "STATE_TRICKLE": 4194304,
+    "FLEX_IN_NEW_TRACK": 8388608,
+    "USER_1": 134217728,
+    "USER_2": 268435456,
+    "USER_3": 536870912,
+    "USER_4": 1073741824
+  },
+  "authoring": {
+    "format": "lvgl-screen-draft-1",
+    "roundtrip": "canonical-v1",
+    "titleField": "title",
+    "buttonCaptionField": "caption",
+    "commonOperationsField": "common"
+  },
+  "valueRules": {
+    "textBytesPerValue": 4096,
+    "points": {
+      "minItems": 2,
+      "maxItems": 256,
+      "min": -32768,
+      "max": 32767
+    },
+    "maxStyleUses": 32
+  },
+  "execution": "wire-order",
+  "dispatch": "shared-signature-local-pointer-arrays",
+  "signatures": [
+    {
+      "id": 0,
+      "parameters": [
+        "lv_obj_flag_t"
+      ]
+    },
+    {
+      "id": 1,
+      "parameters": [
+        "lv_state_t"
+      ]
+    },
+    {
+      "id": 2,
+      "parameters": [
+        "lv_scrollbar_mode_t"
+      ]
+    },
+    {
+      "id": 3,
+      "parameters": [
+        "lv_dir_t"
+      ]
+    },
+    {
+      "id": 4,
+      "parameters": [
+        "text"
+      ]
+    },
+    {
+      "id": 5,
+      "parameters": [
+        "lv_label_long_mode_t"
+      ]
+    },
+    {
+      "id": 6,
+      "parameters": [
+        "int32_t"
+      ]
+    },
+    {
+      "id": 7,
+      "parameters": [
+        "int32_t",
+        "int32_t"
+      ]
+    },
+    {
+      "id": 8,
+      "parameters": [
+        "lv_value_precise_t",
+        "lv_value_precise_t"
+      ]
+    },
+    {
+      "id": 9,
+      "parameters": [
+        "lv_arc_mode_t"
+      ]
+    },
+    {
+      "id": 10,
+      "parameters": [
+        "points"
+      ]
+    },
+    {
+      "id": 11,
+      "parameters": [
+        "resource"
+      ]
+    },
+    {
+      "id": 12,
+      "parameters": [
+        "uint32_t"
+      ]
+    },
+    {
+      "id": 13,
+      "parameters": [
+        "bool"
+      ]
+    }
+  ]
+}

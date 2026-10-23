@@ -1,0 +1,12 @@
+{
+  "name": "@lvgl-cbor/screen-codec",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "exports": "./index.js",
+  "dependencies": {
+    "cborg": "6.1.3",
+    "@lvgl-cbor/style-codec": "0.1.0"
+  },
+  "license": "MIT"
+}

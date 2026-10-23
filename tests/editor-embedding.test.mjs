@@ -1,0 +1,32 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {fileURLToPath} from 'node:url';
+import {createServer} from 'vite';
+import {createSSRApp,h} from 'vue';
+import {renderToString} from 'vue/server-renderer';
+import {editorGroups,editorSections,combinedGroupIds,filterEditorGroups} from '../frontend/src/editor-schema.js';
+test('section schema covers every group once, with shared matrices only rendered once',()=>{
+ assert.deepEqual(editorSections.flatMap(s=>s.ids).sort(),editorGroups.map(g=>g.id).sort());
+ const ids=combinedGroupIds(editorGroups);
+ for(const merged of ['margin','outline','shadow'])assert.equal(ids.includes(merged),false);
+ assert.deepEqual(combinedGroupIds(filterEditorGroups(editorGroups,{}, {group:'outline'})),['outline']);
+});
+test('sections and individual groups render without App, browser storage or a controller',async t=>{
+ const root=fileURLToPath(new URL('../frontend',import.meta.url));
+ const server=await createServer({root,configFile:root+'/vite.config.js',server:{middlewareMode:true,hmr:false},logLevel:'silent'});
+ t.after(()=>server.close());
+ const {default:Section}=await server.ssrLoadModule('/src/components/StyleSection.vue');
+ const {default:Group}=await server.ssrLoadModule('/src/components/StyleGroup.vue');
+ const model={width:420,height:150,bg_color:'#173344'};
+ const render=(component,props)=>renderToString(createSSRApp({render:()=>h(component,props)}));
+ const section=await render(Section,{section:'geometry',modelValue:model});
+ for(const group of ['Размеры','Положение','Трансформация','Внутренние и внешние отступы'])assert.ok(section.includes(group),group);
+ assert.ok(!section.includes('Оформление'));
+ const group=await render(Group,{group:'size',modelValue:model,showSide:false,collapsible:false});
+ assert.match(group,/corner-no-side/);assert.ok(!group.includes('class="corner-toggle"'));
+ assert.match(group,/aria-label="width"/);assert.match(group,/value="420"/);
+ assert.ok(!group.includes('aria-label="x"'));
+ const plain=await render(Group,{group:'size',modelValue:model,showSide:false,showHeader:false,collapsible:false});
+ assert.ok(!plain.includes('class="corner-cap"'));assert.match(plain,/aria-label="width"/);
+ assert.deepEqual(model,{width:420,height:150,bg_color:'#173344'});
+});

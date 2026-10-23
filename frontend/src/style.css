@@ -1,0 +1,9 @@
+/* Application entry point; editor.css is also usable on its own. */
+@import './design/themes.css';
+@import './design/icons/tabler-icons.css';
+@import './design/ui-tooltip.css';
+@import './design/shell.css';
+@import './design/editor.css';
+@import './design/preview.css';
+@import './design/screens.css';
+@import './design/actions.css';

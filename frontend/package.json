@@ -1,0 +1,22 @@
+{
+  "name": "@lvgl-cbor/playground",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5298 --strictPort",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@lvgl-cbor/style-codec": "0.1.0",
+    "vue": "3.5.22",
+    "@lvgl-cbor/screen-codec": "0.1.0",
+    "@lvgl-cbor/document-io": "0.1.0",
+    "@lvgl-cbor/css-codec": "0.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.1",
+    "vite": "7.1.12"
+  },
+  "license": "GPL-3.0-only"
+}

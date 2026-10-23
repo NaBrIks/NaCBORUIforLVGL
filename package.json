@@ -1,0 +1,23 @@
+{
+  "name": "nacboruiforlvgl-workspace",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "frontend",
+    "packages/style-codec",
+    "packages/screen-codec",
+    "packages/document-io",
+    "packages/project-codec",
+    "packages/css-codec"
+  ],
+  "scripts": {
+    "contract": "node tools/style_contract.mjs && node tools/screen_contract.mjs && node tools/binding_contract.mjs && node tools/composition_contract.mjs && node tools/capabilities.mjs",
+    "build": "npm run build --workspace @lvgl-cbor/playground",
+    "test": "node --test tests/*.test.mjs",
+    "dev": "npm run dev --workspace @lvgl-cbor/playground",
+    "sim": "npm run dev --workspace @lvgl-cbor/playground -- --open /?sim=1",
+    "contract:check": "node tools/style_contract.mjs --check && node tools/screen_contract.mjs --check && node tools/binding_contract.mjs --check && node tools/composition_contract.mjs --check && node tools/capabilities.mjs --check"
+  },
+  "license": "MIT",
+  "description": "CBOR-based UI definitions for LVGL"
+}

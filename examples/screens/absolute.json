@@ -1,0 +1,160 @@
+{
+  "format": "lvgl-screen-draft-1",
+  "id": "absolute",
+  "name": "MVP · ручное размещение",
+  "theme": "none",
+  "size": {
+    "width": 800,
+    "height": 480
+  },
+  "styles": {},
+  "root": {
+    "id": "root",
+    "type": "obj",
+    "style": {
+      "bg_color": "#101820",
+      "bg_opa": 255
+    },
+    "props": {},
+    "flags": {
+      "SCROLLABLE": false
+    },
+    "children": [
+      {
+        "id": "title",
+        "type": "label",
+        "style": {
+          "text_color": "#ffffff",
+          "x": 24,
+          "y": 20,
+          "text_font": "montserrat_28"
+        },
+        "props": {
+          "text": "Absolute / border / outline / shadow"
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      },
+      {
+        "id": "card",
+        "type": "obj",
+        "style": {
+          "x": 24,
+          "y": 84,
+          "width": 320,
+          "height": 170,
+          "min_width": 280,
+          "max_width": 360,
+          "bg_color": "#204050",
+          "bg_opa": 255,
+          "border_width": 2,
+          "border_color": "#3dbb91",
+          "outline_width": 3,
+          "outline_color": "#f0ad3d",
+          "outline_pad": 5,
+          "shadow_width": 18,
+          "shadow_offset_x": 8,
+          "shadow_offset_y": 8,
+          "radius": 10
+        },
+        "props": {},
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": [
+          {
+            "id": "caption",
+            "type": "label",
+            "style": {
+              "text_color": "#ffffff",
+              "x": 14,
+              "y": 14,
+              "text_font": "montserrat_20"
+            },
+            "props": {
+              "text": "Independent box"
+            },
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "level",
+        "type": "bar",
+        "style": {
+          "x": 400,
+          "y": 110,
+          "width": 300,
+          "height": 30,
+          "bg_color": "#324652",
+          "bg_opa": 255
+        },
+        "props": {
+          "min": 0,
+          "max": 100,
+          "value": 65
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": [],
+        "styleRules": [
+          {
+            "part": "INDICATOR",
+            "props": {
+              "bg_color": "#3dbb91",
+              "bg_opa": 255,
+              "radius": 5
+            }
+          }
+        ]
+      },
+      {
+        "id": "trace",
+        "type": "line",
+        "style": {
+          "x": 400,
+          "y": 180,
+          "width": 280,
+          "height": 70,
+          "line_color": "#f0ad3d",
+          "line_width": 3
+        },
+        "props": {
+          "points": [
+            [
+              0,
+              60
+            ],
+            [
+              70,
+              20
+            ],
+            [
+              140,
+              45
+            ],
+            [
+              210,
+              0
+            ],
+            [
+              280,
+              30
+            ]
+          ]
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      }
+    ]
+  },
+  "bindings": []
+}

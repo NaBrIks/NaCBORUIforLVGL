@@ -1,0 +1,12 @@
+/* Commands stay visible at every editor density; property cells keep their own compact size. */
+.action-button {
+ display:inline-flex;align-items:center;justify-content:center;gap:5px;
+ min-height:26px;padding:2px 8px;border:1px solid var(--lu-input-border);
+ border-radius:2px;background:var(--lu-surface);color:var(--lu-text);
+ font:inherit;font-weight:600;white-space:nowrap;
+}
+.action-button:hover:not(:disabled) {border-color:var(--lu-primary);background:var(--lu-primary-light);}
+.action-button.primary {border-color:var(--lu-primary);background:var(--lu-primary-light);}
+.action-button:disabled {opacity:.45;}
+.action-button>.ti,.action-button>.svg-icon {font-size:18px;width:18px;height:18px;flex-shrink:0;}
+.action-button.icon-action {width:28px;min-width:28px;padding:2px;}

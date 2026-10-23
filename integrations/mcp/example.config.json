@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "NaCBORUIforLVGL": {
+      "command": "node",
+      "args": ["/absolute/path/to/NaCBORUIforLVGL/integrations/mcp/index.js"],
+      "env": {"LVGL_CBOR_DEVICE":"http://192.0.2.1", "LVGL_CBOR_ALLOW_PREVIEW":"0", "LVGL_CBOR_ALLOW_SAVE":"0", "LVGL_CBOR_ALLOW_DATA":"0"}
+    }
+  }
+}

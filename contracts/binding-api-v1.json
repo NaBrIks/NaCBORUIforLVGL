@@ -1,0 +1,24 @@
+{
+  "format": "lvgl-cbor-bindings",
+  "version": 1,
+  "expressions": ["source", "literal", "op", "event", "array", "object"],
+  "operators": {
+    "eq": [2, 2], "ne": [2, 2], "lt": [2, 2], "le": [2, 2],
+    "gt": [2, 2], "ge": [2, 2], "and": [2, 16], "or": [2, 16],
+    "not": [1, 1], "select": [3, 3], "add": [2, 2], "sub": [2, 2],
+    "mul": [2, 2], "div": [2, 2], "round": [1, 1]
+  },
+  "events": ["clicked", "value_changed", "ready", "long_pressed"],
+  "limits": {
+    "expressionDepth": 8, "expressionNodes": 64, "pathDepth": 8,
+    "bindings": 128, "events": 128, "objectFields": 16,
+    "schemaDepth": 4, "arrayItems": 256, "textBytes": 4096,
+    "valueBytes": 16384, "valueDepth": 16, "sources": 32,
+    "actions": 32, "snapshotBytes": 65536, "eventQueue": 32,
+    "eventQueueBytes": 32768
+  },
+  "schemaTypes": ["null", "bool", "integer", "number", "text", "object", "array"],
+  "authoring": {"bindingScope": "widget by default; common is explicit", "expressionConstants": "literal wrapper", "wire": "flattened node and numeric method", "envelopeVersion": "bindings_version"},
+  "round": "half away from zero",
+  "select": "evaluate only the chosen branch"
+}

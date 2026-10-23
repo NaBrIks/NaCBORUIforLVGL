@@ -1,0 +1,30 @@
+{
+  "methods": [
+    {
+      "alias": "value",
+      "opcode": 256,
+      "parameters": [
+        "int32_t"
+      ],
+      "phase": 0
+    },
+    {
+      "alias": "alarm",
+      "opcode": 257,
+      "parameters": [
+        "int32_t"
+      ],
+      "min": 0,
+      "max": 10
+    },
+    {
+      "alias": "reading",
+      "opcode": 258,
+      "parameters": [
+        "int32_t",
+        "text"
+      ],
+      "phase": 2
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@lvgl-cbor/style-codec",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./index.js",
+    "./values": "./values.js",
+    "./methods": "./methods.js"
+  },
+  "dependencies": {
+    "cborg": "6.1.3"
+  },
+  "license": "MIT"
+}

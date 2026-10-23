@@ -1,0 +1,60 @@
+{
+  "dimension": {
+    "properties": [
+      "width",
+      "height",
+      "min_width",
+      "min_height",
+      "max_width",
+      "max_height",
+      "x",
+      "y"
+    ],
+    "coordMax": 536870911,
+    "coordSpec": 536870912,
+    "pctMax": 10000
+  },
+  "grid": {
+    "properties": [
+      "grid_column_dsc_array",
+      "grid_row_dsc_array"
+    ],
+    "maxTracks": 64,
+    "maxPixels": 32767,
+    "maxFraction": 100,
+    "content": 536870810,
+    "fractionBase": 536870811,
+    "maxStoredValues": 4096
+  },
+  "flagTypes": [
+    "lv_text_decor_t",
+    "lv_border_side_t"
+  ],
+  "properties": {
+    "layout": {
+      "min": 0,
+      "max": 65535,
+      "symbols": {
+        "LV_LAYOUT_NONE": 0,
+        "LV_LAYOUT_FLEX": 1,
+        "LV_LAYOUT_GRID": 2
+      }
+    },
+    "grid_cell_column_pos": {
+      "min": 0,
+      "max": 63
+    },
+    "grid_cell_row_pos": {
+      "min": 0,
+      "max": 63
+    },
+    "grid_cell_column_span": {
+      "min": 1,
+      "max": 64
+    },
+    "grid_cell_row_span": {
+      "min": 1,
+      "max": 64
+    }
+  }
+}

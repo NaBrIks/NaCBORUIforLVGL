@@ -1,0 +1,2272 @@
+{
+  "format": "lvgl-cbor-style",
+  "version": 1,
+  "lvgl": "9.6.0",
+  "dispatch": "family-local-flat-method-table",
+  "family": "shared",
+  "maxPacketBytes": 8192,
+  "maxStylesPerScope": 8,
+  "signatures": [
+    {
+      "id": 0,
+      "c": "void (*fn)(lv_style_t * style, int32_t value);",
+      "parameters": [
+        "int32_t"
+      ]
+    },
+    {
+      "id": 1,
+      "c": "void (*fn)(lv_style_t * style, lv_opa_t value);",
+      "parameters": [
+        "lv_opa_t"
+      ]
+    },
+    {
+      "id": 2,
+      "c": "void (*fn)(lv_style_t * style, lv_color_t value);",
+      "parameters": [
+        "lv_color_t"
+      ]
+    },
+    {
+      "id": 3,
+      "c": "void (*fn)(lv_style_t * style, bool value);",
+      "parameters": [
+        "bool"
+      ]
+    },
+    {
+      "id": 4,
+      "c": "void (*fn)(lv_style_t * style, lv_grid_align_t value);",
+      "parameters": [
+        "lv_grid_align_t"
+      ]
+    },
+    {
+      "id": 5,
+      "c": "void (*fn)(lv_style_t * style, const void * value);",
+      "parameters": [
+        "const void *"
+      ]
+    },
+    {
+      "id": 6,
+      "c": "void (*fn)(lv_style_t * style, lv_flex_align_t value);",
+      "parameters": [
+        "lv_flex_align_t"
+      ]
+    },
+    {
+      "id": 7,
+      "c": "void (*fn)(lv_style_t * style, const int32_t * value);",
+      "parameters": [
+        "const int32_t *"
+      ]
+    },
+    {
+      "id": 8,
+      "c": "void (*fn)(lv_style_t * style, uint32_t value);",
+      "parameters": [
+        "uint32_t"
+      ]
+    },
+    {
+      "id": 9,
+      "c": "void (*fn)(lv_style_t * style, const lv_anim_t * value);",
+      "parameters": [
+        "const lv_anim_t *"
+      ]
+    },
+    {
+      "id": 10,
+      "c": "void (*fn)(lv_style_t * style, const lv_color_filter_dsc_t * value);",
+      "parameters": [
+        "const lv_color_filter_dsc_t *"
+      ]
+    },
+    {
+      "id": 11,
+      "c": "void (*fn)(lv_style_t * style, const lv_font_t * value);",
+      "parameters": [
+        "const lv_font_t *"
+      ]
+    },
+    {
+      "id": 12,
+      "c": "void (*fn)(lv_style_t * style, const lv_grad_dsc_t * value);",
+      "parameters": [
+        "const lv_grad_dsc_t *"
+      ]
+    },
+    {
+      "id": 13,
+      "c": "void (*fn)(lv_style_t * style, const lv_image_colorkey_t * value);",
+      "parameters": [
+        "const lv_image_colorkey_t *"
+      ]
+    },
+    {
+      "id": 14,
+      "c": "void (*fn)(lv_style_t * style, const lv_style_transition_dsc_t * value);",
+      "parameters": [
+        "const lv_style_transition_dsc_t *"
+      ]
+    },
+    {
+      "id": 15,
+      "c": "void (*fn)(lv_style_t * style, int32_t width, int32_t height);",
+      "parameters": [
+        "int32_t",
+        "int32_t"
+      ]
+    },
+    {
+      "id": 16,
+      "c": "void (*fn)(lv_style_t * style, lv_align_t value);",
+      "parameters": [
+        "lv_align_t"
+      ]
+    },
+    {
+      "id": 17,
+      "c": "void (*fn)(lv_style_t * style, lv_base_dir_t value);",
+      "parameters": [
+        "lv_base_dir_t"
+      ]
+    },
+    {
+      "id": 18,
+      "c": "void (*fn)(lv_style_t * style, lv_blend_mode_t value);",
+      "parameters": [
+        "lv_blend_mode_t"
+      ]
+    },
+    {
+      "id": 19,
+      "c": "void (*fn)(lv_style_t * style, lv_border_side_t value);",
+      "parameters": [
+        "lv_border_side_t"
+      ]
+    },
+    {
+      "id": 20,
+      "c": "void (*fn)(lv_style_t * style, lv_flex_flow_t value);",
+      "parameters": [
+        "lv_flex_flow_t"
+      ]
+    },
+    {
+      "id": 21,
+      "c": "void (*fn)(lv_style_t * style, lv_grad_dir_t value);",
+      "parameters": [
+        "lv_grad_dir_t"
+      ]
+    },
+    {
+      "id": 22,
+      "c": "void (*fn)(lv_style_t * style, lv_text_align_t value);",
+      "parameters": [
+        "lv_text_align_t"
+      ]
+    },
+    {
+      "id": 23,
+      "c": "void (*fn)(lv_style_t * style, lv_text_decor_t value);",
+      "parameters": [
+        "lv_text_decor_t"
+      ]
+    },
+    {
+      "id": 24,
+      "c": "void (*fn)(lv_style_t * style, uint16_t value);",
+      "parameters": [
+        "uint16_t"
+      ]
+    },
+    {
+      "id": 25,
+      "c": "void (*fn)(lv_style_t * style, uint8_t value);",
+      "parameters": [
+        "uint8_t"
+      ]
+    },
+    {
+      "id": 26,
+      "c": "void (*fn)(lv_style_t * style, lv_blur_quality_t value);",
+      "parameters": [
+        "lv_blur_quality_t"
+      ]
+    },
+    {
+      "id": 27,
+      "c": "void (*fn)(lv_style_t * style, lv_text_leading_trim_t value);",
+      "parameters": [
+        "lv_text_leading_trim_t"
+      ]
+    }
+  ],
+  "methods": [
+    {
+      "index": 0,
+      "signature": 0,
+      "opcode": 0,
+      "name": "lv_style_set_arc_width",
+      "alias": "arc_width",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "arc_width"
+      ],
+      "retired": false
+    },
+    {
+      "index": 1,
+      "signature": 0,
+      "opcode": 1,
+      "name": "lv_style_set_bg_grad_stop",
+      "alias": "bg_grad_stop",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "bg_grad_stop"
+      ],
+      "retired": false
+    },
+    {
+      "index": 2,
+      "signature": 0,
+      "opcode": 2,
+      "name": "lv_style_set_bg_main_stop",
+      "alias": "bg_main_stop",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "bg_main_stop"
+      ],
+      "retired": false
+    },
+    {
+      "index": 3,
+      "signature": 0,
+      "opcode": 3,
+      "name": "lv_style_set_border_width",
+      "alias": "border_width",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "border_width"
+      ],
+      "retired": false
+    },
+    {
+      "index": 4,
+      "signature": 0,
+      "opcode": 4,
+      "name": "lv_style_set_grid_cell_column_pos",
+      "alias": "grid_cell_column_pos",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "grid_cell_column_pos"
+      ],
+      "retired": false
+    },
+    {
+      "index": 5,
+      "signature": 0,
+      "opcode": 5,
+      "name": "lv_style_set_grid_cell_column_span",
+      "alias": "grid_cell_column_span",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "grid_cell_column_span"
+      ],
+      "retired": false
+    },
+    {
+      "index": 6,
+      "signature": 0,
+      "opcode": 6,
+      "name": "lv_style_set_grid_cell_row_pos",
+      "alias": "grid_cell_row_pos",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "grid_cell_row_pos"
+      ],
+      "retired": false
+    },
+    {
+      "index": 7,
+      "signature": 0,
+      "opcode": 7,
+      "name": "lv_style_set_grid_cell_row_span",
+      "alias": "grid_cell_row_span",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "grid_cell_row_span"
+      ],
+      "retired": false
+    },
+    {
+      "index": 8,
+      "signature": 0,
+      "opcode": 8,
+      "name": "lv_style_set_height",
+      "alias": "height",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "height"
+      ],
+      "retired": false
+    },
+    {
+      "index": 9,
+      "signature": 0,
+      "opcode": 9,
+      "name": "lv_style_set_length",
+      "alias": "length",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "length"
+      ],
+      "retired": false
+    },
+    {
+      "index": 10,
+      "signature": 0,
+      "opcode": 10,
+      "name": "lv_style_set_line_dash_gap",
+      "alias": "line_dash_gap",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "line_dash_gap"
+      ],
+      "retired": false
+    },
+    {
+      "index": 11,
+      "signature": 0,
+      "opcode": 11,
+      "name": "lv_style_set_line_dash_width",
+      "alias": "line_dash_width",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "line_dash_width"
+      ],
+      "retired": false
+    },
+    {
+      "index": 12,
+      "signature": 0,
+      "opcode": 12,
+      "name": "lv_style_set_line_width",
+      "alias": "line_width",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "line_width"
+      ],
+      "retired": false
+    },
+    {
+      "index": 13,
+      "signature": 0,
+      "opcode": 13,
+      "name": "lv_style_set_margin_all",
+      "alias": "margin_all",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "margin_left",
+        "margin_right",
+        "margin_top",
+        "margin_bottom"
+      ],
+      "retired": false
+    },
+    {
+      "index": 14,
+      "signature": 0,
+      "opcode": 14,
+      "name": "lv_style_set_margin_bottom",
+      "alias": "margin_bottom",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "margin_bottom"
+      ],
+      "retired": false
+    },
+    {
+      "index": 15,
+      "signature": 0,
+      "opcode": 15,
+      "name": "lv_style_set_margin_hor",
+      "alias": "margin_hor",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "margin_left",
+        "margin_right"
+      ],
+      "retired": false
+    },
+    {
+      "index": 16,
+      "signature": 0,
+      "opcode": 16,
+      "name": "lv_style_set_margin_left",
+      "alias": "margin_left",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "margin_left"
+      ],
+      "retired": false
+    },
+    {
+      "index": 17,
+      "signature": 0,
+      "opcode": 17,
+      "name": "lv_style_set_margin_right",
+      "alias": "margin_right",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "margin_right"
+      ],
+      "retired": false
+    },
+    {
+      "index": 18,
+      "signature": 0,
+      "opcode": 18,
+      "name": "lv_style_set_margin_top",
+      "alias": "margin_top",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "margin_top"
+      ],
+      "retired": false
+    },
+    {
+      "index": 19,
+      "signature": 0,
+      "opcode": 19,
+      "name": "lv_style_set_margin_ver",
+      "alias": "margin_ver",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "margin_top",
+        "margin_bottom"
+      ],
+      "retired": false
+    },
+    {
+      "index": 20,
+      "signature": 0,
+      "opcode": 20,
+      "name": "lv_style_set_max_height",
+      "alias": "max_height",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "max_height"
+      ],
+      "retired": false
+    },
+    {
+      "index": 21,
+      "signature": 0,
+      "opcode": 21,
+      "name": "lv_style_set_max_width",
+      "alias": "max_width",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "max_width"
+      ],
+      "retired": false
+    },
+    {
+      "index": 22,
+      "signature": 0,
+      "opcode": 22,
+      "name": "lv_style_set_min_height",
+      "alias": "min_height",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "min_height"
+      ],
+      "retired": false
+    },
+    {
+      "index": 23,
+      "signature": 0,
+      "opcode": 23,
+      "name": "lv_style_set_min_width",
+      "alias": "min_width",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "min_width"
+      ],
+      "retired": false
+    },
+    {
+      "index": 24,
+      "signature": 0,
+      "opcode": 24,
+      "name": "lv_style_set_outline_pad",
+      "alias": "outline_pad",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "outline_pad"
+      ],
+      "retired": false
+    },
+    {
+      "index": 25,
+      "signature": 0,
+      "opcode": 25,
+      "name": "lv_style_set_outline_width",
+      "alias": "outline_width",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "outline_width"
+      ],
+      "retired": false
+    },
+    {
+      "index": 26,
+      "signature": 0,
+      "opcode": 26,
+      "name": "lv_style_set_pad_all",
+      "alias": "pad_all",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "pad_left",
+        "pad_right",
+        "pad_top",
+        "pad_bottom"
+      ],
+      "retired": false
+    },
+    {
+      "index": 27,
+      "signature": 0,
+      "opcode": 27,
+      "name": "lv_style_set_pad_bottom",
+      "alias": "pad_bottom",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "pad_bottom"
+      ],
+      "retired": false
+    },
+    {
+      "index": 28,
+      "signature": 0,
+      "opcode": 28,
+      "name": "lv_style_set_pad_column",
+      "alias": "pad_column",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "pad_column"
+      ],
+      "retired": false
+    },
+    {
+      "index": 29,
+      "signature": 0,
+      "opcode": 29,
+      "name": "lv_style_set_pad_gap",
+      "alias": "pad_gap",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "pad_row",
+        "pad_column"
+      ],
+      "retired": false
+    },
+    {
+      "index": 30,
+      "signature": 0,
+      "opcode": 30,
+      "name": "lv_style_set_pad_hor",
+      "alias": "pad_hor",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "pad_left",
+        "pad_right"
+      ],
+      "retired": false
+    },
+    {
+      "index": 31,
+      "signature": 0,
+      "opcode": 31,
+      "name": "lv_style_set_pad_left",
+      "alias": "pad_left",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "pad_left"
+      ],
+      "retired": false
+    },
+    {
+      "index": 32,
+      "signature": 0,
+      "opcode": 32,
+      "name": "lv_style_set_pad_radial",
+      "alias": "pad_radial",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "pad_radial"
+      ],
+      "retired": false
+    },
+    {
+      "index": 33,
+      "signature": 0,
+      "opcode": 33,
+      "name": "lv_style_set_pad_right",
+      "alias": "pad_right",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "pad_right"
+      ],
+      "retired": false
+    },
+    {
+      "index": 34,
+      "signature": 0,
+      "opcode": 34,
+      "name": "lv_style_set_pad_row",
+      "alias": "pad_row",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "pad_row"
+      ],
+      "retired": false
+    },
+    {
+      "index": 35,
+      "signature": 0,
+      "opcode": 35,
+      "name": "lv_style_set_pad_top",
+      "alias": "pad_top",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "pad_top"
+      ],
+      "retired": false
+    },
+    {
+      "index": 36,
+      "signature": 0,
+      "opcode": 36,
+      "name": "lv_style_set_pad_ver",
+      "alias": "pad_ver",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "pad_top",
+        "pad_bottom"
+      ],
+      "retired": false
+    },
+    {
+      "index": 37,
+      "signature": 0,
+      "opcode": 37,
+      "name": "lv_style_set_radial_offset",
+      "alias": "radial_offset",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "radial_offset"
+      ],
+      "retired": false
+    },
+    {
+      "index": 38,
+      "signature": 0,
+      "opcode": 38,
+      "name": "lv_style_set_radius",
+      "alias": "radius",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "radius"
+      ],
+      "retired": false
+    },
+    {
+      "index": 39,
+      "signature": 0,
+      "opcode": 39,
+      "name": "lv_style_set_shadow_offset_x",
+      "alias": "shadow_offset_x",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "shadow_offset_x"
+      ],
+      "retired": false
+    },
+    {
+      "index": 40,
+      "signature": 0,
+      "opcode": 40,
+      "name": "lv_style_set_shadow_offset_y",
+      "alias": "shadow_offset_y",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "shadow_offset_y"
+      ],
+      "retired": false
+    },
+    {
+      "index": 41,
+      "signature": 0,
+      "opcode": 41,
+      "name": "lv_style_set_shadow_spread",
+      "alias": "shadow_spread",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "shadow_spread"
+      ],
+      "retired": false
+    },
+    {
+      "index": 42,
+      "signature": 0,
+      "opcode": 42,
+      "name": "lv_style_set_shadow_width",
+      "alias": "shadow_width",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "shadow_width"
+      ],
+      "retired": false
+    },
+    {
+      "index": 43,
+      "signature": 0,
+      "opcode": 43,
+      "name": "lv_style_set_text_letter_space",
+      "alias": "text_letter_space",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "text_letter_space"
+      ],
+      "retired": false
+    },
+    {
+      "index": 44,
+      "signature": 0,
+      "opcode": 44,
+      "name": "lv_style_set_text_line_space",
+      "alias": "text_line_space",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "text_line_space"
+      ],
+      "retired": false
+    },
+    {
+      "index": 45,
+      "signature": 0,
+      "opcode": 45,
+      "name": "lv_style_set_text_outline_stroke_width",
+      "alias": "text_outline_stroke_width",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "text_outline_stroke_width"
+      ],
+      "retired": false
+    },
+    {
+      "index": 46,
+      "signature": 0,
+      "opcode": 46,
+      "name": "lv_style_set_transform_height",
+      "alias": "transform_height",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "transform_height"
+      ],
+      "retired": false
+    },
+    {
+      "index": 47,
+      "signature": 0,
+      "opcode": 47,
+      "name": "lv_style_set_transform_pivot_x",
+      "alias": "transform_pivot_x",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "transform_pivot_x"
+      ],
+      "retired": false
+    },
+    {
+      "index": 48,
+      "signature": 0,
+      "opcode": 48,
+      "name": "lv_style_set_transform_pivot_y",
+      "alias": "transform_pivot_y",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "transform_pivot_y"
+      ],
+      "retired": false
+    },
+    {
+      "index": 49,
+      "signature": 0,
+      "opcode": 49,
+      "name": "lv_style_set_transform_rotation",
+      "alias": "transform_rotation",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "transform_rotation"
+      ],
+      "retired": false
+    },
+    {
+      "index": 50,
+      "signature": 0,
+      "opcode": 50,
+      "name": "lv_style_set_transform_scale",
+      "alias": "transform_scale",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "transform_scale_x",
+        "transform_scale_y"
+      ],
+      "retired": false
+    },
+    {
+      "index": 51,
+      "signature": 0,
+      "opcode": 51,
+      "name": "lv_style_set_transform_scale_x",
+      "alias": "transform_scale_x",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "transform_scale_x"
+      ],
+      "retired": false
+    },
+    {
+      "index": 52,
+      "signature": 0,
+      "opcode": 52,
+      "name": "lv_style_set_transform_scale_y",
+      "alias": "transform_scale_y",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "transform_scale_y"
+      ],
+      "retired": false
+    },
+    {
+      "index": 53,
+      "signature": 0,
+      "opcode": 53,
+      "name": "lv_style_set_transform_skew_x",
+      "alias": "transform_skew_x",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "transform_skew_x"
+      ],
+      "retired": false
+    },
+    {
+      "index": 54,
+      "signature": 0,
+      "opcode": 54,
+      "name": "lv_style_set_transform_skew_y",
+      "alias": "transform_skew_y",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "transform_skew_y"
+      ],
+      "retired": false
+    },
+    {
+      "index": 55,
+      "signature": 0,
+      "opcode": 55,
+      "name": "lv_style_set_transform_width",
+      "alias": "transform_width",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "transform_width"
+      ],
+      "retired": false
+    },
+    {
+      "index": 56,
+      "signature": 0,
+      "opcode": 56,
+      "name": "lv_style_set_translate_radial",
+      "alias": "translate_radial",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "translate_radial"
+      ],
+      "retired": false
+    },
+    {
+      "index": 57,
+      "signature": 0,
+      "opcode": 57,
+      "name": "lv_style_set_translate_x",
+      "alias": "translate_x",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "translate_x"
+      ],
+      "retired": false
+    },
+    {
+      "index": 58,
+      "signature": 0,
+      "opcode": 58,
+      "name": "lv_style_set_translate_y",
+      "alias": "translate_y",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "translate_y"
+      ],
+      "retired": false
+    },
+    {
+      "index": 59,
+      "signature": 0,
+      "opcode": 59,
+      "name": "lv_style_set_width",
+      "alias": "width",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "width"
+      ],
+      "retired": false
+    },
+    {
+      "index": 60,
+      "signature": 0,
+      "opcode": 60,
+      "name": "lv_style_set_x",
+      "alias": "x",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "x"
+      ],
+      "retired": false
+    },
+    {
+      "index": 61,
+      "signature": 0,
+      "opcode": 61,
+      "name": "lv_style_set_y",
+      "alias": "y",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "y"
+      ],
+      "retired": false
+    },
+    {
+      "index": 62,
+      "signature": 1,
+      "opcode": 318,
+      "name": "lv_style_set_arc_opa",
+      "alias": "arc_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "arc_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 63,
+      "signature": 1,
+      "opcode": 319,
+      "name": "lv_style_set_bg_grad_opa",
+      "alias": "bg_grad_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "bg_grad_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 64,
+      "signature": 1,
+      "opcode": 320,
+      "name": "lv_style_set_bg_image_opa",
+      "alias": "bg_image_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "bg_image_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 65,
+      "signature": 1,
+      "opcode": 321,
+      "name": "lv_style_set_bg_image_recolor_opa",
+      "alias": "bg_image_recolor_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "bg_image_recolor_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 66,
+      "signature": 1,
+      "opcode": 322,
+      "name": "lv_style_set_bg_main_opa",
+      "alias": "bg_main_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "bg_main_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 67,
+      "signature": 1,
+      "opcode": 323,
+      "name": "lv_style_set_bg_opa",
+      "alias": "bg_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "bg_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 68,
+      "signature": 1,
+      "opcode": 324,
+      "name": "lv_style_set_border_opa",
+      "alias": "border_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "border_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 69,
+      "signature": 1,
+      "opcode": 325,
+      "name": "lv_style_set_color_filter_opa",
+      "alias": "color_filter_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "color_filter_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 70,
+      "signature": 1,
+      "opcode": 326,
+      "name": "lv_style_set_image_opa",
+      "alias": "image_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "image_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 71,
+      "signature": 1,
+      "opcode": 327,
+      "name": "lv_style_set_image_recolor_opa",
+      "alias": "image_recolor_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "image_recolor_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 72,
+      "signature": 1,
+      "opcode": 328,
+      "name": "lv_style_set_line_opa",
+      "alias": "line_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "line_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 73,
+      "signature": 1,
+      "opcode": 329,
+      "name": "lv_style_set_opa",
+      "alias": "opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 74,
+      "signature": 1,
+      "opcode": 330,
+      "name": "lv_style_set_opa_layered",
+      "alias": "opa_layered",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "opa_layered"
+      ],
+      "retired": false
+    },
+    {
+      "index": 75,
+      "signature": 1,
+      "opcode": 331,
+      "name": "lv_style_set_outline_opa",
+      "alias": "outline_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "outline_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 76,
+      "signature": 1,
+      "opcode": 332,
+      "name": "lv_style_set_recolor_opa",
+      "alias": "recolor_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "recolor_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 77,
+      "signature": 1,
+      "opcode": 333,
+      "name": "lv_style_set_shadow_opa",
+      "alias": "shadow_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "shadow_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 78,
+      "signature": 1,
+      "opcode": 334,
+      "name": "lv_style_set_text_opa",
+      "alias": "text_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "text_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 79,
+      "signature": 1,
+      "opcode": 335,
+      "name": "lv_style_set_text_outline_stroke_opa",
+      "alias": "text_outline_stroke_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "text_outline_stroke_opa"
+      ],
+      "retired": false
+    },
+    {
+      "index": 80,
+      "signature": 2,
+      "opcode": 592,
+      "name": "lv_style_set_arc_color",
+      "alias": "arc_color",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "arc_color"
+      ],
+      "retired": false
+    },
+    {
+      "index": 81,
+      "signature": 2,
+      "opcode": 593,
+      "name": "lv_style_set_bg_color",
+      "alias": "bg_color",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "bg_color"
+      ],
+      "retired": false
+    },
+    {
+      "index": 82,
+      "signature": 2,
+      "opcode": 594,
+      "name": "lv_style_set_bg_grad_color",
+      "alias": "bg_grad_color",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "bg_grad_color"
+      ],
+      "retired": false
+    },
+    {
+      "index": 83,
+      "signature": 2,
+      "opcode": 595,
+      "name": "lv_style_set_bg_image_recolor",
+      "alias": "bg_image_recolor",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "bg_image_recolor"
+      ],
+      "retired": false
+    },
+    {
+      "index": 84,
+      "signature": 2,
+      "opcode": 596,
+      "name": "lv_style_set_border_color",
+      "alias": "border_color",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "border_color"
+      ],
+      "retired": false
+    },
+    {
+      "index": 85,
+      "signature": 2,
+      "opcode": 597,
+      "name": "lv_style_set_image_recolor",
+      "alias": "image_recolor",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "image_recolor"
+      ],
+      "retired": false
+    },
+    {
+      "index": 86,
+      "signature": 2,
+      "opcode": 598,
+      "name": "lv_style_set_line_color",
+      "alias": "line_color",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "line_color"
+      ],
+      "retired": false
+    },
+    {
+      "index": 87,
+      "signature": 2,
+      "opcode": 599,
+      "name": "lv_style_set_outline_color",
+      "alias": "outline_color",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "outline_color"
+      ],
+      "retired": false
+    },
+    {
+      "index": 88,
+      "signature": 2,
+      "opcode": 600,
+      "name": "lv_style_set_recolor",
+      "alias": "recolor",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "recolor"
+      ],
+      "retired": false
+    },
+    {
+      "index": 89,
+      "signature": 2,
+      "opcode": 601,
+      "name": "lv_style_set_shadow_color",
+      "alias": "shadow_color",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "shadow_color"
+      ],
+      "retired": false
+    },
+    {
+      "index": 90,
+      "signature": 2,
+      "opcode": 602,
+      "name": "lv_style_set_text_color",
+      "alias": "text_color",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "text_color"
+      ],
+      "retired": false
+    },
+    {
+      "index": 91,
+      "signature": 2,
+      "opcode": 603,
+      "name": "lv_style_set_text_outline_stroke_color",
+      "alias": "text_outline_stroke_color",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "text_outline_stroke_color"
+      ],
+      "retired": false
+    },
+    {
+      "index": 92,
+      "signature": 3,
+      "opcode": 860,
+      "name": "lv_style_set_arc_rounded",
+      "alias": "arc_rounded",
+      "parameters": [
+        "bool"
+      ],
+      "properties": [
+        "arc_rounded"
+      ],
+      "retired": false
+    },
+    {
+      "index": 93,
+      "signature": 3,
+      "opcode": 861,
+      "name": "lv_style_set_bg_image_tiled",
+      "alias": "bg_image_tiled",
+      "parameters": [
+        "bool"
+      ],
+      "properties": [
+        "bg_image_tiled"
+      ],
+      "retired": false
+    },
+    {
+      "index": 94,
+      "signature": 3,
+      "opcode": 862,
+      "name": "lv_style_set_border_post",
+      "alias": "border_post",
+      "parameters": [
+        "bool"
+      ],
+      "properties": [
+        "border_post"
+      ],
+      "retired": false
+    },
+    {
+      "index": 95,
+      "signature": 3,
+      "opcode": 863,
+      "name": "lv_style_set_clip_corner",
+      "alias": "clip_corner",
+      "parameters": [
+        "bool"
+      ],
+      "properties": [
+        "clip_corner"
+      ],
+      "retired": false
+    },
+    {
+      "index": 96,
+      "signature": 3,
+      "opcode": 864,
+      "name": "lv_style_set_line_rounded",
+      "alias": "line_rounded",
+      "parameters": [
+        "bool"
+      ],
+      "properties": [
+        "line_rounded"
+      ],
+      "retired": false
+    },
+    {
+      "index": 97,
+      "signature": 4,
+      "opcode": 1121,
+      "name": "lv_style_set_grid_cell_x_align",
+      "alias": "grid_cell_x_align",
+      "parameters": [
+        "lv_grid_align_t"
+      ],
+      "properties": [
+        "grid_cell_x_align"
+      ],
+      "retired": false
+    },
+    {
+      "index": 98,
+      "signature": 4,
+      "opcode": 1122,
+      "name": "lv_style_set_grid_cell_y_align",
+      "alias": "grid_cell_y_align",
+      "parameters": [
+        "lv_grid_align_t"
+      ],
+      "properties": [
+        "grid_cell_y_align"
+      ],
+      "retired": false
+    },
+    {
+      "index": 99,
+      "signature": 4,
+      "opcode": 1123,
+      "name": "lv_style_set_grid_column_align",
+      "alias": "grid_column_align",
+      "parameters": [
+        "lv_grid_align_t"
+      ],
+      "properties": [
+        "grid_column_align"
+      ],
+      "retired": false
+    },
+    {
+      "index": 100,
+      "signature": 4,
+      "opcode": 1124,
+      "name": "lv_style_set_grid_row_align",
+      "alias": "grid_row_align",
+      "parameters": [
+        "lv_grid_align_t"
+      ],
+      "properties": [
+        "grid_row_align"
+      ],
+      "retired": false
+    },
+    {
+      "index": 101,
+      "signature": 5,
+      "opcode": 1381,
+      "name": "lv_style_set_arc_image_src",
+      "alias": "arc_image_src",
+      "parameters": [
+        "const void *"
+      ],
+      "properties": [
+        "arc_image_src"
+      ],
+      "retired": false
+    },
+    {
+      "index": 102,
+      "signature": 5,
+      "opcode": 1382,
+      "name": "lv_style_set_bg_image_src",
+      "alias": "bg_image_src",
+      "parameters": [
+        "const void *"
+      ],
+      "properties": [
+        "bg_image_src"
+      ],
+      "retired": false
+    },
+    {
+      "index": 103,
+      "signature": 5,
+      "opcode": 1383,
+      "name": "lv_style_set_bitmap_mask_src",
+      "alias": "bitmap_mask_src",
+      "parameters": [
+        "const void *"
+      ],
+      "properties": [
+        "bitmap_mask_src"
+      ],
+      "retired": false
+    },
+    {
+      "index": 104,
+      "signature": 6,
+      "opcode": 1640,
+      "name": "lv_style_set_flex_cross_place",
+      "alias": "flex_cross_place",
+      "parameters": [
+        "lv_flex_align_t"
+      ],
+      "properties": [
+        "flex_cross_place"
+      ],
+      "retired": false
+    },
+    {
+      "index": 105,
+      "signature": 6,
+      "opcode": 1641,
+      "name": "lv_style_set_flex_main_place",
+      "alias": "flex_main_place",
+      "parameters": [
+        "lv_flex_align_t"
+      ],
+      "properties": [
+        "flex_main_place"
+      ],
+      "retired": false
+    },
+    {
+      "index": 106,
+      "signature": 6,
+      "opcode": 1642,
+      "name": "lv_style_set_flex_track_place",
+      "alias": "flex_track_place",
+      "parameters": [
+        "lv_flex_align_t"
+      ],
+      "properties": [
+        "flex_track_place"
+      ],
+      "retired": false
+    },
+    {
+      "index": 107,
+      "signature": 7,
+      "opcode": 1899,
+      "name": "lv_style_set_grid_column_dsc_array",
+      "alias": "grid_column_dsc_array",
+      "parameters": [
+        "const int32_t *"
+      ],
+      "properties": [
+        "grid_column_dsc_array"
+      ],
+      "retired": false
+    },
+    {
+      "index": 108,
+      "signature": 7,
+      "opcode": 1900,
+      "name": "lv_style_set_grid_row_dsc_array",
+      "alias": "grid_row_dsc_array",
+      "parameters": [
+        "const int32_t *"
+      ],
+      "properties": [
+        "grid_row_dsc_array"
+      ],
+      "retired": false
+    },
+    {
+      "index": 109,
+      "signature": 8,
+      "opcode": 2157,
+      "name": "lv_style_set_anim_duration",
+      "alias": "anim_duration",
+      "parameters": [
+        "uint32_t"
+      ],
+      "properties": [
+        "anim_duration"
+      ],
+      "retired": false
+    },
+    {
+      "index": 110,
+      "signature": 8,
+      "opcode": 2158,
+      "name": "lv_style_set_rotary_sensitivity",
+      "alias": "rotary_sensitivity",
+      "parameters": [
+        "uint32_t"
+      ],
+      "properties": [
+        "rotary_sensitivity"
+      ],
+      "retired": false
+    },
+    {
+      "index": 111,
+      "signature": 9,
+      "opcode": 2415,
+      "name": "lv_style_set_anim",
+      "alias": "anim",
+      "parameters": [
+        "const lv_anim_t *"
+      ],
+      "properties": [
+        "anim"
+      ],
+      "retired": false
+    },
+    {
+      "index": 112,
+      "signature": 10,
+      "opcode": 2672,
+      "name": "lv_style_set_color_filter_dsc",
+      "alias": "color_filter_dsc",
+      "parameters": [
+        "const lv_color_filter_dsc_t *"
+      ],
+      "properties": [
+        "color_filter_dsc"
+      ],
+      "retired": false
+    },
+    {
+      "index": 113,
+      "signature": 11,
+      "opcode": 2929,
+      "name": "lv_style_set_text_font",
+      "alias": "text_font",
+      "parameters": [
+        "const lv_font_t *"
+      ],
+      "properties": [
+        "text_font"
+      ],
+      "retired": false
+    },
+    {
+      "index": 114,
+      "signature": 12,
+      "opcode": 3186,
+      "name": "lv_style_set_bg_grad",
+      "alias": "bg_grad",
+      "parameters": [
+        "const lv_grad_dsc_t *"
+      ],
+      "properties": [
+        "bg_grad"
+      ],
+      "retired": false
+    },
+    {
+      "index": 115,
+      "signature": 13,
+      "opcode": 3443,
+      "name": "lv_style_set_image_colorkey",
+      "alias": "image_colorkey",
+      "parameters": [
+        "const lv_image_colorkey_t *"
+      ],
+      "properties": [
+        "image_colorkey"
+      ],
+      "retired": false
+    },
+    {
+      "index": 116,
+      "signature": 14,
+      "opcode": 3700,
+      "name": "lv_style_set_transition",
+      "alias": "transition",
+      "parameters": [
+        "const lv_style_transition_dsc_t *"
+      ],
+      "properties": [
+        "transition"
+      ],
+      "retired": false
+    },
+    {
+      "index": 117,
+      "signature": 15,
+      "opcode": 3957,
+      "name": "lv_style_set_size",
+      "alias": "size",
+      "parameters": [
+        "int32_t",
+        "int32_t"
+      ],
+      "properties": [
+        "width",
+        "height"
+      ],
+      "retired": false
+    },
+    {
+      "index": 118,
+      "signature": 16,
+      "opcode": 4214,
+      "name": "lv_style_set_align",
+      "alias": "align",
+      "parameters": [
+        "lv_align_t"
+      ],
+      "properties": [
+        "align"
+      ],
+      "retired": false
+    },
+    {
+      "index": 119,
+      "signature": 17,
+      "opcode": 4471,
+      "name": "lv_style_set_base_dir",
+      "alias": "base_dir",
+      "parameters": [
+        "lv_base_dir_t"
+      ],
+      "properties": [
+        "base_dir"
+      ],
+      "retired": false
+    },
+    {
+      "index": 120,
+      "signature": 18,
+      "opcode": 4728,
+      "name": "lv_style_set_blend_mode",
+      "alias": "blend_mode",
+      "parameters": [
+        "lv_blend_mode_t"
+      ],
+      "properties": [
+        "blend_mode"
+      ],
+      "retired": false
+    },
+    {
+      "index": 121,
+      "signature": 19,
+      "opcode": 4985,
+      "name": "lv_style_set_border_side",
+      "alias": "border_side",
+      "parameters": [
+        "lv_border_side_t"
+      ],
+      "properties": [
+        "border_side"
+      ],
+      "retired": false
+    },
+    {
+      "index": 122,
+      "signature": 20,
+      "opcode": 5242,
+      "name": "lv_style_set_flex_flow",
+      "alias": "flex_flow",
+      "parameters": [
+        "lv_flex_flow_t"
+      ],
+      "properties": [
+        "flex_flow"
+      ],
+      "retired": false
+    },
+    {
+      "index": 123,
+      "signature": 21,
+      "opcode": 5499,
+      "name": "lv_style_set_bg_grad_dir",
+      "alias": "bg_grad_dir",
+      "parameters": [
+        "lv_grad_dir_t"
+      ],
+      "properties": [
+        "bg_grad_dir"
+      ],
+      "retired": false
+    },
+    {
+      "index": 124,
+      "signature": 22,
+      "opcode": 5756,
+      "name": "lv_style_set_text_align",
+      "alias": "text_align",
+      "parameters": [
+        "lv_text_align_t"
+      ],
+      "properties": [
+        "text_align"
+      ],
+      "retired": false
+    },
+    {
+      "index": 125,
+      "signature": 23,
+      "opcode": 6013,
+      "name": "lv_style_set_text_decor",
+      "alias": "text_decor",
+      "parameters": [
+        "lv_text_decor_t"
+      ],
+      "properties": [
+        "text_decor"
+      ],
+      "retired": false
+    },
+    {
+      "index": 126,
+      "signature": 24,
+      "opcode": 6270,
+      "name": "lv_style_set_layout",
+      "alias": "layout",
+      "parameters": [
+        "uint16_t"
+      ],
+      "properties": [
+        "layout"
+      ],
+      "retired": false
+    },
+    {
+      "index": 127,
+      "signature": 25,
+      "opcode": 6527,
+      "name": "lv_style_set_flex_grow",
+      "alias": "flex_grow",
+      "parameters": [
+        "uint8_t"
+      ],
+      "properties": [
+        "flex_grow"
+      ],
+      "retired": false
+    },
+    {
+      "index": 128,
+      "signature": 0,
+      "opcode": 128,
+      "name": "lv_style_set_blur_radius",
+      "alias": "blur_radius",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "blur_radius"
+      ]
+    },
+    {
+      "index": 129,
+      "signature": 0,
+      "opcode": 129,
+      "name": "lv_style_set_drop_shadow_offset_x",
+      "alias": "drop_shadow_offset_x",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "drop_shadow_offset_x"
+      ]
+    },
+    {
+      "index": 130,
+      "signature": 0,
+      "opcode": 130,
+      "name": "lv_style_set_drop_shadow_offset_y",
+      "alias": "drop_shadow_offset_y",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "drop_shadow_offset_y"
+      ]
+    },
+    {
+      "index": 131,
+      "signature": 0,
+      "opcode": 131,
+      "name": "lv_style_set_drop_shadow_radius",
+      "alias": "drop_shadow_radius",
+      "parameters": [
+        "int32_t"
+      ],
+      "properties": [
+        "drop_shadow_radius"
+      ]
+    },
+    {
+      "index": 132,
+      "signature": 1,
+      "opcode": 388,
+      "name": "lv_style_set_drop_shadow_opa",
+      "alias": "drop_shadow_opa",
+      "parameters": [
+        "lv_opa_t"
+      ],
+      "properties": [
+        "drop_shadow_opa"
+      ]
+    },
+    {
+      "index": 133,
+      "signature": 2,
+      "opcode": 645,
+      "name": "lv_style_set_drop_shadow_color",
+      "alias": "drop_shadow_color",
+      "parameters": [
+        "lv_color_t"
+      ],
+      "properties": [
+        "drop_shadow_color"
+      ]
+    },
+    {
+      "index": 134,
+      "signature": 3,
+      "opcode": 902,
+      "name": "lv_style_set_blur_backdrop",
+      "alias": "blur_backdrop",
+      "parameters": [
+        "bool"
+      ],
+      "properties": [
+        "blur_backdrop"
+      ]
+    },
+    {
+      "index": 135,
+      "signature": 26,
+      "opcode": 6791,
+      "name": "lv_style_set_blur_quality",
+      "alias": "blur_quality",
+      "parameters": [
+        "lv_blur_quality_t"
+      ],
+      "properties": [
+        "blur_quality"
+      ]
+    },
+    {
+      "index": 136,
+      "signature": 26,
+      "opcode": 6792,
+      "name": "lv_style_set_drop_shadow_quality",
+      "alias": "drop_shadow_quality",
+      "parameters": [
+        "lv_blur_quality_t"
+      ],
+      "properties": [
+        "drop_shadow_quality"
+      ]
+    },
+    {
+      "index": 137,
+      "signature": 27,
+      "opcode": 7049,
+      "name": "lv_style_set_text_leading_trim",
+      "alias": "text_leading_trim",
+      "parameters": [
+        "lv_text_leading_trim_t"
+      ],
+      "properties": [
+        "text_leading_trim"
+      ]
+    }
+  ],
+  "enums": {
+    "lv_blend_mode_t": {
+      "LV_BLEND_MODE_NORMAL": 0,
+      "LV_BLEND_MODE_ADDITIVE": 1,
+      "LV_BLEND_MODE_SUBTRACTIVE": 2,
+      "LV_BLEND_MODE_MULTIPLY": 3,
+      "LV_BLEND_MODE_DIFFERENCE": 4
+    },
+    "lv_text_decor_t": {
+      "LV_TEXT_DECOR_NONE": 0,
+      "LV_TEXT_DECOR_UNDERLINE": 1,
+      "LV_TEXT_DECOR_STRIKETHROUGH": 2
+    },
+    "lv_border_side_t": {
+      "LV_BORDER_SIDE_NONE": 0,
+      "LV_BORDER_SIDE_BOTTOM": 1,
+      "LV_BORDER_SIDE_TOP": 2,
+      "LV_BORDER_SIDE_LEFT": 4,
+      "LV_BORDER_SIDE_RIGHT": 8,
+      "LV_BORDER_SIDE_FULL": 15,
+      "LV_BORDER_SIDE_INTERNAL": 16
+    },
+    "lv_blur_quality_t": {
+      "LV_BLUR_QUALITY_AUTO": 0,
+      "LV_BLUR_QUALITY_SPEED": 1,
+      "LV_BLUR_QUALITY_PRECISION": 2
+    },
+    "lv_style_res_t": {
+      "LV_STYLE_RES_NOT_FOUND": 0,
+      "LV_STYLE_RES_FOUND": 1
+    },
+    "lv_align_t": {
+      "LV_ALIGN_DEFAULT": 0,
+      "LV_ALIGN_TOP_LEFT": 1,
+      "LV_ALIGN_TOP_MID": 2,
+      "LV_ALIGN_TOP_RIGHT": 3,
+      "LV_ALIGN_BOTTOM_LEFT": 4,
+      "LV_ALIGN_BOTTOM_MID": 5,
+      "LV_ALIGN_BOTTOM_RIGHT": 6,
+      "LV_ALIGN_LEFT_MID": 7,
+      "LV_ALIGN_RIGHT_MID": 8,
+      "LV_ALIGN_CENTER": 9,
+      "LV_ALIGN_OUT_TOP_LEFT": 10,
+      "LV_ALIGN_OUT_TOP_MID": 11,
+      "LV_ALIGN_OUT_TOP_RIGHT": 12,
+      "LV_ALIGN_OUT_BOTTOM_LEFT": 13,
+      "LV_ALIGN_OUT_BOTTOM_MID": 14,
+      "LV_ALIGN_OUT_BOTTOM_RIGHT": 15,
+      "LV_ALIGN_OUT_LEFT_TOP": 16,
+      "LV_ALIGN_OUT_LEFT_MID": 17,
+      "LV_ALIGN_OUT_LEFT_BOTTOM": 18,
+      "LV_ALIGN_OUT_RIGHT_TOP": 19,
+      "LV_ALIGN_OUT_RIGHT_MID": 20,
+      "LV_ALIGN_OUT_RIGHT_BOTTOM": 21
+    },
+    "lv_dir_t": {
+      "LV_DIR_NONE": 0,
+      "LV_DIR_LEFT": 1,
+      "LV_DIR_RIGHT": 2,
+      "LV_DIR_TOP": 4,
+      "LV_DIR_BOTTOM": 8,
+      "LV_DIR_HOR": 3,
+      "LV_DIR_VER": 12,
+      "LV_DIR_ALL": 15
+    },
+    "lv_text_flag_t": {
+      "LV_TEXT_FLAG_NONE": 0,
+      "LV_TEXT_FLAG_EXPAND": 1,
+      "LV_TEXT_FLAG_FIT": 2,
+      "LV_TEXT_FLAG_BREAK_ALL": 4,
+      "LV_TEXT_FLAG_RECOLOR": 8
+    },
+    "lv_text_align_t": {
+      "LV_TEXT_ALIGN_AUTO": 0,
+      "LV_TEXT_ALIGN_LEFT": 1,
+      "LV_TEXT_ALIGN_CENTER": 2,
+      "LV_TEXT_ALIGN_RIGHT": 3
+    },
+    "lv_text_leading_trim_t": {
+      "LV_TEXT_LEADING_TRIM_NONE": 0,
+      "LV_TEXT_LEADING_TRIM_CAPITAL_BASELINE": 1,
+      "LV_TEXT_LEADING_TRIM_LOWER_BASELINE": 2,
+      "LV_TEXT_LEADING_TRIM_CAPITAL": 3,
+      "LV_TEXT_LEADING_TRIM_LOWER": 4
+    },
+    "lv_base_dir_t": {
+      "LV_BASE_DIR_LTR": 0,
+      "LV_BASE_DIR_RTL": 1,
+      "LV_BASE_DIR_AUTO": 2,
+      "LV_BASE_DIR_NEUTRAL": 32,
+      "LV_BASE_DIR_WEAK": 33
+    },
+    "lv_grad_dir_t": {
+      "LV_GRAD_DIR_NONE": 0,
+      "LV_GRAD_DIR_VER": 1,
+      "LV_GRAD_DIR_HOR": 2,
+      "LV_GRAD_DIR_LINEAR": 3,
+      "LV_GRAD_DIR_RADIAL": 4,
+      "LV_GRAD_DIR_CONICAL": 5
+    },
+    "lv_grad_extend_t": {
+      "LV_GRAD_EXTEND_PAD": 0,
+      "LV_GRAD_EXTEND_REPEAT": 1,
+      "LV_GRAD_EXTEND_REFLECT": 2
+    },
+    "lv_flex_align_t": {
+      "LV_FLEX_ALIGN_START": 0,
+      "LV_FLEX_ALIGN_END": 1,
+      "LV_FLEX_ALIGN_CENTER": 2,
+      "LV_FLEX_ALIGN_SPACE_EVENLY": 3,
+      "LV_FLEX_ALIGN_SPACE_AROUND": 4,
+      "LV_FLEX_ALIGN_SPACE_BETWEEN": 5
+    },
+    "lv_flex_flow_t": {
+      "LV_FLEX_FLOW_ROW": 0
+    },
+    "lv_grid_align_t": {
+      "LV_GRID_ALIGN_START": 0,
+      "LV_GRID_ALIGN_CENTER": 1,
+      "LV_GRID_ALIGN_END": 2,
+      "LV_GRID_ALIGN_STRETCH": 3,
+      "LV_GRID_ALIGN_SPACE_EVENLY": 4,
+      "LV_GRID_ALIGN_SPACE_AROUND": 5,
+      "LV_GRID_ALIGN_SPACE_BETWEEN": 6
+    }
+  }
+}

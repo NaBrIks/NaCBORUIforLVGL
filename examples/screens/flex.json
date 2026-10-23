@@ -1,0 +1,265 @@
+{
+  "format": "lvgl-screen-draft-1",
+  "id": "flex",
+  "name": "MVP · Flex",
+  "theme": "none",
+  "size": {
+    "width": 800,
+    "height": 480
+  },
+  "styles": {},
+  "root": {
+    "id": "root",
+    "type": "obj",
+    "style": {
+      "bg_color": "#101820",
+      "bg_opa": 255,
+      "layout": "LV_LAYOUT_FLEX",
+      "flex_flow": "LV_FLEX_FLOW_COLUMN",
+      "pad_all": 20,
+      "pad_row": 16
+    },
+    "props": {},
+    "flags": {
+      "SCROLLABLE": false
+    },
+    "children": [
+      {
+        "id": "title",
+        "type": "label",
+        "style": {
+          "text_color": "#ffffff",
+          "text_font": "montserrat_28"
+        },
+        "props": {
+          "text": "Flex / grow / nested containers"
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      },
+      {
+        "id": "row",
+        "type": "obj",
+        "style": {
+          "width": {
+            "pct": 100
+          },
+          "height": 200,
+          "layout": "LV_LAYOUT_FLEX",
+          "flex_flow": "LV_FLEX_FLOW_ROW",
+          "pad_column": 16
+        },
+        "props": {},
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": [
+          {
+            "id": "card_0",
+            "type": "obj",
+            "style": {
+              "width": 160,
+              "height": 180,
+              "flex_grow": 1,
+              "layout": "LV_LAYOUT_FLEX",
+              "flex_flow": "LV_FLEX_FLOW_COLUMN",
+              "pad_all": 12,
+              "pad_row": 16,
+              "bg_color": "#204050",
+              "bg_opa": 255,
+              "radius": 8
+            },
+            "props": {},
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": [
+              {
+                "id": "text_0",
+                "type": "label",
+                "style": {
+                  "text_color": "#ffffff",
+                  "text_font": "montserrat_20"
+                },
+                "props": {
+                  "text": "Value 25"
+                },
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": []
+              },
+              {
+                "id": "bar_0",
+                "type": "bar",
+                "style": {
+                  "width": {
+                    "pct": 100
+                  },
+                  "height": 24,
+                  "bg_color": "#324652",
+                  "bg_opa": 255
+                },
+                "props": {
+                  "min": 0,
+                  "max": 100,
+                  "value": 25
+                },
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "styleRules": [
+                  {
+                    "part": "INDICATOR",
+                    "props": {
+                      "bg_color": "#3dbb91",
+                      "bg_opa": 255
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "card_1",
+            "type": "obj",
+            "style": {
+              "width": 160,
+              "height": 180,
+              "flex_grow": 1,
+              "layout": "LV_LAYOUT_FLEX",
+              "flex_flow": "LV_FLEX_FLOW_COLUMN",
+              "pad_all": 12,
+              "pad_row": 16,
+              "bg_color": "#204050",
+              "bg_opa": 255,
+              "radius": 8
+            },
+            "props": {},
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": [
+              {
+                "id": "text_1",
+                "type": "label",
+                "style": {
+                  "text_color": "#ffffff",
+                  "text_font": "montserrat_20"
+                },
+                "props": {
+                  "text": "Value 65"
+                },
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": []
+              },
+              {
+                "id": "bar_1",
+                "type": "bar",
+                "style": {
+                  "width": {
+                    "pct": 100
+                  },
+                  "height": 24,
+                  "bg_color": "#324652",
+                  "bg_opa": 255
+                },
+                "props": {
+                  "min": 0,
+                  "max": 100,
+                  "value": 65
+                },
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "styleRules": [
+                  {
+                    "part": "INDICATOR",
+                    "props": {
+                      "bg_color": "#3dbb91",
+                      "bg_opa": 255
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "card_2",
+            "type": "obj",
+            "style": {
+              "width": 160,
+              "height": 180,
+              "flex_grow": 1,
+              "layout": "LV_LAYOUT_FLEX",
+              "flex_flow": "LV_FLEX_FLOW_COLUMN",
+              "pad_all": 12,
+              "pad_row": 16,
+              "bg_color": "#204050",
+              "bg_opa": 255,
+              "radius": 8
+            },
+            "props": {},
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": [
+              {
+                "id": "text_2",
+                "type": "label",
+                "style": {
+                  "text_color": "#ffffff",
+                  "text_font": "montserrat_20"
+                },
+                "props": {
+                  "text": "Value 90"
+                },
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": []
+              },
+              {
+                "id": "bar_2",
+                "type": "bar",
+                "style": {
+                  "width": {
+                    "pct": 100
+                  },
+                  "height": 24,
+                  "bg_color": "#324652",
+                  "bg_opa": 255
+                },
+                "props": {
+                  "min": 0,
+                  "max": 100,
+                  "value": 90
+                },
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "styleRules": [
+                  {
+                    "part": "INDICATOR",
+                    "props": {
+                      "bg_color": "#3dbb91",
+                      "bg_opa": 255
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "bindings": []
+}

@@ -1,0 +1,7 @@
+{
+  "format": "lvgl-cbor-composition",
+  "version": 1,
+  "limits": {"maxDepth": 8, "maxInstances": 16, "inactiveCache": 2},
+  "retention": ["release", "cache", "retain"],
+  "sizing": ["fill", "design"]
+}

@@ -1,0 +1,17 @@
+.view-editor>.corner-data {min-width:0;}
+.view-enable {display:flex;align-items:center;gap:4px;min-height:var(--editor-row-height);}
+.view-page-row,.view-option {display:flex;align-items:center;gap:3px;min-width:0;margin:2px 0;}
+.view-editor :where(input,select,button) {height:var(--editor-control-height);min-height:var(--editor-control-height);padding:0 3px;}
+.view-page-row>select:first-child {flex:1;min-width:0;width:0;}
+.view-page-row>select:nth-child(2) {width:120px;min-width:0;}
+.view-option>label {width:75px;color:var(--lu-text-muted);}
+.view-option>select {flex:1;min-width:0;}
+.view-note {font-size:var(--editor-small-font-size);margin:2px 0;}
+.composition-graph-scroll {overflow:auto;max-height:280px;}
+.composition-graph svg {display:block;width:100%;min-width:520px;max-height:none;}
+.composition-graph rect {fill:var(--lu-bg-canvas);stroke:var(--lu-border);}
+.composition-graph .composition-entry {stroke:var(--lu-primary);stroke-width:2;}
+.composition-graph text {fill:var(--lu-text);font:12px Segoe UI,Arial,sans-serif;}
+.composition-graph marker path {fill:var(--lu-text-muted);}
+.composition-edge {fill:none;stroke:var(--lu-text-muted);stroke-width:1;stroke-dasharray:3 3;}
+.composition-edge.composition-initial {stroke-dasharray:none;}

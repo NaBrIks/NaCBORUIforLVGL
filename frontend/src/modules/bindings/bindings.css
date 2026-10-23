@@ -1,0 +1,39 @@
+.binding-editor {margin-bottom:4px;}
+.binding-editor.property-category.corner-frame {width:100%;max-width:100%;min-width:0;}
+.binding-editor>.corner-data {width:100%;max-width:100%;min-width:0;}
+.binding-editor :where(.binding-rule,.binding-expression,.binding-expression-children,.binding-data-fields) {max-width:100%;}
+.binding-editor .binding-section-head,.binding-rule-head,.binding-expression-head,.binding-format,.binding-source-path,.binding-action-target {display:flex;align-items:center;gap:4px;min-width:0;flex-wrap:wrap;}
+.binding-section-head {justify-content:space-between;min-height:var(--editor-row-height);}
+.binding-section-head strong {font-weight:500;}
+.binding-rule {border-top:1px solid var(--lu-border);padding:3px 0;min-width:0;}
+.binding-rule-head>label,.binding-action-target>label {min-width:52px;color:var(--lu-text-muted);}
+.binding-rule-head>select {min-width:95px;max-width:210px;}
+.binding-rule-head>.icon-action {margin-left:auto;}
+.binding-editor :where(input,select) {height:var(--editor-control-height);min-height:var(--editor-control-height);padding:0 3px;line-height:normal;}
+.binding-editor button {min-height:var(--editor-control-height);padding:0 3px;}
+.binding-editor :where(input,select):not([type=checkbox]) {max-width:100%;min-width:32px;}
+.binding-expression {min-width:0;flex:1;}
+.binding-expression-head>select:first-child {width:106px;max-width:100%;flex-shrink:1;}
+.binding-expression-head>input,.binding-expression-head>.binding-data-fields {flex:1;}
+.binding-expression-children {margin:2px 0 2px 9px;padding-left:5px;border-left:1px solid var(--lu-border);}
+.binding-expression-argument,.binding-data-field {display:flex;align-items:start;gap:4px;min-width:0;margin-top:2px;}
+.binding-argument-name {width:42px;flex-shrink:0;color:var(--lu-text-muted);line-height:var(--editor-control-height);}
+.binding-data-field>label {width:70px;flex-shrink:0;color:var(--lu-text-muted);overflow:hidden;text-overflow:ellipsis;line-height:var(--editor-control-height);}
+.binding-data-field>input:not([type=checkbox]),.binding-data-field>.binding-data-fields {min-width:40px;flex:1;}
+.binding-data-fields {min-width:0;}
+.binding-data-field>.binding-field-label,.binding-expression-argument>.binding-field-label {display:flex;align-items:center;gap:3px;width:90px;min-width:0;flex-shrink:0;color:var(--lu-text-muted);line-height:var(--editor-control-height);}
+.binding-field-label>span {overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.binding-editor .binding-field-label>input {margin:0;flex-shrink:0;}
+.binding-field-absent {color:var(--lu-text-muted);line-height:var(--editor-control-height);}
+.binding-source-path {flex:1 1 150px;width:100%;max-width:100%;}
+.binding-source-path>select {max-width:180px;}
+.binding-source-path>input {width:90px;}
+.binding-source-path>input.binding-path-index {width:44px;text-align:right;}
+.binding-source-type {color:var(--lu-text-muted);font-size:var(--editor-small-font-size);}
+.binding-path-separator {color:var(--lu-text-muted);}
+.binding-format {margin-top:3px;}
+.binding-format label {display:flex;align-items:center;gap:3px;color:var(--lu-text-muted);}
+.binding-format input {width:64px;}
+.binding-format input[type=number] {width:38px;text-align:right;}
+.binding-error,.binding-offline-note {margin:2px 0;font-size:var(--editor-small-font-size);}
+.binding-offline-note {color:var(--lu-text-muted);}

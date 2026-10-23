@@ -1,0 +1,178 @@
+{
+  "format": "lvgl-screen-draft-1",
+  "id": "widgets",
+  "name": "MVP · параметры виджетов",
+  "theme": "none",
+  "size": {
+    "width": 800,
+    "height": 480
+  },
+  "styles": {},
+  "root": {
+    "id": "root",
+    "type": "obj",
+    "style": {
+      "bg_color": "#101820",
+      "bg_opa": 255
+    },
+    "props": {},
+    "flags": {
+      "SCROLLABLE": false
+    },
+    "children": [
+      {
+        "id": "title",
+        "type": "label",
+        "style": {
+          "text_color": "#ffffff",
+          "x": 20,
+          "y": 10,
+          "text_font": "montserrat_28"
+        },
+        "props": {
+          "text": "Widget setters / typed parameters"
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      },
+      {
+        "id": "slider",
+        "type": "slider",
+        "style": {
+          "x": 30,
+          "y": 80,
+          "width": 250,
+          "height": 25
+        },
+        "props": {
+          "min": -20,
+          "max": 80,
+          "value": 35,
+          "start_value": 0
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      },
+      {
+        "id": "arc",
+        "type": "arc",
+        "style": {
+          "x": 330,
+          "y": 70,
+          "width": 140,
+          "height": 140,
+          "arc_color": "#3dbb91",
+          "arc_width": 8
+        },
+        "props": {
+          "min": 0,
+          "max": 100,
+          "value": 70,
+          "angles": [
+            30,
+            240
+          ],
+          "bg_angles": [
+            0,
+            270
+          ],
+          "rotation": 0,
+          "mode": 0
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      },
+      {
+        "id": "textarea",
+        "type": "textarea",
+        "style": {
+          "x": 30,
+          "y": 150,
+          "width": 250,
+          "height": 60,
+          "text_color": "#ffffff",
+          "border_width": 1,
+          "border_color": "#3dbb91"
+        },
+        "props": {
+          "text": "MVP text",
+          "max_length": 20,
+          "one_line": true,
+          "password_mode": false
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      },
+      {
+        "id": "dropdown",
+        "type": "dropdown",
+        "style": {
+          "x": 30,
+          "y": 240,
+          "width": 250,
+          "height": 40,
+          "text_color": "#ffffff",
+          "bg_color": "#246e8c",
+          "bg_opa": 255
+        },
+        "props": {
+          "options": [
+            "One",
+            "Two",
+            "Three"
+          ],
+          "selected": 1,
+          "direction": 8
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      },
+      {
+        "id": "switch",
+        "type": "switch",
+        "style": {
+          "x": 330,
+          "y": 250,
+          "width": 60,
+          "height": 28
+        },
+        "props": {
+          "checked": true
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      },
+      {
+        "id": "image",
+        "type": "image",
+        "style": {
+          "x": 450,
+          "y": 250,
+          "width": 50,
+          "height": 50
+        },
+        "props": {
+          "scale": 256,
+          "rotation": 0
+        },
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": []
+      }
+    ]
+  },
+  "bindings": []
+}

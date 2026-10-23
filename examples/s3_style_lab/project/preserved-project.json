@@ -1,0 +1,934 @@
+{
+  "format": "lvgl-project-1",
+  "manifest": {
+    "id": "tpms-gps",
+    "name": "TPMS / GPS · стенд",
+    "entry": "dashboard",
+    "requirements": {
+      "screenABI": "fad10d7e4c7c808a22b5ce06af537f4c0062d458e5dc1ad8d4dff15cd788f050",
+      "styleABI": "efdbe8aee4e961473bf8d671142361b1feb5ee8c582801d005acf1cd739acef2"
+    },
+    "description": "Демонстрационный проект: четыре датчика давления и GPS. Значения примеров; привязки к оборудованию не подключены."
+  },
+  "screens": {
+    "dashboard": {
+      "format": "lvgl-screen-draft-1",
+      "id": "dashboard",
+      "name": "Давление и GPS",
+      "size": {
+        "width": 800,
+        "height": 480
+      },
+      "theme": "none",
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "props": {},
+        "flags": {},
+        "styles": [],
+        "children": [
+          {
+            "id": "title",
+            "type": "label",
+            "props": {
+              "text": "TPMS / GPS"
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 20,
+              "y": 14,
+              "text_font": "montserrat_28"
+            }
+          },
+          {
+            "id": "demo",
+            "type": "label",
+            "props": {
+              "text": "DEMO DATA / sensors not connected"
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 20,
+              "y": 49,
+              "text_color": "#ffc56b"
+            }
+          },
+          {
+            "id": "front_left",
+            "type": "obj",
+            "props": {},
+            "flags": {},
+            "styles": [
+              {
+                "ref": "global:panel",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": [
+              {
+                "id": "front_left_name",
+                "type": "label",
+                "props": {
+                  "text": "FRONT LEFT"
+                },
+                "flags": {},
+                "styles": [],
+                "children": [],
+                "style": {
+                  "x": 12,
+                  "y": 10,
+                  "text_font": "montserrat_20"
+                }
+              },
+              {
+                "id": "front_left_pressure",
+                "type": "label",
+                "props": {
+                  "text": "2.35 bar"
+                },
+                "flags": {},
+                "styles": [
+                  {
+                    "ref": "global:reading",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ],
+                "children": [],
+                "style": {
+                  "x": 12,
+                  "y": 39
+                }
+              },
+              {
+                "id": "front_left_temp",
+                "type": "label",
+                "props": {
+                  "text": "26 C  /  DEMO"
+                },
+                "flags": {},
+                "styles": [],
+                "children": [],
+                "style": {
+                  "x": 12,
+                  "y": 82,
+                  "text_color": "#9eb4c1"
+                }
+              }
+            ],
+            "style": {
+              "x": 20,
+              "y": 84,
+              "width": 204,
+              "height": 114
+            }
+          },
+          {
+            "id": "front_right",
+            "type": "obj",
+            "props": {},
+            "flags": {},
+            "styles": [
+              {
+                "ref": "global:panel",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": [
+              {
+                "id": "front_right_name",
+                "type": "label",
+                "props": {
+                  "text": "FRONT RIGHT"
+                },
+                "flags": {},
+                "styles": [],
+                "children": [],
+                "style": {
+                  "x": 12,
+                  "y": 10,
+                  "text_font": "montserrat_20"
+                }
+              },
+              {
+                "id": "front_right_pressure",
+                "type": "label",
+                "props": {
+                  "text": "2.32 bar"
+                },
+                "flags": {},
+                "styles": [
+                  {
+                    "ref": "global:reading",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ],
+                "children": [],
+                "style": {
+                  "x": 12,
+                  "y": 39
+                }
+              },
+              {
+                "id": "front_right_temp",
+                "type": "label",
+                "props": {
+                  "text": "27 C  /  DEMO"
+                },
+                "flags": {},
+                "styles": [],
+                "children": [],
+                "style": {
+                  "x": 12,
+                  "y": 82,
+                  "text_color": "#9eb4c1"
+                }
+              }
+            ],
+            "style": {
+              "x": 238,
+              "y": 84,
+              "width": 204,
+              "height": 114
+            }
+          },
+          {
+            "id": "rear_left",
+            "type": "obj",
+            "props": {},
+            "flags": {},
+            "styles": [
+              {
+                "ref": "global:panel",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": [
+              {
+                "id": "rear_left_name",
+                "type": "label",
+                "props": {
+                  "text": "REAR LEFT"
+                },
+                "flags": {},
+                "styles": [],
+                "children": [],
+                "style": {
+                  "x": 12,
+                  "y": 10,
+                  "text_font": "montserrat_20"
+                }
+              },
+              {
+                "id": "rear_left_pressure",
+                "type": "label",
+                "props": {
+                  "text": "2.28 bar"
+                },
+                "flags": {},
+                "styles": [
+                  {
+                    "ref": "global:reading",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ],
+                "children": [],
+                "style": {
+                  "x": 12,
+                  "y": 39
+                }
+              },
+              {
+                "id": "rear_left_temp",
+                "type": "label",
+                "props": {
+                  "text": "25 C  /  DEMO"
+                },
+                "flags": {},
+                "styles": [],
+                "children": [],
+                "style": {
+                  "x": 12,
+                  "y": 82,
+                  "text_color": "#9eb4c1"
+                }
+              }
+            ],
+            "style": {
+              "x": 20,
+              "y": 212,
+              "width": 204,
+              "height": 114
+            }
+          },
+          {
+            "id": "rear_right",
+            "type": "obj",
+            "props": {},
+            "flags": {},
+            "styles": [
+              {
+                "ref": "global:panel",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": [
+              {
+                "id": "rear_right_name",
+                "type": "label",
+                "props": {
+                  "text": "REAR RIGHT"
+                },
+                "flags": {},
+                "styles": [],
+                "children": [],
+                "style": {
+                  "x": 12,
+                  "y": 10,
+                  "text_font": "montserrat_20"
+                }
+              },
+              {
+                "id": "rear_right_pressure",
+                "type": "label",
+                "props": {
+                  "text": "2.34 bar"
+                },
+                "flags": {},
+                "styles": [
+                  {
+                    "ref": "global:reading",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ],
+                "children": [],
+                "style": {
+                  "x": 12,
+                  "y": 39
+                }
+              },
+              {
+                "id": "rear_right_temp",
+                "type": "label",
+                "props": {
+                  "text": "26 C  /  DEMO"
+                },
+                "flags": {},
+                "styles": [],
+                "children": [],
+                "style": {
+                  "x": 12,
+                  "y": 82,
+                  "text_color": "#9eb4c1"
+                }
+              }
+            ],
+            "style": {
+              "x": 238,
+              "y": 212,
+              "width": 204,
+              "height": 114
+            }
+          },
+          {
+            "id": "gps_speed",
+            "type": "lab:speedometer",
+            "props": {
+              "range": [
+                0,
+                180
+              ],
+              "title": "GPS / GROUND SPEED",
+              "redline": 130,
+              "reading": [
+                87,
+                "km/h"
+              ]
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 460,
+              "y": 70,
+              "width": 320,
+              "height": 292
+            }
+          },
+          {
+            "id": "gps_status",
+            "type": "lab:signal",
+            "props": {
+              "title": "GPS / DEMO FIX",
+              "state": 2
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 20,
+              "y": 348,
+              "width": 422,
+              "height": 110
+            }
+          },
+          {
+            "id": "gps_meta",
+            "type": "label",
+            "props": {
+              "text": "SAT 12  /  ALT 246 m"
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 470,
+              "y": 381,
+              "text_font": "montserrat_20",
+              "text_color": "#9eb4c1"
+            }
+          },
+          {
+            "id": "gps_notice",
+            "type": "label",
+            "props": {
+              "text": "No receiver connected"
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 470,
+              "y": 418,
+              "text_color": "#ffc56b"
+            }
+          }
+        ],
+        "style": {
+          "bg_color": "#101e28",
+          "bg_opa": 255,
+          "pad_all": 0,
+          "text_color": "#e8f0f2"
+        },
+        "common": {
+          "remove_flags": 16
+        }
+      },
+      "bindings": []
+    },
+    "radar": {
+      "format": "lvgl-screen-draft-1",
+      "id": "radar",
+      "name": "Радар · обзор",
+      "size": {
+        "width": 800,
+        "height": 480
+      },
+      "theme": "none",
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "props": {},
+        "flags": {},
+        "styles": [],
+        "children": [
+          {
+            "id": "title",
+            "type": "label",
+            "props": {
+              "text": "POLAR / SURROUND VIEW"
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 20,
+              "y": 14,
+              "text_font": "montserrat_28"
+            }
+          },
+          {
+            "id": "radar",
+            "type": "lab:radar",
+            "props": {
+              "title": "DEMO / CONTACT TRACKER",
+              "running": true,
+              "targets": [
+                [
+                  "ALPHA",
+                  38,
+                  64,
+                  90
+                ],
+                [
+                  "BRAVO",
+                  122,
+                  74,
+                  55
+                ],
+                [
+                  "CHARLIE",
+                  230,
+                  56,
+                  75
+                ],
+                [
+                  "DELTA",
+                  308,
+                  81,
+                  45
+                ]
+              ],
+              "sweep": 45,
+              "range": 12
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 16,
+              "y": 58,
+              "width": 416,
+              "height": 412
+            }
+          },
+          {
+            "id": "heading",
+            "type": "label",
+            "props": {
+              "text": "CONTACTS / DEMO"
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 460,
+              "y": 86,
+              "text_font": "montserrat_20"
+            }
+          },
+          {
+            "id": "legend",
+            "type": "label",
+            "props": {
+              "text": "ALPHA       038 deg\nBRAVO       122 deg\nCHARLIE     230 deg\nDELTA       308 deg"
+            },
+            "flags": {},
+            "styles": [
+              {
+                "ref": "global:radar_grid",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": [],
+            "style": {
+              "x": 460,
+              "y": 139,
+              "text_color": "#4de0ad",
+              "text_line_space": 12
+            }
+          },
+          {
+            "id": "link",
+            "type": "lab:signal",
+            "props": {
+              "title": "RADAR / DEMO",
+              "state": 1
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 454,
+              "y": 291,
+              "width": 326,
+              "height": 116
+            }
+          },
+          {
+            "id": "note",
+            "type": "label",
+            "props": {
+              "text": "Generated targets / no sensor"
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 460,
+              "y": 433,
+              "text_color": "#ffc56b"
+            }
+          }
+        ],
+        "style": {
+          "bg_color": "#101e28",
+          "bg_opa": 255,
+          "pad_all": 0,
+          "text_color": "#e8f0f2"
+        },
+        "common": {
+          "remove_flags": 16
+        }
+      },
+      "bindings": []
+    },
+    "trip": {
+      "format": "lvgl-screen-draft-1",
+      "id": "trip",
+      "name": "GPS · маршрут",
+      "size": {
+        "width": 800,
+        "height": 480
+      },
+      "theme": "none",
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "props": {},
+        "flags": {},
+        "styles": [],
+        "children": [
+          {
+            "id": "title",
+            "type": "label",
+            "props": {
+              "text": "GPS / TRIP COMPUTER"
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 20,
+              "y": 14,
+              "text_font": "montserrat_28"
+            }
+          },
+          {
+            "id": "speed",
+            "type": "lab:speedometer",
+            "props": {
+              "range": [
+                0,
+                180
+              ],
+              "title": "GPS / SPEED",
+              "redline": 130,
+              "reading": [
+                87,
+                "km/h"
+              ]
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 22,
+              "y": 70,
+              "width": 340,
+              "height": 292
+            }
+          },
+          {
+            "id": "metrics",
+            "type": "obj",
+            "props": {},
+            "flags": {},
+            "styles": [
+              {
+                "ref": "global:panel",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": [
+              {
+                "id": "captions",
+                "type": "label",
+                "props": {
+                  "text": "DISTANCE\nMOVING TIME\nAVG SPEED\nALTITUDE\nSATELLITES"
+                },
+                "flags": {},
+                "styles": [],
+                "children": [],
+                "style": {
+                  "x": 16,
+                  "y": 16,
+                  "text_font": "montserrat_20",
+                  "text_line_space": 21
+                }
+              },
+              {
+                "id": "values",
+                "type": "label",
+                "props": {
+                  "text": "124.8 km\n01:43\n72 km/h\n246 m\n12"
+                },
+                "flags": {},
+                "styles": [],
+                "children": [],
+                "style": {
+                  "x": 225,
+                  "y": 16,
+                  "text_font": "montserrat_20",
+                  "text_color": "#4de0ad",
+                  "text_line_space": 21
+                }
+              }
+            ],
+            "style": {
+              "x": 390,
+              "y": 82,
+              "width": 388,
+              "height": 276
+            }
+          },
+          {
+            "id": "demo",
+            "type": "label",
+            "props": {
+              "text": "DEMO DATA / GPS receiver not connected"
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "x": 22,
+              "y": 408,
+              "text_color": "#ffc56b",
+              "text_font": "montserrat_20"
+            }
+          }
+        ],
+        "style": {
+          "bg_color": "#101e28",
+          "bg_opa": 255,
+          "pad_all": 0,
+          "text_color": "#e8f0f2"
+        },
+        "common": {
+          "remove_flags": 16
+        }
+      },
+      "bindings": []
+    },
+    "workbench-main": {
+      "format": "lvgl-screen-draft-1",
+      "id": "workbench-main",
+      "name": "Мастерская · Главный экран",
+      "size": {
+        "width": 800,
+        "height": 480
+      },
+      "theme": "device",
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "props": {},
+        "flags": {},
+        "styles": [],
+        "children": [
+          {
+            "id": "message",
+            "type": "label",
+            "props": {
+              "text": "Project base"
+            },
+            "flags": {},
+            "styles": [
+              {
+                "ref": "global:accent",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": [],
+            "style": {}
+          },
+          {
+            "id": "lab:radar_1",
+            "type": "lab:radar",
+            "props": {
+              "title": "POLAR / CONTACT TRACKER",
+              "running": true,
+              "targets": [
+                [
+                  "ALPHA",
+                  38,
+                  64,
+                  90
+                ],
+                [
+                  "BRAVO",
+                  122,
+                  74,
+                  55
+                ],
+                [
+                  "CHARLIE",
+                  230,
+                  56,
+                  75
+                ],
+                [
+                  "DELTA",
+                  308,
+                  81,
+                  45
+                ]
+              ],
+              "sweep": 45,
+              "range": 12
+            },
+            "flags": {},
+            "styles": [],
+            "children": [],
+            "style": {
+              "width": 416,
+              "height": 412
+            }
+          },
+          {
+            "id": "obj_1",
+            "type": "obj",
+            "props": {},
+            "flags": {},
+            "styles": [
+              {
+                "ref": "global:style_1",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": [
+              {
+                "id": "label_1",
+                "type": "label",
+                "props": {
+                  "text": "Label"
+                },
+                "flags": {},
+                "styles": [],
+                "children": [],
+                "style": {}
+              }
+            ],
+            "style": {
+              "bg_color": "#eeeeee",
+              "bg_opa": 255
+            }
+          }
+        ],
+        "style": {
+          "bg_color": "#17252d",
+          "bg_opa": 255,
+          "pad_left": 0,
+          "pad_right": 0,
+          "pad_top": 0,
+          "pad_bottom": 0,
+          "arc_width": -1,
+          "layout": 1
+        },
+        "common": {
+          "remove_flags": 16
+        }
+      },
+      "bindings": []
+    }
+  },
+  "styles": {
+    "panel": {
+      "scope": "global",
+      "name": "panel",
+      "copy": null,
+      "merge": [],
+      "attach": false,
+      "props": {
+        "border_width": 1,
+        "pad_all": 0,
+        "radius": 10,
+        "bg_opa": 255,
+        "bg_color": "#1b303d",
+        "border_color": "#385563"
+      }
+    },
+    "reading": {
+      "scope": "global",
+      "name": "reading",
+      "copy": null,
+      "merge": [],
+      "attach": false,
+      "props": {
+        "text_color": "#4de0ad",
+        "text_font": "montserrat_28"
+      }
+    },
+    "caption": {
+      "scope": "global",
+      "name": "caption",
+      "copy": null,
+      "merge": [],
+      "attach": false,
+      "props": {
+        "text_color": "#9eb4c1",
+        "text_font": "montserrat_20"
+      }
+    },
+    "radar_grid": {
+      "scope": "global",
+      "name": "radar_grid",
+      "copy": null,
+      "merge": [],
+      "attach": false,
+      "props": {
+        "border_width": 1,
+        "border_color": "#4de0ad",
+        "text_color": "#4de0ad"
+      }
+    },
+    "accent": {
+      "scope": "global",
+      "name": "accent",
+      "copy": null,
+      "merge": [],
+      "attach": false,
+      "props": {
+        "text_color": "#22cc88"
+      }
+    },
+    "style_1": {
+      "scope": "global",
+      "name": "style_1",
+      "copy": null,
+      "merge": [],
+      "attach": false,
+      "props": {
+        "border_width": 17,
+        "outline_width": 6,
+        "radius": 36,
+        "border_opa": 0,
+        "bg_color": "#ffa8a8",
+        "border_color": "#ff00f7",
+        "outline_color": "#0400ff",
+        "text_font": "montserrat_20",
+        "border_side": 1
+      }
+    }
+  }
+}
