@@ -1,6 +1,6 @@
 option(LVGL_CBOR_DEMO_BLE_SCANNER "Build the optional real yabt BLE scanner" ON)
 if(LVGL_CBOR_DEMO_BLE_SCANNER)
-  get_filename_component(_yabt "${CMAKE_CURRENT_LIST_DIR}/../../../../../ESP32-yabt/src" ABSOLUTE)
+  get_filename_component(_yabt "${CMAKE_CURRENT_LIST_DIR}/../../../../../NaBTools/src" ABSOLUTE)
   if(NOT EXISTS "${_yabt}/yabt_utils.cpp")
     message(FATAL_ERROR "Optional scanner requires the owner's external yabt library at ${_yabt}; disable LVGL_CBOR_DEMO_BLE_SCANNER to omit it")
   endif()
