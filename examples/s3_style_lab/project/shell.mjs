@@ -16,7 +16,7 @@ export function withSystemBindings(catalog=systemBindingCatalog){
 // Application choices for this optional demo. The factory itself accepts any
 // registered project page; the editor/runtime have no page-name branches.
 export const demoShellOptions={initial:'dashboard',labels:{dashboard:'TPMS / GPS',radar:'Radar',trip:'Trip',
- 'workbench-main':'Workshop','ble-scanner':'Bluetooth'},retention:{dashboard:'retain',radar:'cache','ble-scanner':'cache'}};
+ 'workbench-main':'Workshop'},retention:{dashboard:'retain',radar:'cache'}};
 const colors={background:'#101e28',panel:'#1b303d',line:'#385563',text:'#e8f0f2',muted:'#9eb4c1',accent:'#4de0ad'};
 const label=(id,x,width,source,path,format)=>({id,type:'label',props:{text:'--',long_mode:1,max_lines:1},
  style:{x,y:2,width,height:24},children:[],bindings:[{method:'text',value:{source,path},format}]});

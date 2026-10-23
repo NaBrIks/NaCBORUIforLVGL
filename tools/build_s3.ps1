@@ -1,4 +1,4 @@
-param([string]$CoreDir=$env:PLATFORMIO_CORE_DIR,[switch]$WithoutEditor,[switch]$WithoutProjectApi,[switch]$WithoutProject,[string]$PreserveProject,[string]$ProjectJson,[switch]$WithoutScanner)
+param([string]$CoreDir=$env:PLATFORMIO_CORE_DIR,[switch]$WithoutEditor,[switch]$WithoutProjectApi,[switch]$WithoutProject,[string]$PreserveProject,[string]$ProjectJson)
 $ErrorActionPreference='Stop'
 if(!$CoreDir){$CoreDir=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../NaWServer/local/pio-core'))}
 $projectRoot=Split-Path $PSScriptRoot -Parent
@@ -7,11 +7,10 @@ if($LASTEXITCODE){throw 'Native widget catalog generation failed'}
 $projectArgs=@(Join-Path $projectRoot 'tools/project_image.mjs')
 if($PreserveProject){$projectArgs+=@('--preserve',$PreserveProject)}
 if($ProjectJson){$projectArgs+=@('--project-json',$ProjectJson)}
-if(!$WithoutScanner){$projectArgs+='--with-scanner'}
 & node @projectArgs
 if($LASTEXITCODE){throw 'Project base generation failed'}
-if(@($WithoutEditor,$WithoutProjectApi,$WithoutProject,$WithoutScanner).Where({$_}).Count -gt 1){throw 'Choose one exclusion profile per build'}
-$buildEnvironment=if($WithoutEditor){'s3-no-editor'}elseif($WithoutProject){'s3-no-project'}elseif($WithoutProjectApi){'s3-no-project-api'}elseif($WithoutScanner){'s3-no-scanner'}else{'s3'}
+if(@($WithoutEditor,$WithoutProjectApi,$WithoutProject).Where({$_}).Count -gt 1){throw 'Choose one exclusion profile per build'}
+$buildEnvironment=if($WithoutEditor){'s3-no-editor'}elseif($WithoutProject){'s3-no-project'}elseif($WithoutProjectApi){'s3-no-project-api'}else{'s3'}
 if($WithoutEditor){
  & node (Join-Path $projectRoot 'tools/pack_assets.mjs') --startup-only
  if($LASTEXITCODE){throw 'Startup packet generation failed'}
@@ -30,11 +29,11 @@ if(!(Test-Path (Join-Path $managerDir 'idf_component_manager-2.5.2.dist-info')))
 $env:PLATFORMIO_CORE_DIR=$CoreDir
 $pioExe=Join-Path $env:USERPROFILE '.platformio/penv/Scripts/pio.exe'
 # PlatformIO 6.10 watches the two example CMakeLists, not extra components or
-# included module.cmake files. Refresh its code model when either input changes.
+# nested component CMakeLists. Refresh its code model when either input changes.
 $cmakeCache=Join-Path $projectRoot "examples/s3_style_lab/.pio/build/$buildEnvironment/CMakeCache.txt"
 $componentCmake=@(
  (Join-Path $projectRoot 'CMakeLists.txt')
- (Join-Path $projectRoot 'examples/s3_style_lab/main/ble_scanner/module.cmake')
+ (Join-Path $projectRoot 'examples/s3_style_lab/main/CMakeLists.txt')
 )
 if((Test-Path -LiteralPath $cmakeCache) -and @($componentCmake|Where-Object{(Get-Item -LiteralPath $_).LastWriteTimeUtc -gt (Get-Item -LiteralPath $cmakeCache).LastWriteTimeUtc}).Count){
  Remove-Item -LiteralPath $cmakeCache -Force

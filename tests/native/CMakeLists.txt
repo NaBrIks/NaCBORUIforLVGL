@@ -47,8 +47,6 @@ set(BINDING_SOURCES "${ROOT}/src/data_value.cpp" "${ROOT}/src/data_registry.cpp"
 foreach(target screen_runtime_tests style_service_tests native_widget_tests project_service_tests)
   target_sources(${target} PRIVATE ${BINDING_SOURCES})
 endforeach()
-add_executable(ble_scanner_tests ble_scanner.cpp)
-target_compile_features(ble_scanner_tests PRIVATE cxx_std_17)
 add_executable(system_status_tests system_status.cpp)
 target_compile_features(system_status_tests PRIVATE cxx_std_17)
 add_executable(binding_tests bindings.cpp ${BINDING_SOURCES} "${ROOT}/src/screen_runtime.cpp" "${ROOT}/src/screen_decode.cpp" "${ROOT}/src/widget_registry.cpp" "${ROOT}/src/widget_dispatch.cpp" "${ROOT}/src/screen_styles.cpp" "${ROOT}/src/style_dispatch.cpp" "${ROOT}/src/style_service.cpp" "${ROOT}/src/style_runtime.cpp")

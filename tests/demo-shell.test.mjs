@@ -4,11 +4,10 @@ import {readFile} from 'node:fs/promises';
 import {encodeScreen,decodeScreen,screenContract} from '../packages/screen-codec/index.js';
 import {validateDataValue} from '../packages/screen-codec/binding-schema.js';
 import {capabilities} from '../examples/s3_style_lab/project/demo.mjs';
-import {scannerBindingCatalog,appendScanner} from '../examples/s3_style_lab/project/ble_scanner.mjs';
 import {appendShell,demoShellOptions,systemBindingCatalog,withSystemBindings} from '../examples/s3_style_lab/project/shell.mjs';
 
 test('demo shell preserves all author pages/styles and declares explicit generic view policies',async()=>{
- const original=appendScanner(JSON.parse(await readFile(new URL('../examples/s3_style_lab/project/preserved-project.json',import.meta.url),'utf8')));
+ const original=JSON.parse(await readFile(new URL('../examples/s3_style_lab/project/preserved-project.json',import.meta.url),'utf8'));
  const before=structuredClone(original),project=appendShell(original,demoShellOptions),shell=project.screens.shell;
  assert.deepEqual(original,before);assert.equal(project.manifest.entry,'shell');
  assert.deepEqual(project.styles,before.styles);
@@ -27,9 +26,9 @@ test('demo shell preserves all author pages/styles and declares explicit generic
  project.screens.shell.name='Owner shell edit';assert.deepEqual(appendShell(project,demoShellOptions),project);
 });
 test('shell compiles system bindings and local navigation without native or page-specific editor code',async()=>{
- const source=appendScanner(JSON.parse(await readFile(new URL('../examples/s3_style_lab/project/preserved-project.json',import.meta.url),'utf8')));
+ const source=JSON.parse(await readFile(new URL('../examples/s3_style_lab/project/preserved-project.json',import.meta.url),'utf8'));
  const shell=appendShell(source,demoShellOptions).screens.shell;
- const caps={...capabilities,source:'simulator',binding:withSystemBindings(scannerBindingCatalog)};
+ const caps={...capabilities,source:'simulator',binding:withSystemBindings(capabilities.binding)};
  const bytes=encodeScreen(shell,'demo-shell',caps),back=decodeScreen(bytes,caps);
  assert.ok(bytes.length<screenContract.limits.packetBytes);
  assert.deepEqual(back.root.children.find(node=>node.id==='content').view,shell.root.children.find(node=>node.id==='content').view);

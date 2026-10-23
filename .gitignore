@@ -28,13 +28,6 @@ examples/*/main/assets.generated.hpp
 examples/*/main/startup.generated.hpp
 examples/*/main/project.generated.hpp
 examples/*/main/assets.manifest.generated.json
-examples/*/sdkconfig.s3-no-editor
-examples/*/sdkconfig.s3-no-editor.old
-examples/*/sdkconfig.s3-no-project*
-examples/*/sdkconfig.s3
-examples/*/sdkconfig.s3.old
-examples/*/sdkconfig.s3-no-scanner
-examples/*/sdkconfig.s3-no-scanner.old
 
 # Private keys and local integration settings
 *.key
@@ -59,3 +52,6 @@ Testing/
 compile_commands.json
 examples/*/sdkconfig
 examples/*/sdkconfig.old
+
+# Generated board configuration profiles
+examples/*/sdkconfig.s3*

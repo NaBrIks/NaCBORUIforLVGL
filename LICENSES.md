@@ -10,6 +10,6 @@ The root [MIT License](LICENSE) applies to independently authored NaCBORUIforLVG
 | LVGL-derived API reference material | MIT under the upstream LVGL notice; see the source register and generated reference provenance |
 | External dependencies | Their own licenses and copyright notices; versions are recorded in lock files and the source register |
 
-The GPL example uses the external NaWServer server (formerly ESP32-yaidfws) and optionally ESP32-yabt. These dependencies remain outside the portable core. Combining or distributing the example or frontend must retain their applicable GPL terms; the root MIT license does not remove them.
+The GPL example uses the external NaWServer server (formerly ESP32-yaidfws). This dependency remains outside the portable core. Combining or distributing the example or frontend must retain their applicable GPL terms; the root MIT license does not remove them.
 
 The [source and dependency register](docs/readme_sources_ru.md) records origins, versions, and notice locations. Existing upstream copyright notices must be preserved.

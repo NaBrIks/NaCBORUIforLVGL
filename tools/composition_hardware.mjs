@@ -33,22 +33,12 @@ try{
  assert.equal(capabilities.composition.version,1);report.capabilities=capabilities.composition;
  await client.preview(project,'shell',{capabilities});
  const initial=await client.info();assert.equal(initial.display.screen,'shell');assert.equal(slot(initial).selected,'dashboard');assert.equal(slot(initial).error,'');
- const dashboard=slot(initial).pageInstance,radar=await navigate(1,'radar'),ble=await navigate(4,'ble-scanner');
- const visible=await json('/api/data');const trip=await navigate(2,'trip');
- // An event sent to a paused cached instance must not invoke its clear action.
- await command({kind:'event',instance:ble,node:'ble-clear',event:'clicked'});
- const paused=await json('/api/data');assert.ok(value(paused,'ble.scan.status').packets>=value(visible,'ble.scan.status').packets);
+ const dashboard=slot(initial).pageInstance,radar=await navigate(1,'radar'),trip=await navigate(2,'trip');
  assert.equal(await navigate(0,'dashboard'),dashboard);
  assert.notEqual(await navigate(2,'trip'),trip);
  assert.equal(await navigate(1,'radar'),radar);
- assert.equal(await navigate(4,'ble-scanner'),ble);
- checks.push('nested local navigation; retain/cache reuse; release recreates; paused child event does not clear source');
- report.instances={dashboard,radar,ble,trip};
- const first=await json('/api/data');await delay(3500);const second=await json('/api/data');
- const enabled=value(initialData,'ble.scan.enabled');assert.equal(value(second,'ble.scan.enabled'),enabled);
- if(enabled){assert.ok(value(second,'ble.scan.status').packets>value(first,'ble.scan.status').packets);assert.ok(value(second,'ble.scan.devices').length>0);}
- assert.ok(value(second,'ble.scan.devices').length<=16);report.radio={enabled,packetsBefore:value(first,'ble.scan.status').packets,packetsAfter:value(second,'ble.scan.status').packets,devices:value(second,'ble.scan.devices').length};
- checks.push('source continues collecting outside its page; scanner state preserved; real bounded device array');
+ checks.push('nested local navigation; retain/cache reuse; release recreates');
+ report.instances={dashboard,radar,trip};
  // Allowed transition graph may contain a cycle; active tree must reject it.
  const failing=structuredClone(project),root=failing.screens.shell.root,content=root.children.find(node=>node.id==='content');
  content.view.pages.push({screen:'shell',retention:'release'});
@@ -69,4 +59,4 @@ try{
  report.system={clock,advanced,network};checks.push('real SNTP time, advancing seconds, timezone and IP sources');
 }catch(error){report.error=String(error);throw error;}
 finally{await writeFile(new URL('../local/composition-hardware.json',import.meta.url),JSON.stringify(report,null,2));}
-console.log(JSON.stringify({checks:checks.length,boot:report.after.boot_id,...report.radio,system:report.system,diagnostics:report.diagnostics}));
+console.log(JSON.stringify({checks:checks.length,boot:report.after.boot_id,system:report.system,diagnostics:report.diagnostics}));

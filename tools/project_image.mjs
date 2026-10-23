@@ -2,17 +2,15 @@ import {mkdir,writeFile,readFile,readdir,unlink} from 'node:fs/promises';
 import {baseProject,storageProject,capabilities} from '../examples/s3_style_lab/project/demo.mjs';
 import {encodeProject,decodeProject} from '../packages/project-codec/index.js';
 import {compileCatalog,inspectCatalog} from '../packages/project-codec/catalog.js';
-import {scannerBindingCatalog} from '../examples/s3_style_lab/project/ble_scanner.mjs';
 import {withSystemBindings} from '../examples/s3_style_lab/project/shell.mjs';
 import {prepareProvisioningProject} from '../examples/s3_style_lab/project/provision.mjs';
 const output=new URL('../local/project-image/',import.meta.url),fs=new URL('files/',output);await mkdir(fs,{recursive:true});
-const fullJson=process.argv.indexOf('--project-json'),includeScanner=process.argv.includes('--with-scanner');
+const fullJson=process.argv.indexOf('--project-json');
 if(fullJson>=0&&process.argv.includes('--preserve'))throw Error('Choose --project-json or --preserve');
-// These services are always registered by the example application. The scanner
-// remains optional; an existing JSON shell can bind the system sources either way.
-const compileCapabilities={...capabilities,binding:withSystemBindings(includeScanner?scannerBindingCatalog:capabilities.binding)};
+// These system services are registered by the example application.
+const compileCapabilities={...capabilities,binding:withSystemBindings(capabilities.binding)};
 let project=fullJson>=0?JSON.parse(await readFile(process.argv[fullJson+1],'utf8')):structuredClone(storageProject);
-project=prepareProvisioningProject(project,{scanner:includeScanner});
+project=prepareProvisioningProject(project);
 // A previous owner project may be explicitly included during provisioning. It is
 // never implicitly read from browser storage or fetched while building firmware.
 const preserve=process.argv.indexOf('--preserve');

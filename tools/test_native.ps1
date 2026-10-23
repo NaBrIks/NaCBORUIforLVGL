@@ -29,8 +29,6 @@ try {
  if ($LASTEXITCODE) { throw 'Binding codec fixtures failed' }
  & "local/native-build/$Configuration/binding_tests.exe" local/binding-fixtures
  if ($LASTEXITCODE) { throw 'Binding/event integration failed' }
- & "local/native-build/$Configuration/ble_scanner_tests.exe"
- if ($LASTEXITCODE) { throw 'BLE scanner reducer failed' }
  & "local/native-build/$Configuration/system_status_tests.exe"
  if ($LASTEXITCODE) { throw 'System status reducer failed' }
  & "local/native-build/$Configuration/composition_tests.exe" local/composition-fixtures

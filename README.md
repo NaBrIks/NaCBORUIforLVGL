@@ -19,7 +19,7 @@ Repository name: `NaCBORUIforLVGL`.
 - Device capability discovery and live project updates over WebSocket.
 - Separate preview and save operations; connecting or selecting a page does not change the device screen.
 - An optional host-side MCP adapter using the existing device API and shared codecs.
-- A browser simulator and an ESP32-S3 example with an optional BLE scanner.
+- A browser simulator and an ESP32-S3 UI example.
 
 ## Try the editor
 

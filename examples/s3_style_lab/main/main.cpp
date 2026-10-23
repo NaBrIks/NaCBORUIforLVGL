@@ -7,9 +7,6 @@
 #include "lvgl_cbor/style_runtime.hpp"
 #include "lvgl_cbor/contract.hpp"
 #include "lvgl_cbor/data_registry.hpp"
-#if LVGL_CBOR_DEMO_BLE_SCANNER
-#include "ble_scanner/scanner.hpp"
-#endif
 #if LVGL_CBOR_DATA_API
 #include "data_api.hpp"
 #endif
@@ -192,14 +189,6 @@ void respond(const lvgl_cbor::Reply &reply,const Packet &packet,lv_obj_t *label)
 extern "C" void app_main(){
  std::snprintf(boot_id,sizeof(boot_id),"s3-%08lx",static_cast<unsigned long>(esp_random()));
  ESP_ERROR_CHECK(nvs_flash_init());
-#if LVGL_CBOR_DEMO_BLE_SCANNER
- // The controller needs a contiguous internal DMA block. Initialize it before
- // display/network allocations fragment that heap; scanning starts in process().
- ESP_LOGI("style_lab","Before BLE: internal %u, largest DMA %u",
-   unsigned(heap_caps_get_free_size(MALLOC_CAP_INTERNAL|MALLOC_CAP_8BIT)),
-   unsigned(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL|MALLOC_CAP_DMA)));
- lab_ble::begin();
-#endif
  packets=xQueueCreateStatic(4,sizeof(Packet),queue_bytes,&queue_storage);ESP_ERROR_CHECK(initialize_display());
  auto *screen=lv_screen_active();lv_obj_set_style_bg_color(screen,lv_color_hex(0x101820),0);
  auto *label=lv_label_create(screen);lv_obj_remove_style_all(label);lv_label_set_text(label,"NaCBORUIforLVGL");
@@ -213,9 +202,6 @@ extern "C" void app_main(){
  if(!lab_widgets::register_examples(widget_registry)){ESP_LOGE("style_lab","Native widget registration failed");abort();}
  std::string data_error;
  if(!lab_system::register_data(data_registry,data_error)){ESP_LOGE("style_lab","System catalog rejected: %s",data_error.c_str());abort();}
-#if LVGL_CBOR_DEMO_BLE_SCANNER
- if(!lab_ble::register_data(data_registry,data_error)){ESP_LOGE("style_lab","Data catalog rejected: %s",data_error.c_str());abort();}
-#endif
  data_registry.flush();
  screen_endpoint.begin(screen,&styles);
 #if LVGL_CBOR_HAS_PROJECT_SERVICE
@@ -248,9 +234,6 @@ extern "C" void app_main(){
   project_api.process();
 #endif
   lab_system::process();
-#if LVGL_CBOR_DEMO_BLE_SCANNER
-  lab_ble::process();
-#endif
 #if LVGL_CBOR_DATA_API
   data_api.process();
 #endif
