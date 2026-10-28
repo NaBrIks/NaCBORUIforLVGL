@@ -80,13 +80,13 @@ void DataApi::handleRequest(NaWServer::Request *request, NaWServer::Response &re
   (void)response.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   (void)response.header("Access-Control-Allow-Headers", "Content-Type");
   (void)response.header("Cache-Control", "no-store");
-  if (request->method() == HTTP_OPTIONS) { (void)response.empty(); return; }
-  if (request->method() == HTTP_GET) {
+  if (request->method() == NaWServer::HttpMethod::Options) { (void)response.empty(); return; }
+  if (request->method() == NaWServer::HttpMethod::Get) {
     const auto snapshot = std::atomic_load(&snapshot_);
     json(response, 200, *snapshot);
     return;
   }
-  if (request->method() != HTTP_POST) { json(response, 405, "{\"error\":\"data_method\"}"); return; }
+  if (request->method() != NaWServer::HttpMethod::Post) { json(response, 405, "{\"error\":\"data_method\"}"); return; }
   const auto body = request->body();
   if (body.empty() || body.size() > command_bytes) {
     json(response, 400, "{\"error\":\"data_command_size\"}"); return;

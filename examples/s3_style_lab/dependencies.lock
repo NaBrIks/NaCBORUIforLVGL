@@ -36,7 +36,7 @@ dependencies:
   idf:
     source:
       type: idf
-    version: 5.4.0
+    version: 5.5.6
   lvgl/lvgl:
     component_hash: d5e723db3a3feca71e34e333a6598b7624e3822577d374e1d44f0e18374952e1
     dependencies:
@@ -74,6 +74,6 @@ direct_dependencies:
 - espressif/esp_lcd_touch_gt911
 - idf
 - lvgl/lvgl
-manifest_hash: 05dafbcd64bdfe2196ad6e51091f9e5115a63542168bff472cdd80b8273618d0
+manifest_hash: aeacc876563b78bc818f98cd831849c2ad1880fe7cdb806e201c4c7e80d83439
 target: esp32s3
 version: 2.0.0

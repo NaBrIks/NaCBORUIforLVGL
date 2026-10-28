@@ -1,12 +1,4 @@
 cmake_minimum_required(VERSION 3.16)
-# PlatformIO 6.10 bundles a component manager unable to parse LVGL 9.6's
-# CONFIG-dependent optional dependencies. Keep its upgrade project-local.
-set(_manager "${CMAKE_CURRENT_LIST_DIR}/../../local/idf-manager-libs")
-if(EXISTS "${_manager}/idf_component_manager")
- set(ENV{PYTHONPATH} "${_manager}")
-else()
- message(FATAL_ERROR "Run tools/build_s3.ps1 to prepare the project-local component manager 2.5.2")
-endif()
 set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/../.." "${CMAKE_CURRENT_LIST_DIR}/../../../NaWServer")
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 set(PROJECT_VER "0.1.0-style-lab")

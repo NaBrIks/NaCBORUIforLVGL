@@ -126,10 +126,10 @@ void ProjectApi::begin_transfer(const CborValue &root,NaWServer::Response &respo
 void ProjectApi::handleRequest(NaWServer::Request *request,NaWServer::Response &response){
  using namespace lvgl_cbor;
  (void)response.header("Access-Control-Allow-Origin","*");(void)response.header("Access-Control-Allow-Methods","GET, POST, OPTIONS");(void)response.header("Access-Control-Allow-Headers","Content-Type");(void)response.header("Access-Control-Expose-Headers","X-Project-Revision");
- if(request->method()==HTTP_OPTIONS){(void)response.empty();return;}
+ if(request->method()==NaWServer::HttpMethod::Options){(void)response.empty();return;}
  const auto action=query(request,"action");
- if(request->method()==HTTP_GET){handle_get(request,response,action);return;}
- if(request->method()!=HTTP_POST){error(response,"project_method");return;}
+ if(request->method()==NaWServer::HttpMethod::Get){handle_get(request,response,action);return;}
+ if(request->method()!=NaWServer::HttpMethod::Post){error(response,"project_method");return;}
  const auto now=esp_timer_get_time();if(!transfer_.token.empty()&&now>transfer_.deadline)transfer_={};
  if(action=="chunk"||action=="finish"||action=="cancel"){handle_transfer(request,response,action,now);return;}
  CborParser parser;CborValue root;

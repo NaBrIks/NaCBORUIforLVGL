@@ -36,7 +36,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
-#include <NaWServer/server.h>
+#include <NaWServer/http_server.h>
+#include <NaWServer/backends/tcp.h>
+#include <NaWServer/backends/esp_idf_tcp.h>
 #include <NaWServer/route.h>
 #include <NaWServer/handler_static.h>
 #include <NaWServer/websocket.h>
@@ -53,7 +55,7 @@
 #endif
 namespace {
 using namespace NaWServer;
-// NaWServer has a 4096-byte frame bound. Leave room for acknowledgement/readback.
+// UI packets fit the configured WebSocket frame bound, including reply overhead.
 constexpr size_t max_style_packet=3584;
 struct Packet{size_t length;uint8_t bytes[max_style_packet];};
 StaticQueue_t queue_storage;alignas(4) uint8_t queue_bytes[4*sizeof(Packet)];QueueHandle_t packets;
@@ -127,10 +129,10 @@ SendResult capabilities(Response &response){
  const auto snapshot=std::atomic_load(&capabilities_snapshot);
  return response.send(200,"application/json",{reinterpret_cast<const uint8_t*>(snapshot->data()),snapshot->size()});
 }
-Route capability_route("/api/capabilities",HTTP_GET,capabilities);
-Route information("/api/info",HTTP_GET,info);
+Route capability_route("/api/capabilities",NaWServer::HttpMethod::Get,capabilities);
+Route information("/api/info",NaWServer::HttpMethod::Get,info);
 #if LVGL_CBOR_EMBED_EDITOR
-class Assets:public HandlerBase{bool canHandle(Request *r)override{for(const auto &asset:assets)if(r->path()==asset.path)return true;return false;}void handleRequest(Request *r,Response &response)override{for(const auto &asset:assets)if(r->path()==asset.path){(void)response.header("Content-Encoding","gzip");(void)response.send(200,asset.mime,{asset.data,asset.size});return;}}} asset_handler;
+class Assets:public HandlerBase{bool canHandle(Request *r)override{for(const auto &asset:assets)if(r->path()==asset.path)return true;return false;}void handleRequest(Request *r,Response &response)override{for(const auto &asset:assets)if(r->path()==asset.path){(void)response.header("Content-Encoding","gzip");(void)response.sendImmutable(200,asset.mime,{asset.data,asset.size});return;}}} asset_handler;
 #endif
 HandlerBase *const routes[]{&information,&capability_route,&websocket,&screen_endpoint.endpoint(),&screen_endpoint.component_endpoint()
 #if LVGL_CBOR_HAS_PROJECT_SERVICE && LVGL_CBOR_PROJECT_API
@@ -142,7 +144,14 @@ HandlerBase *const routes[]{&information,&capability_route,&websocket,&screen_en
 #if LVGL_CBOR_EMBED_EDITOR
  ,&asset_handler
 #endif
-};Server server(routes,80,{},ResponseOptions{ContentType::Default,CachePolicy::NoStore,HeaderFlags::NoSniff,ConnectionPolicy::Close},ServerOptions{12});
+};
+// The transport and static routes outlive HttpServer. Startup is explicit after
+// the application initializes esp_netif; HTTP callbacks stay serialized.
+tcp::IdfTransport tcp_transport;
+TcpOptions transport_options(){TcpOptions value;value.bind_address="0.0.0.0";value.port=80;return value;}
+TcpHttpBackend http_backend(tcp_transport,transport_options());
+HttpLimits http_limits(){HttpLimits value;value.max_connections=12;value.max_header_bytes=4096;return value;}
+HttpServer server(http_backend,routes,http_limits(),{},ResponseOptions{ContentType::Default,CachePolicy::NoStore,HeaderFlags::NoSniff,ConnectionPolicy::Close});
 void wifi_event(void*,esp_event_base_t base,int32_t id,void *data){
  if(base==WIFI_EVENT&&(id==WIFI_EVENT_STA_START||id==WIFI_EVENT_STA_DISCONNECTED)){
   lab_system::network_changed(false);esp_wifi_connect();
@@ -227,7 +236,11 @@ extern "C" void app_main(){
 #if LVGL_CBOR_DATA_API
  if(!data_api.begin()){ESP_LOGE("style_lab","Data API queue failed");abort();}
 #endif
- ESP_ERROR_CHECK(server.begin());ESP_LOGI("style_lab","HTTP ready; style frame limit %u",unsigned(max_style_packet));
+ const auto transport_result=tcp_transport.start();
+ if(transport_result.status!=tcp::Status::Ok){ESP_LOGE("style_lab","TCP transport start failed: %d",int(transport_result.status));abort();}
+ const auto server_result=server.begin();
+ if(server_result!=HttpError::Ok){ESP_LOGE("style_lab","HTTP server start failed: %d",int(server_result));(void)tcp_transport.stop();abort();}
+ ESP_LOGI("style_lab","TCP HTTP ready; style frame limit %u",unsigned(max_style_packet));
  int64_t previous=esp_timer_get_time();static Packet packet;
  for(;;){if(capabilities_revision!=widget_registry.revision())publish_capabilities();screen_endpoint.process();if(xQueueReceive(packets,&packet,0)==pdTRUE){lvgl_cbor::Reply reply;if(styles.apply(packet.bytes,packet.length,reply)){__atomic_fetch_add(&applied,1u,__ATOMIC_RELAXED);if(lv_screen_active()!=screen)lv_screen_load(screen);lv_obj_update_layout(styles.target());lv_refr_now(nullptr);}respond(reply,packet,styles.target());}
 #if LVGL_CBOR_HAS_PROJECT_SERVICE && LVGL_CBOR_PROJECT_API

@@ -2,7 +2,7 @@ import {mkdir,writeFile,readFile,readdir,unlink} from 'node:fs/promises';
 import {baseProject,storageProject,capabilities} from '../examples/s3_style_lab/project/demo.mjs';
 import {encodeProject,decodeProject} from '../packages/project-codec/index.js';
 import {compileCatalog,inspectCatalog} from '../packages/project-codec/catalog.js';
-import {withSystemBindings} from '../examples/s3_style_lab/project/shell.mjs';
+import {withSystemBindings,demoShellOptions} from '../examples/s3_style_lab/project/shell.mjs';
 import {prepareProvisioningProject} from '../examples/s3_style_lab/project/provision.mjs';
 const output=new URL('../local/project-image/',import.meta.url),fs=new URL('files/',output);await mkdir(fs,{recursive:true});
 const fullJson=process.argv.indexOf('--project-json');
@@ -10,7 +10,9 @@ if(fullJson>=0&&process.argv.includes('--preserve'))throw Error('Choose --projec
 // These system services are registered by the example application.
 const compileCapabilities={...capabilities,binding:withSystemBindings(capabilities.binding)};
 let project=fullJson>=0?JSON.parse(await readFile(process.argv[fullJson+1],'utf8')):structuredClone(storageProject);
-project=prepareProvisioningProject(project);
+// The shipped example starts with its generic status/navigation shell.
+// Explicit authoring files retain their own entry page and composition.
+project=prepareProvisioningProject(project,fullJson>=0?{}:{shell:true,shellOptions:demoShellOptions});
 // A previous owner project may be explicitly included during provisioning. It is
 // never implicitly read from browser storage or fetched while building firmware.
 const preserve=process.argv.indexOf('--preserve');

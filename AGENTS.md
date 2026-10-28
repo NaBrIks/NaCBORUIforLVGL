@@ -33,3 +33,14 @@ Read agents/architecture.md and docs/README.md before changes.
 - Keep transient generated files, local credentials and build outputs out of source control. Versioned contract derivatives are reviewable source artifacts. The owner-authorized S3 demo adapts GPL-3.0-only files from ESP32-yaidfws; retain provenance and licenses. Do not extend this license to independently authored core code or copy other third-party code implicitly.
 - Do not commit, push, configure remotes or publish without an owner request.
 - LVGL 9.6.0 remains the target. Style v2 IDs are append-only per signature; screen v3 IDs are append-only in the common/component-local namespace. Prior screen contracts are historical. Preserve current lock files unless the owner authorizes another ABI break. Binding names remain symbolic.
+
+## Recommended development environment (owner clarification, 2026-10-26)
+
+The intended reproducible baseline is documented in
+[docs/readme_development_environment_ru.md](docs/readme_development_environment_ru.md).
+Use username-independent paths and prefer shared versioned SDKs under the chosen
+PlatformIO packages directory. This is a recommendation/default, not a mandatory
+machine layout or a prohibition on other explicit configurations. Alternative
+paths and version profiles are allowed when deliberately configured and validated.
+Do not silently change versions based on historical verification reports.
+- Owner authorization 2026-10-28: for NaCBORUIforLVGL firmware work, independently build and flash the identified target, including bootloader, partition table, application and filesystem changes required by the task, without asking again. Owner explicitly declined backing up the current board in this deployment. Verify chip/MAC before writing; do not operate unrelated boards. Keep private device evidence ignored and public reports generic.

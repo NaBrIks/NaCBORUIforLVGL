@@ -45,3 +45,11 @@ CONFIG_BT_ENABLED=n
 
 # Use lwIP's bounded server failover when one NTP endpoint is unavailable.
 CONFIG_LWIP_SNTP_MAX_SERVERS=3
+
+# Use NaWServer shared TCP engine, not the legacy native HTTPD wrapper.
+CONFIG_NAWSERVER_BACKEND_TCP=y
+# CONFIG_NAWSERVER_BACKEND_HTTPD is not set
+CONFIG_NAWSERVER_WEBSOCKET=y
+
+# The UI API serializes rich catalog/project metadata on the HTTP worker.
+CONFIG_NAWSERVER_TCP_HTTP_STACK_SIZE=12288

@@ -20,16 +20,16 @@ node tools/pack_assets.mjs
 ./tools/build_s3.ps1
 ```
 
-При использовании отдельного каталога PlatformIO укажите свой путь:
+Рекомендуемый каталог PlatformIO по умолчанию (другие пути допустимы):
 
 ```powershell
-$env:PLATFORMIO_CORE_DIR=(Resolve-Path '../NaWServer/local/pio-core').Path
+$env:PLATFORMIO_CORE_DIR=Join-Path $env:USERPROFILE '.platformio'
 & ./tools/build_s3.ps1
 ```
 
-Компоненты загружаются IDF Component Manager: LVGL 9.6.0, espressif/cbor 0.6.1~4. ESP-IDF 5.4.0, espressif32 6.10.0. Базовый board PlatformIO называется devkitc N8, но пример явно переопределяет Flash в 16 MB и включает octal PSRAM; это настройки конкретного Waveshare, не универсального DevKitC.
+Компоненты загружаются IDF Component Manager: LVGL 9.6.0, espressif/cbor 0.6.1~4. Общая ESP-IDF 5.5.6, espressif32 8.0.0. Базовый board PlatformIO называется devkitc N8, но пример явно переопределяет Flash в 16 MB и включает octal PSRAM; это настройки конкретного Waveshare, не универсального DevKitC.
 
-Скрипт готовит IDF Component Manager 2.5.2 в `local/idf-manager-libs`: старый менеджер PlatformIO не понимает `$CONFIG{...}` в манифесте LVGL 9.6. CMake использует этот каталог только для данной сборки. Python-пакеты общего окружения соседнего проекта не обновляются. Официальный managed component LVGL не патчится.
+Общая среда ESP-IDF 5.5.6 уже содержит совместимый IDF Component Manager. Локальный обход `local/idf-manager-libs` больше не используется. Официальный managed component LVGL не патчится.
 
 Скопировать `main/wifi_secret.example.hpp` в игнорируемый `main/wifi_secret.hpp` и задать сеть самостоятельно. Без него проект собирается, LCD инициализируется, но Wi-Fi не подключается. При разрешённом аппаратном запуске локальная конфигурация перенесена из игнорируемого Wi-Fi header проверенного S3-примера; значения не выводились. Автоматического стирания NVS нет.
 
@@ -66,6 +66,10 @@ cmake --build local/native-build --config Release --parallel 8
 
 В меню «Экраны» создать пустой экран либо добавить пример, открыть его и выбрать компоненты в общем списке над деревом. Стандартные и нативные типы получаются из возможностей платы. «Посмотреть на МК» передаёт полный проект для предпросмотра выбранного экрана. Без платы CSS-приближение не исполняет LVGL.
 
-В `examples/screens` находятся ручная, Flex, Grid, вложенная, shared/state и widget-раскладки, а также отдельный компонент 240×120. [Файлы реализации, API, ограничения и проверки](../../docs/readme_screen_runtime_ru.md). Привязки пока отсутствуют. LV_USE_OBJ_PROPERTY_NAME выключен.
+В `examples/screens` находятся ручная, Flex, Grid, вложенная, shared/state и widget-раскладки, а также отдельный компонент 240×120. [Файлы реализации, API, ограничения и проверки](../../docs/readme_screen_runtime_ru.md). Типизированные привязки и события описаны в [руководстве](../../docs/readme_bindings_ru.md). LV_USE_OBJ_PROPERTY_NAME выключен.
+
+Штатный образ SPIFFS стартует с оболочки `shell`: статусбар сверху, страницы в
+контейнере и кнопки навигации снизу. Явный входной Project JSON сохраняет свой
+entry. [Новый TCP HTTP/WS стек, полная прошивка и проверки](../../docs/readme_nawserver_tcp_ru.md).
 
 Текущая серверная зависимость — **NaWServer**, GPL-3.0-only. Разместите её рядом с checkout NaCBORUIforLVGL, в папке `NaWServer`. Это отдельный приватный репозиторий: для сборки демки требуется доступ к нему. Перенос include/namespace и адаптеров описан в [отчёте миграции](../../docs/reviews/REVIEW_20261023_nawserver.md).
