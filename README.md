@@ -59,6 +59,7 @@ Most detailed guides are currently in Russian:
 
 - [Documentation index](docs/README.md)
 - [Projects, storage, API, and MCP](docs/readme_projects_ru.md)
+- [SeMaps architecture maps and local MCP setup (Russian)](docs/readme_semaps_ru.md)
 - [Data bindings and events](docs/readme_bindings_ru.md)
 - [Nested pages and lifecycle](docs/readme_page_composition_ru.md)
 - [Modules, file formats, CSS, and MCP](docs/readme_modules_files_css_mcp_ru.md)

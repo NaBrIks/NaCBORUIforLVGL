@@ -3,6 +3,8 @@
 .env.*
 !.env.example
 local/
+# SeMaps host state, journals and caches; the authored model remains versioned.
+docs/diagrams/.semaps/
 
 # Build and generated outputs
 build/

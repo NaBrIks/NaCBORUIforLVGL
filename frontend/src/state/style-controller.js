@@ -3,11 +3,11 @@ import {contract,encodeStyle,decodeStyle,diagnostic} from '@lvgl-cbor/style-code
 import {CommandChannel} from '../transport/command-channel.js';
 import {ComponentPreviewLink} from '../component-preview-link.js';
 
-export function useStyleController(connection,{document,page,auto,preview,simulator,projectPreview,suspended,otherBusy=()=>false,onEvent=()=>{},onOnline=()=>{}}){
+export function useStyleController(connection,{document,page,auto,preview,simulator,projectPreview,suspended,otherBusy=()=>false,onEvent=()=>{},onOnline=()=>{},onSocketState=()=>{}}){
  const busy=ref(false),componentBusy=ref(false),error=ref(''),reply=ref(null),hex=ref(''),decoded=ref(''),observed=ref(null),wsStatus=ref('stopped'),connectionNote=ref(''),styleCheckResult=ref('');
  const online=computed(()=>wsStatus.value==='online'),canApply=computed(()=>connection.ready.value&&online.value);
  let queued=false,disposed=false;
- const channel=new CommandChannel({origin:connection.origin,path:'/ws',...(simulator?{makeSocket:()=>simulator.socket()}:{}),onEvent,onState:state=>{wsStatus.value=state;if(state==='online')onOnline();},onError:message=>connectionNote.value=message,validate:ack=>{if(!simulator&&ack.get('contract_sha256')!==contract.sha256)throw Error('Style ACK ABI mismatch');}});
+ const channel=new CommandChannel({origin:connection.origin,path:'/ws',...(simulator?{makeSocket:()=>simulator.socket()}:{}),onEvent,onState:state=>{wsStatus.value=state;onSocketState(state);if(state==='online')onOnline();},onError:message=>connectionNote.value=message,validate:ack=>{if(!simulator&&ack.get('contract_sha256')!==contract.sha256)throw Error('Style ACK ABI mismatch');}});
  const component=new ComponentPreviewLink({document:()=>preview.componentDocument(),origin:connection.origin,limit:()=>connection.capabilities.value?.limits.screenPacketBytes??3584,capabilities:()=>connection.capabilities.value,bootId:()=>connection.info.value?.boot_id,busy:value=>componentBusy.value=value,applied:(ack,doc)=>styleCheckResult.value='МК создал '+doc.root.children[0].type+' · кадр '+ack.get('frame_count')});
  function reset(){queued=false;channel.stop();component.invalidate();observed.value=null;reply.value=null;connectionNote.value='';}
  const stopReset=connection.onReset(reset);

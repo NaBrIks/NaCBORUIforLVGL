@@ -1,0 +1,117 @@
+{
+  "contractVersion": 5,
+  "relations": [
+    {
+      "id": "r_editor_codecs_call",
+      "from": "e_editor",
+      "to": "e_codecs",
+      "type": "call",
+      "origin": "authored"
+    },
+    {
+      "id": "r_mcp_codecs_call",
+      "from": "e_mcp",
+      "to": "e_codecs",
+      "type": "call",
+      "origin": "authored"
+    },
+    {
+      "id": "r_editor_http_call",
+      "from": "e_editor",
+      "to": "e_http",
+      "type": "call",
+      "origin": "authored"
+    },
+    {
+      "id": "r_mcp_http_call",
+      "from": "e_mcp",
+      "to": "e_http",
+      "type": "call",
+      "origin": "authored"
+    },
+    {
+      "id": "r_http_projects_call",
+      "from": "e_http",
+      "to": "e_projects",
+      "type": "call",
+      "origin": "authored"
+    },
+    {
+      "id": "r_http_registry_data_flow",
+      "from": "e_http",
+      "to": "e_registry",
+      "type": "data-flow",
+      "origin": "authored"
+    },
+    {
+      "id": "r_projects_runtime_call",
+      "from": "e_projects",
+      "to": "e_runtime",
+      "type": "call",
+      "origin": "authored"
+    },
+    {
+      "id": "r_projects_styles_call",
+      "from": "e_projects",
+      "to": "e_styles",
+      "type": "call",
+      "origin": "authored"
+    },
+    {
+      "id": "r_projects_store_storage",
+      "from": "e_projects",
+      "to": "e_store",
+      "type": "storage",
+      "origin": "authored"
+    },
+    {
+      "id": "r_registry_runtime_event",
+      "from": "e_registry",
+      "to": "e_runtime",
+      "type": "event",
+      "origin": "authored"
+    },
+    {
+      "id": "r_runtime_lvgl_call",
+      "from": "e_runtime",
+      "to": "e_lvgl",
+      "type": "call",
+      "origin": "authored"
+    },
+    {
+      "id": "r_styles_lvgl_call",
+      "from": "e_styles",
+      "to": "e_lvgl",
+      "type": "call",
+      "origin": "authored"
+    },
+    {
+      "id": "r_generator_bus_event",
+      "from": "e_generator",
+      "to": "e_bus",
+      "type": "event",
+      "origin": "authored"
+    },
+    {
+      "id": "r_bus_registry_data_flow",
+      "from": "e_bus",
+      "to": "e_registry",
+      "type": "data-flow",
+      "origin": "authored"
+    },
+    {
+      "id": "r_registry_data_events_event",
+      "from": "e_registry",
+      "to": "e_data_events",
+      "type": "event",
+      "origin": "authored"
+    },
+    {
+      "id": "r_data_events_web_live_event",
+      "from": "e_data_events",
+      "to": "e_web_live",
+      "type": "event",
+      "origin": "authored"
+    }
+  ]
+}

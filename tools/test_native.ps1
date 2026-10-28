@@ -19,6 +19,10 @@ try {
  if ($LASTEXITCODE) { throw 'Style service integration failed' }
  & "local/native-build/$Configuration/native_widget_tests.exe" local/native-widget-fixtures
  if ($LASTEXITCODE) { throw 'Native widget integration failed' }
+ & "local/native-build/$Configuration/demo_speed_tests.exe"
+ if ($LASTEXITCODE) { throw 'Demo speed model failed' }
+ & "local/native-build/$Configuration/data_events_tests.exe"
+ if ($LASTEXITCODE) { throw 'CBOR data events failed' }
  & "local/native-build/$Configuration/native_widget_disabled_tests.exe"
  if ($LASTEXITCODE) { throw 'Native widget module exclusion failed' }
  & node tools/check_native_extensions.mjs

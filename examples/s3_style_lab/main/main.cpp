@@ -3,6 +3,8 @@
 #include "screen_endpoint.hpp"
 #include "native_widgets/registry.hpp"
 #include "system_status.hpp"
+#include "demo_speed.hpp"
+#include "data_events.hpp"
 #include "lvgl_cbor/screen_contract.hpp"
 #include "lvgl_cbor/style_runtime.hpp"
 #include "lvgl_cbor/contract.hpp"
@@ -211,6 +213,7 @@ extern "C" void app_main(){
  if(!lab_widgets::register_examples(widget_registry)){ESP_LOGE("style_lab","Native widget registration failed");abort();}
  std::string data_error;
  if(!lab_system::register_data(data_registry,data_error)){ESP_LOGE("style_lab","System catalog rejected: %s",data_error.c_str());abort();}
+ if(!lab_demo_speed::register_data(data_registry,data_error)){ESP_LOGE("style_lab","Demo catalog rejected: %s",data_error.c_str());abort();}
  data_registry.flush();
  screen_endpoint.begin(screen,&styles);
 #if LVGL_CBOR_HAS_PROJECT_SERVICE
@@ -233,6 +236,7 @@ extern "C" void app_main(){
 #endif
  publish_capabilities();
  start_network();
+ if(!lab_demo_speed::begin(data_error)){ESP_LOGE("style_lab","Demo producer failed: %s",data_error.c_str());abort();}
 #if LVGL_CBOR_DATA_API
  if(!data_api.begin()){ESP_LOGE("style_lab","Data API queue failed");abort();}
 #endif
@@ -241,16 +245,20 @@ extern "C" void app_main(){
  const auto server_result=server.begin();
  if(server_result!=HttpError::Ok){ESP_LOGE("style_lab","HTTP server start failed: %d",int(server_result));(void)tcp_transport.stop();abort();}
  ESP_LOGI("style_lab","TCP HTTP ready; style frame limit %u",unsigned(max_style_packet));
+ lab_data::Events data_events(data_registry,{"demo.speed","system.clock","system.network"},[](const uint8_t *bytes,size_t size){return websocket.send_binary(bytes,size).rejected==0;});
+ if(!data_events.begin(data_error)){ESP_LOGE("style_lab","Data events failed: %s",data_error.c_str());abort();}
  int64_t previous=esp_timer_get_time();static Packet packet;
  for(;;){if(capabilities_revision!=widget_registry.revision())publish_capabilities();screen_endpoint.process();if(xQueueReceive(packets,&packet,0)==pdTRUE){lvgl_cbor::Reply reply;if(styles.apply(packet.bytes,packet.length,reply)){__atomic_fetch_add(&applied,1u,__ATOMIC_RELAXED);if(lv_screen_active()!=screen)lv_screen_load(screen);lv_obj_update_layout(styles.target());lv_refr_now(nullptr);}respond(reply,packet,styles.target());}
 #if LVGL_CBOR_HAS_PROJECT_SERVICE && LVGL_CBOR_PROJECT_API
   project_api.process();
 #endif
   lab_system::process();
+  lab_demo_speed::process();
 #if LVGL_CBOR_DATA_API
   data_api.process();
 #endif
   data_registry.flush();
+  data_events.process(esp_timer_get_time());
   const auto now=esp_timer_get_time();lv_tick_inc(static_cast<uint32_t>((now-previous)/1000));previous+=((now-previous)/1000)*1000;
   lv_timer_handler();vTaskDelay(pdMS_TO_TICKS(5));}
 }

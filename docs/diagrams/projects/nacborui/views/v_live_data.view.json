@@ -1,0 +1,98 @@
+{
+  "id": "v_live_data",
+  "project": "nacborui",
+  "axis": "axis_flow",
+  "placements": [
+    {
+      "entity": "e_device",
+      "parent": null,
+      "x": 0,
+      "y": 0,
+      "width": 1420,
+      "height": 460,
+      "override": {
+        "border": {
+          "color": "#86efac"
+        },
+        "fill": "#f0fdf4",
+        "header": {
+          "fill": "#dcfce7"
+        }
+      }
+    },
+    {
+      "entity": "e_pc",
+      "parent": null,
+      "x": 1480,
+      "y": 0,
+      "width": 340,
+      "height": 460,
+      "override": {
+        "border": {
+          "color": "#93c5fd"
+        },
+        "fill": "#eff6ff",
+        "header": {
+          "fill": "#dbeafe"
+        }
+      }
+    },
+    {
+      "entity": "e_generator",
+      "parent": "e_device",
+      "x": 40,
+      "y": 80,
+      "width": 220,
+      "height": 80
+    },
+    {
+      "entity": "e_bus",
+      "parent": "e_device",
+      "x": 320,
+      "y": 80,
+      "width": 220,
+      "height": 80
+    },
+    {
+      "entity": "e_registry",
+      "parent": "e_device",
+      "x": 600,
+      "y": 80,
+      "width": 220,
+      "height": 80
+    },
+    {
+      "entity": "e_runtime",
+      "parent": "e_device",
+      "x": 880,
+      "y": 80,
+      "width": 220,
+      "height": 80
+    },
+    {
+      "entity": "e_lvgl",
+      "parent": "e_device",
+      "x": 1160,
+      "y": 80,
+      "width": 220,
+      "height": 80
+    },
+    {
+      "entity": "e_data_events",
+      "parent": "e_device",
+      "x": 600,
+      "y": 320,
+      "width": 220,
+      "height": 80
+    },
+    {
+      "entity": "e_web_live",
+      "parent": "e_pc",
+      "x": 1520,
+      "y": 320,
+      "width": 260,
+      "height": 80
+    }
+  ],
+  "routing": "orthogonal"
+}

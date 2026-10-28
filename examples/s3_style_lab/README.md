@@ -72,4 +72,8 @@ cmake --build local/native-build --config Release --parallel 8
 контейнере и кнопки навигации снизу. Явный входной Project JSON сохраняет свой
 entry. [Новый TCP HTTP/WS стек, полная прошивка и проверки](../../docs/readme_nawserver_tcp_ru.md).
 
+Три вложенные страницы рассчитаны на 800×408 между панелями. Автономный
+генератор скорости работает через CBOR event queue и DataRegistry; дробная
+стрелка управляется биндингом. [Данные, размеры и live WS](../../docs/readme_demo_events_ru.md).
+
 Текущая серверная зависимость — **NaWServer**, GPL-3.0-only. Разместите её рядом с checkout NaCBORUIforLVGL, в папке `NaWServer`. Это отдельный приватный репозиторий: для сборки демки требуется доступ к нему. Перенос include/namespace и адаптеров описан в [отчёте миграции](../../docs/reviews/REVIEW_20261023_nawserver.md).

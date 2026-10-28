@@ -1,0 +1,14 @@
+# Launch from this repository; SeMaps discovers its .semaps file upward from cwd.
+[mcp_servers.semaps]
+command = "semaps"
+args = ["mcp"]
+
+# Offline by default. Configure LVGL_CBOR_DEVICE privately to enable reads.
+[mcp_servers.nacborui]
+command = "node"
+args = ["integrations/mcp/index.js"]
+
+[mcp_servers.nacborui.env]
+LVGL_CBOR_ALLOW_PREVIEW = "0"
+LVGL_CBOR_ALLOW_SAVE = "0"
+LVGL_CBOR_ALLOW_DATA = "0"

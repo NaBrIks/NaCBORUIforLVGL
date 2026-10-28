@@ -4,6 +4,8 @@
 #include "../../examples/s3_style_lab/main/native_widgets/radar.hpp"
 #include "lvgl_cbor/capabilities.hpp"
 #include "lvgl_cbor/screen_runtime.hpp"
+#include "lvgl_cbor/project_service.hpp"
+#include "lvgl_cbor/data_registry.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -12,6 +14,23 @@
 #include <vector>
 #include <set>
 static void require(bool ok, const char *why) { if(!ok) {std::fprintf(stderr,"FAILED: %s\n",why);std::exit(1);} }
+// Test actual LVGL geometry, including labels/internal native children. Disabling
+// scroll is not evidence that an overflowing child is visible.
+static void contained(lv_obj_t *parent) {
+  lv_area_t p;lv_obj_get_coords(parent,&p);
+  for(uint32_t i=0;i<lv_obj_get_child_count(parent);++i){
+    auto *child=lv_obj_get_child(parent,i);if(lv_obj_has_flag(child,LV_OBJ_FLAG_HIDDEN))continue;
+    lv_area_t c;lv_obj_get_coords(child,&c);
+    if(c.x1<p.x1||c.y1<p.y1||c.x2>p.x2||c.y2>p.y2){std::fprintf(stderr,"Outside parent: child [%ld,%ld,%ld,%ld], parent [%ld,%ld,%ld,%ld]\n",long(c.x1),long(c.y1),long(c.x2),long(c.y2),long(p.x1),long(p.y1),long(p.x2),long(p.y2));require(false,"complete component containment");}
+    contained(child);
+  }
+}
+static void separate(lv_obj_t *root) {
+  for(uint32_t i=0;i<lv_obj_get_child_count(root);++i)for(uint32_t j=i+1;j<lv_obj_get_child_count(root);++j){
+    lv_area_t a,b;lv_obj_get_coords(lv_obj_get_child(root,i),&a);lv_obj_get_coords(lv_obj_get_child(root,j),&b);
+    require(a.x2<b.x1||b.x2<a.x1||a.y2<b.y1||b.y2<a.y1,"demo sibling components must not overlap");
+  }
+}
 int main(int argc,char **argv) {
  require(argc==2,"fixture directory");
  lv_init();auto *display=lv_display_create(800,480);
@@ -66,5 +85,35 @@ int main(int argc,char **argv) {
   require(std::string(after.targets[1].name)=="BRAVO","text survives input buffer release");
  }
  require(lv_screen_active()==original&&lv_obj_get_child_count(original)==0,"complete native object teardown");
+ {
+  std::ifstream file(std::string(argv[1])+"/layout.cbor",std::ios::binary);
+  std::vector<uint8_t> bytes{std::istreambuf_iterator<char>(file),{}};
+  lvgl_cbor::ConstProjectSource source(bytes.data(),bytes.size());
+  lvgl_cbor::DataRegistry data;std::string error;using S=lvgl_cbor::DataSchema;
+  require(data.add_source({"demo.speed",S::object({{"kmh",S::number(0,180)},{"unit",S::text(16)},{"sequence",S::integer(0)}})},error),error.c_str());
+  require(data.add_source({"system.clock",S::object({{"localTime",S::text(8)},{"syncState",S::text(16)}})},error),error.c_str());
+  require(data.add_source({"system.network",S::object({{"ip",S::text(15)}})},error),error.c_str());
+  lvgl_cbor::ProjectService project(source,nullptr,{}, {},resources,2,&registry,{},&data);
+  require(project.begin(error),error.c_str());lvgl_cbor::ScreenReply reply;
+  require(project.load_screen("",reply),reply.error);
+  for(int tab=0;tab<3;++tab){
+    require(lv_obj_send_event(project.find(("nav-"+std::to_string(tab)).c_str()),LV_EVENT_CLICKED,nullptr)==LV_RESULT_OK,"navigation event");
+    data.flush();lv_obj_update_layout(lv_screen_active());
+    auto status=project.status();require(status.views.size()==1&&status.views[0].error.empty(),"mounted page");
+    auto *content=project.find("content");require(lv_obj_get_width(content)==800&&lv_obj_get_height(content)==408,"actual shell content dimensions");
+    separate(project.find(status.views[0].page_instance,"root"));
+    contained(lv_screen_active());
+    require(lv_obj_get_scroll_bottom(content)==0&&lv_obj_get_scroll_right(content)==0,"no hidden overflow behind disabled scroll");
+    if(tab!=1){
+      const double value=tab?179.625:43.125;
+      require(data.publish("demo.speed",lvgl_cbor::DataValue::Object{{"kmh",value},{"unit","km/h"},{"sequence",tab+1}},error),error.c_str());data.flush();
+      auto *obj=project.find(status.views[0].page_instance,tab?"speed":"gps_speed");
+      require(obj&&lab_widgets::state<lab_widgets::speedometer::State>(obj).value==value,"CBOR binding preserves fractional needle position");
+    }
+    lv_refr_now(display);
+    std::ofstream raster(std::string(argv[1])+"/layout-"+std::to_string(tab)+".rgb565",std::ios::binary);
+    raster.write(reinterpret_cast<const char*>(pixels.data()),pixels.size());
+  }
+ }
  lv_display_delete(display);lv_deinit();std::puts("Native graphics: rasterized dial/radar, animated pixels, cursor, registration, 100 replacements and timer teardown passed");
 }

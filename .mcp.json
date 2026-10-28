@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "semaps": {
+      "type": "stdio",
+      "command": "semaps",
+      "args": ["mcp"]
+    },
+    "nacborui": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["integrations/mcp/index.js"],
+      "env": {
+        "LVGL_CBOR_ALLOW_PREVIEW": "0",
+        "LVGL_CBOR_ALLOW_SAVE": "0",
+        "LVGL_CBOR_ALLOW_DATA": "0"
+      }
+    }
+  }
+}

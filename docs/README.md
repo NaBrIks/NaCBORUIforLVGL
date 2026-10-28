@@ -1,6 +1,9 @@
 # Документация NaCBORUIforLVGL
 
+- [SeMaps: архитектура, потоки данных и локальные MCP](readme_semaps_ru.md)
+
 - [Сборка на новом TCP-стеке NaWServer](readme_nawserver_tcp_ru.md)
+- [Компоновка 800×408 и автономные CBOR-события скорости](readme_demo_events_ru.md)
 - [Полная прошивка S3 и аппаратная проверка TCP HTTP/WS, MCP и вложенных страниц](reviews/REVIEW_20261028_tcp-hardware.md)
 
 [English overview](../README.md) · [Обзор на русском](../readme.ru.md) · [Лицензии](../LICENSES.md)

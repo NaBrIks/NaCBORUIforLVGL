@@ -1,0 +1,5 @@
+version: 1
+name: NaCBORUIforLVGL
+workspace: docs/diagrams
+source_root: .
+port: 42761

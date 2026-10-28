@@ -59,6 +59,7 @@ HTTP/WebSocket-сервер примера — **NaWServer** (ранее ESP32-y
 
 - [Указатель документации](docs/README.md)
 - [Проекты, хранение, API и MCP](docs/readme_projects_ru.md)
+- [SeMaps: архитектура и локальные MCP](docs/readme_semaps_ru.md)
 - [Биндинги данных и события](docs/readme_bindings_ru.md)
 - [Вложенные страницы и жизненный цикл](docs/readme_page_composition_ru.md)
 - [Модули, файлы, CSS и MCP](docs/readme_modules_files_css_mcp_ru.md)

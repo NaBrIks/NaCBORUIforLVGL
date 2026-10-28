@@ -1,0 +1,222 @@
+{
+  "contractVersion": 5,
+  "language": "ru",
+  "entries": {
+    "v_architecture": {
+      "name": {
+        "v": "Архитектура и границы",
+        "at": "2026-10-28T07:55:18Z",
+        "origin": "authored"
+      },
+      "doc": {
+        "v": "Реализованная архитектура, подтверждённая исходниками на 2026-10-28. Узлы — логические обязанности, не автоматически извлечённый C++ граф. HTTP/WS адаптеры передают команды в UI-контекст; браузер и MCP разделяют API/кодеки. Preview и save независимы. Подробности: docs/readme_projects_ru.md, docs/readme_bindings_ru.md, docs/readme_nawserver_tcp_ru.md. Исходники каждого узла перечислены в его описании.",
+        "at": "2026-10-28T07:58:17Z",
+        "origin": "authored"
+      }
+    },
+    "v_live_data": {
+      "name": {
+        "v": "Данные, биндинги и CBOR-события",
+        "at": "2026-10-28T07:55:18Z",
+        "origin": "authored"
+      },
+      "doc": {
+        "v": "Реальный поток demo.speed: автономный таймер25Гц → owned CBOR event → UI publish_cbor → flush → биндинг/стрелка и общий WS адаптер. Clock/network идут тем же data_changed. Источник живёт вне страницы; page instance владеет подписками, inactive bindings на паузе. Browser bootstrap+WS не меняет авторскую модель. Ограничения: queue4, frame192, WS3584, latest10Гц. См. docs/readme_demo_events_ru.md и docs/reviews/REVIEW_20261028_demo-layout-data.md.",
+        "at": "2026-10-28T07:58:17Z",
+        "origin": "authored"
+      }
+    },
+    "e_pc": {
+      "name": {
+        "v": "ПК и браузер",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "Авторские документы, кодеки и необязательный stdio MCP. Ядро не требует браузера или MCP.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_device": {
+      "name": {
+        "v": "Приложение и runtime",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "S3-пример собирает сервисы, сеть и LVGL; переносимое ядро не владеет ESP-задачами или драйверами.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_editor": {
+      "name": {
+        "v": "Веб-редактор",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "frontend/src/state/lab.js: общий визуальный редактор. Авторский Project отделён от runtime-данных и сохранённой версии МК. Выбор страницы пассивен; preview и save раздельны.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_mcp": {
+      "name": {
+        "v": "MCP-адаптер",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "integrations/mcp/index.js и device.js: Node stdio обёртка существующего API и общих кодеков. Офлайн compile/decode; подключение одного origin. Preview/save/data независимо разрешаются env.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_codecs": {
+      "name": {
+        "v": "Кодеки JS",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "packages/{screen,style,project}-codec: JSON/CBOR, валидация, catalog, общие ProjectClient/DataClient. Screen ABI v3 и style ABI v2; числовые opcodes, символические источники и узлы.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_http": {
+      "name": {
+        "v": "HTTP / WS адаптеры",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "examples/s3_style_lab/main/main.cpp, integrations/nawserver: NaWServer TCP HTTP/WS. HTTP читает immutable snapshots, команды копируются в bounded UI-очереди. /api/project, /api/data, /api/capabilities; /ws, /screen-ws, /component-ws. На МК нет отдельного MCP listener.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_projects": {
+      "name": {
+        "v": "ProjectService",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "src/project_service.cpp: целый проект, named screens, ROM base + один changes layer. Preview временный; save не переключает LCD. Полная загрузка заменяет текущую композицию и кэш.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_store": {
+      "name": {
+        "v": "ROM + каталог SPIFFS",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "src/project_catalog_store.cpp и main/project_config.hpp: независимые screen/style CBOR-файлы, две генерации каталога. Пример: последние 4 МиБ Flash; обычный app-only flash сохраняет проект.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_runtime": {
+      "name": {
+        "v": "ScreenRuntime",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "src/screen_runtime.cpp, screen_views.cpp, screen_bindings.cpp: курсорный исполнитель, дерево экземпляров страниц. Каждый владеет локальными IDs, объектами, биндингами, событиями и потомками; release/cache/retain, пауза скрытых привязок.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_styles": {
+      "name": {
+        "v": "StyleService",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "src/style_service.cpp: shared globals, screen scopes и object-local styles. Владение явно передаёт приложение; стили не являются process-wide singleton.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_registry": {
+      "name": {
+        "v": "DataRegistry",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "src/data_registry.cpp: typed symbolic sources/actions, bounded owned snapshots, known/unknown/stale. publish ставит pending-значение, flush коммитит пакет и уведомляет подписчиков в UI-контексте. Источник живёт независимо от страницы; биндинг получает последний снимок при активации.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_lvgl": {
+      "name": {
+        "v": "LVGL + виджеты",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "LVGL 9.6.0 и WidgetRegistry; нативные компоненты регистрирует приложение. execute по component-local opcode. Пример speedometer reading_number(260) сохраняет дробную позицию; старый reading(258) поддерживается.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_generator": {
+      "name": {
+        "v": "Генератор 25 Гц",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "main/demo_speed.cpp и demo_speed/model.hpp: автономный esp_timer, косинус 0..180 км/ч за24с. Absolute-time samples без догоняющей очереди; не знает страниц, объектов LVGL или клиентов.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_bus": {
+      "name": {
+        "v": "ESP CBOR события",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "main/demo_speed.cpp: отдельный taskless esp_event loop,4 копируемых кадра до192Б. UI dispatcher разбирает value и вызывает publish_cbor demo.speed; чужая задача не трогает LVGL.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_data_events": {
+      "name": {
+        "v": "CBOR data_changed",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "main/data_events.cpp: наблюдает committed DataRegistry после flush. Latest coalescing до10Гц на источник, max3584Б, retry при backpressure, явные known/unknown/stale. Один общий путь для speed/clock/network.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_web_live": {
+      "name": {
+        "v": "Live-предпросмотр",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "frontend/src/state/live-data.js и modules/bindings/preview-bindings.js: разовый bootstrap /api/data на connect, затем CBOR /ws. Shared evaluator/formatter; runtime-проекция не меняет Project/dirty/autoapply. Нативная графика остаётся на МК; браузер показывает параметры биндинга.",
+        "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    }
+  }
+}

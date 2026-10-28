@@ -16,6 +16,14 @@
 
 Read agents/architecture.md and docs/README.md before changes.
 
+- Architecture maps live in `docs/diagrams`, opened by `nacboruiforlvgl.semaps`.
+  Before architectural changes, read the relevant SeMaps views and compare their
+  authored responsibilities with source facts. Use MCP to edit the model, never
+  edit registry/view JSON directly. Confirm `list_projects` identifies `nacborui`
+  before mutations; an old session may still point to another workspace. Current
+  maps are authored logical architecture, not an extracted C++ symbol graph.
+  See docs/readme_semaps_ru.md for startup, MCP scopes and verification.
+
 - Owner refinement 2026-10-22: keep code maximally modular. Each module owns one responsibility; keep App.vue as composition and presentation. Share validation and bidirectional value adapters instead of maintaining parallel implementations. Combining or deleting duplicate code while preserving behavior is encouraged.
 - Owner preference 2026-10-22: evaluate proposals before adopting them, especially ideas explicitly called proposals rather than commands. Explain advantages, disadvantages, suitability and how established the approach is. Treat the suggested mechanism as a design option; distinguish it from required behavior and make a reasoned recommendation.
 - The connected firmware advertises actual capabilities; the editor uses them for choices and validation. Offline editing uses the bundled contract and must not claim device compatibility.

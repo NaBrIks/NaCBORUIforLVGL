@@ -1,0 +1,101 @@
+{
+  "contractVersion": 5,
+  "entities": [
+    {
+      "id": "e_pc",
+      "kind": "group",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_device",
+      "kind": "group",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_editor",
+      "kind": "app",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_mcp",
+      "kind": "app",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_codecs",
+      "kind": "component",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_http",
+      "kind": "service",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_projects",
+      "kind": "service",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_store",
+      "kind": "store",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_runtime",
+      "kind": "component",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_styles",
+      "kind": "service",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_registry",
+      "kind": "service",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_lvgl",
+      "kind": "component",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_generator",
+      "kind": "component",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_bus",
+      "kind": "queue",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_data_events",
+      "kind": "service",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_web_live",
+      "kind": "component",
+      "origin": "authored",
+      "status": "present"
+    }
+  ]
+}

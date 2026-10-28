@@ -139,6 +139,24 @@
               "max": 1000000
             }
           ]
+        },
+        {
+          "alias": "reading_number",
+          "title": "Показание (дробное)",
+          "opcode": 260,
+          "parameters": [
+            {
+              "type": "number",
+              "title": "Скорость",
+              "min": -1000000,
+              "max": 1000000
+            },
+            {
+              "type": "text",
+              "title": "Единица",
+              "maxBytes": 16
+            }
+          ]
         }
       ]
     }

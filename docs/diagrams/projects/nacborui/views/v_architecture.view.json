@@ -1,0 +1,122 @@
+{
+  "id": "v_architecture",
+  "project": "nacborui",
+  "axis": "axis_layer",
+  "placements": [
+    {
+      "entity": "e_pc",
+      "parent": null,
+      "x": 0,
+      "y": 0,
+      "width": 640,
+      "height": 610,
+      "override": {
+        "border": {
+          "color": "#93c5fd"
+        },
+        "fill": "#eff6ff",
+        "header": {
+          "fill": "#dbeafe"
+        }
+      }
+    },
+    {
+      "entity": "e_device",
+      "parent": null,
+      "x": 730,
+      "y": 0,
+      "width": 1040,
+      "height": 610,
+      "override": {
+        "border": {
+          "color": "#86efac"
+        },
+        "fill": "#f0fdf4",
+        "header": {
+          "fill": "#dcfce7"
+        }
+      }
+    },
+    {
+      "entity": "e_editor",
+      "parent": "e_pc",
+      "x": 40,
+      "y": 70,
+      "width": 260,
+      "height": 80
+    },
+    {
+      "entity": "e_mcp",
+      "parent": "e_pc",
+      "x": 340,
+      "y": 70,
+      "width": 260,
+      "height": 80
+    },
+    {
+      "entity": "e_codecs",
+      "parent": "e_pc",
+      "x": 190,
+      "y": 240,
+      "width": 260,
+      "height": 80
+    },
+    {
+      "entity": "e_http",
+      "parent": "e_device",
+      "x": 770,
+      "y": 70,
+      "width": 260,
+      "height": 80
+    },
+    {
+      "entity": "e_projects",
+      "parent": "e_device",
+      "x": 770,
+      "y": 240,
+      "width": 260,
+      "height": 80
+    },
+    {
+      "entity": "e_store",
+      "parent": "e_device",
+      "x": 770,
+      "y": 470,
+      "width": 260,
+      "height": 80
+    },
+    {
+      "entity": "e_runtime",
+      "parent": "e_device",
+      "x": 1470,
+      "y": 240,
+      "width": 260,
+      "height": 80
+    },
+    {
+      "entity": "e_registry",
+      "parent": "e_device",
+      "x": 1120,
+      "y": 70,
+      "width": 260,
+      "height": 80
+    },
+    {
+      "entity": "e_styles",
+      "parent": "e_device",
+      "x": 1120,
+      "y": 240,
+      "width": 260,
+      "height": 80
+    },
+    {
+      "entity": "e_lvgl",
+      "parent": "e_device",
+      "x": 1470,
+      "y": 470,
+      "width": 260,
+      "height": 80
+    }
+  ],
+  "routing": "orthogonal"
+}

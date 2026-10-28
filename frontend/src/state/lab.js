@@ -12,6 +12,7 @@ import {useAuthoringCapabilities} from '../modules/native-widgets/authoring-capa
 import {useProjectWorkspace} from './project-workspace.js';
 import {useProjectController} from './project-controller.js';
 import {usePagePreview} from './page-preview.js';
+import {useLiveData} from './live-data.js';
 
 export function useLab(){
  provideScreenPreviewSettings();
@@ -28,8 +29,9 @@ export function useLab(){
  provide('lvgl-capabilities',connection.capabilities);
  const projects=useProjectController(connection,projectWorkspace,{...preview,pagePreview,currentScreen:()=>screenWorkspace.current.value});
  provide('lvgl-project',{workspace:projectWorkspace,controller:projects,pagePreview});
+ const liveData=useLiveData(connection);provide('lvgl-live-data',liveData);
  let screens;
- const styles=useStyleController(connection,{document:workspace.styleDoc,page,auto:workspace.autoStyle,preview,simulator,projectPreview:projects.previewStyle,suspended:projectWorkspace.loading,otherBusy:()=>screens?.screenBusy.value,onEvent:projects.projectChanged,onOnline:projects.socketOnline});
+ const styles=useStyleController(connection,{document:workspace.styleDoc,page,auto:workspace.autoStyle,preview,simulator,projectPreview:projects.previewStyle,suspended:projectWorkspace.loading,otherBusy:()=>screens?.screenBusy.value,onEvent:event=>{projects.projectChanged(event);liveData.event(event);},onOnline:projects.socketOnline,onSocketState:liveData.socketState});
  screens=useScreenController(connection,{document:screenWorkspace.current,page,auto:workspace.autoScreen,simulated,projectPreview:projects.previewScreen,suspended:projectWorkspace.loading,previewKey:pagePreview.target,otherBusy:()=>styles.busy.value||styles.componentBusy.value});
  const activeAuto=computed({get:()=>page.value==='screens'?workspace.autoScreen.value:workspace.autoStyle.value,set:value=>{if(page.value==='screens')workspace.autoScreen.value=value;else workspace.autoStyle.value=value;}});
  return {appRoute,simulated,page,device,screenWorkspace,...workspace,...preview,...pane,...connection,...styles,...screens,activeAuto,

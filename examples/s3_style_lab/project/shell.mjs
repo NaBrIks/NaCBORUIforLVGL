@@ -1,5 +1,7 @@
 import {bindingContract} from '../../../packages/screen-codec/index.js';
 export const shellId='shell';
+export const shellGeometry={width:800,height:480,statusHeight:28,footerHeight:44};
+export const contentSize={width:shellGeometry.width,height:shellGeometry.height-shellGeometry.statusHeight-shellGeometry.footerHeight};
 const integer=()=>({type:'integer',min:0,max:9007199254740991});
 const text=maxBytes=>({type:'text',maxBytes});
 export const systemBindingCatalog={version:1,sources:[
@@ -29,7 +31,7 @@ export function createShell(project,{id=shellId,initial=project.manifest.entry,l
   if(!['release','cache','retain'].includes(policy))throw Error('Shell retention '+screen);
   return {screen,retention:policy};
  });
- const width=800,height=480,statusHeight=28,footerHeight=44;
+ const {width,height,statusHeight,footerHeight}=shellGeometry;
  const clock=label('system-time',12,128,'system.clock',['localTime'],{unknown:'--:--:--'});
  const state=label('system-sync',150,280,'system.clock',['syncState'],{prefix:'NTP  ',unknown:'NTP  --'});
  state.style.text_color=colors.muted;
