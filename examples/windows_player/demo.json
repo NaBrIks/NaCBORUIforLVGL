@@ -1,0 +1,516 @@
+{
+  "format": "lvgl-project-1",
+  "manifest": {
+    "id": "windows-demo",
+    "name": "Windows LVGL demo",
+    "entry": "shell"
+  },
+  "screens": {
+    "shell": {
+      "format": "lvgl-screen-draft-1",
+      "id": "shell",
+      "name": "Windows LVGL demo",
+      "size": {
+        "width": 800,
+        "height": 480
+      },
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "props": {},
+        "style": {
+          "bg_color": "#fdfbf7",
+          "bg_opa": 255,
+          "pad_all": 0,
+          "border_width": 0,
+          "text_color": "#4a3b2c",
+          "text_font": "montserrat_20"
+        },
+        "children": [
+          {
+            "id": "status",
+            "type": "obj",
+            "props": {},
+            "style": {
+              "x": 0,
+              "y": 0,
+              "width": 800,
+              "height": 28,
+              "pad_all": 0,
+              "border_width": 0,
+              "radius": 0,
+              "bg_color": "#eae5d8"
+            },
+            "children": [
+              {
+                "id": "platform",
+                "type": "label",
+                "props": {
+                  "text": "Windows / LVGL 9.6 - autonomous demo"
+                },
+                "style": {
+                  "x": 8,
+                  "y": 2
+                },
+                "children": []
+              },
+              {
+                "id": "clock",
+                "type": "label",
+                "props": {
+                  "text": "--:--:--"
+                },
+                "style": {
+                  "x": 690,
+                  "y": 2
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "text",
+                    "value": {
+                      "source": "system.clock",
+                      "path": [
+                        "localTime"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "content",
+            "type": "obj",
+            "props": {},
+            "style": {
+              "x": 0,
+              "y": 28,
+              "width": 800,
+              "height": 408,
+              "pad_all": 0,
+              "border_width": 0,
+              "radius": 0
+            },
+            "children": [],
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "view": {
+              "pages": [
+                {
+                  "screen": "overview",
+                  "retention": "retain"
+                },
+                {
+                  "screen": "details",
+                  "retention": "cache"
+                }
+              ],
+              "initial": "overview",
+              "sizing": "fill"
+            }
+          },
+          {
+            "id": "go_overview",
+            "type": "button",
+            "props": {
+              "text": "Overview"
+            },
+            "style": {
+              "x": 0,
+              "y": 436,
+              "width": 400,
+              "height": 44
+            },
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "navigate": {
+                  "view": "content",
+                  "screen": "overview"
+                }
+              }
+            ]
+          },
+          {
+            "id": "go_details",
+            "type": "button",
+            "props": {
+              "text": "Details"
+            },
+            "style": {
+              "x": 400,
+              "y": 436,
+              "width": 400,
+              "height": 44
+            },
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "navigate": {
+                  "view": "content",
+                  "screen": "details"
+                }
+              }
+            ]
+          }
+        ],
+        "flags": {
+          "SCROLLABLE": false
+        }
+      }
+    },
+    "overview": {
+      "format": "lvgl-screen-draft-1",
+      "id": "overview",
+      "name": "Overview",
+      "size": {
+        "width": 800,
+        "height": 408
+      },
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "props": {},
+        "style": {
+          "bg_color": "#fdfbf7",
+          "bg_opa": 255,
+          "pad_all": 0,
+          "border_width": 0,
+          "text_color": "#4a3b2c",
+          "text_font": "montserrat_20"
+        },
+        "children": [
+          {
+            "id": "speed_arc",
+            "type": "arc",
+            "props": {
+              "min": 0,
+              "max": 180,
+              "value": 0
+            },
+            "style": {
+              "x": 22,
+              "y": 24,
+              "width": 280,
+              "height": 280
+            },
+            "children": [],
+            "flags": {
+              "CLICKABLE": false
+            },
+            "bindings": [
+              {
+                "method": "value",
+                "value": {
+                  "op": "round",
+                  "args": [
+                    {
+                      "source": "demo.speed",
+                      "path": [
+                        "kmh"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "speed",
+            "type": "label",
+            "props": {
+              "text": "-- km/h"
+            },
+            "style": {
+              "x": 340,
+              "y": 40
+            },
+            "children": [],
+            "bindings": [
+              {
+                "method": "text",
+                "value": {
+                  "source": "demo.speed",
+                  "path": [
+                    "kmh"
+                  ]
+                },
+                "format": {
+                  "precision": 1,
+                  "suffix": " km/h"
+                }
+              }
+            ]
+          },
+          {
+            "id": "counter",
+            "type": "label",
+            "props": {
+              "text": "Actions: 0"
+            },
+            "style": {
+              "x": 340,
+              "y": 92
+            },
+            "children": [],
+            "bindings": [
+              {
+                "method": "text",
+                "value": {
+                  "source": "demo.clicks"
+                },
+                "format": {
+                  "prefix": "Actions: "
+                }
+              }
+            ]
+          },
+          {
+            "id": "running_title",
+            "type": "label",
+            "props": {
+              "text": "Run generator"
+            },
+            "style": {
+              "x": 340,
+              "y": 150
+            },
+            "children": []
+          },
+          {
+            "id": "running",
+            "type": "switch",
+            "props": {
+              "checked": true
+            },
+            "style": {
+              "x": 570,
+              "y": 144,
+              "width": 70,
+              "height": 36
+            },
+            "children": [],
+            "bindings": [
+              {
+                "scope": "common",
+                "method": "state",
+                "value": [
+                  {
+                    "literal": 4
+                  },
+                  {
+                    "source": "demo.running"
+                  }
+                ]
+              }
+            ],
+            "events": [
+              {
+                "event": "value_changed",
+                "write": {
+                  "source": "demo.running"
+                },
+                "value": {
+                  "event": "value"
+                }
+              }
+            ]
+          },
+          {
+            "id": "step",
+            "type": "button",
+            "props": {
+              "text": "Add 1"
+            },
+            "style": {
+              "x": 340,
+              "y": 210,
+              "width": 140,
+              "height": 36
+            },
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "action": "demo.step",
+                "args": {
+                  "literal": 1
+                }
+              }
+            ]
+          },
+          {
+            "id": "reset",
+            "type": "button",
+            "props": {
+              "text": "Reset"
+            },
+            "style": {
+              "x": 500,
+              "y": 210,
+              "width": 140,
+              "height": 36
+            },
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "action": "demo.reset",
+                "args": {
+                  "literal": null
+                }
+              }
+            ]
+          },
+          {
+            "id": "hint",
+            "type": "label",
+            "props": {
+              "text": "JSON / CBOR -> one runtime, real LVGL widgets"
+            },
+            "style": {
+              "x": 22,
+              "y": 346
+            },
+            "children": []
+          }
+        ],
+        "flags": {
+          "SCROLLABLE": false
+        }
+      }
+    },
+    "details": {
+      "format": "lvgl-screen-draft-1",
+      "id": "details",
+      "name": "Details",
+      "size": {
+        "width": 800,
+        "height": 408
+      },
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "props": {},
+        "style": {
+          "bg_color": "#fdfbf7",
+          "bg_opa": 255,
+          "pad_all": 0,
+          "border_width": 0,
+          "text_color": "#4a3b2c",
+          "text_font": "montserrat_20"
+        },
+        "children": [
+          {
+            "id": "title",
+            "type": "label",
+            "props": {
+              "text": "Nested page / shared application data"
+            },
+            "style": {
+              "x": 24,
+              "y": 30
+            },
+            "children": []
+          },
+          {
+            "id": "counter",
+            "type": "label",
+            "props": {
+              "text": "--"
+            },
+            "style": {
+              "x": 24,
+              "y": 90
+            },
+            "children": [],
+            "bindings": [
+              {
+                "method": "text",
+                "value": {
+                  "source": "demo.clicks"
+                },
+                "format": {
+                  "prefix": "Actions: "
+                }
+              }
+            ]
+          },
+          {
+            "id": "speed",
+            "type": "label",
+            "props": {
+              "text": "--"
+            },
+            "style": {
+              "x": 24,
+              "y": 140
+            },
+            "children": [],
+            "bindings": [
+              {
+                "method": "text",
+                "value": {
+                  "source": "demo.speed",
+                  "path": [
+                    "kmh"
+                  ]
+                },
+                "format": {
+                  "precision": 1,
+                  "suffix": " km/h"
+                }
+              }
+            ]
+          },
+          {
+            "id": "step",
+            "type": "button",
+            "props": {
+              "text": "Add 10"
+            },
+            "style": {
+              "x": 24,
+              "y": 210,
+              "width": 180,
+              "height": 36
+            },
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "action": "demo.step",
+                "args": {
+                  "literal": 10
+                }
+              }
+            ]
+          },
+          {
+            "id": "note",
+            "type": "label",
+            "props": {
+              "text": "Sources keep their last value across page changes."
+            },
+            "style": {
+              "x": 24,
+              "y": 300
+            },
+            "children": []
+          }
+        ],
+        "flags": {
+          "SCROLLABLE": false
+        }
+      }
+    }
+  },
+  "styles": {}
+}

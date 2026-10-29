@@ -2,6 +2,8 @@
 
 The root [MIT License](LICENSE) applies to independently authored NaCBORUIforLVGL code and documentation, including the C++ core (`include/lvgl_cbor`, `src`), JavaScript codecs (`packages`), and host MCP adapter (`integrations/mcp`). It does not replace third-party licenses or relicense adapted code.
 
+The independently authored Windows player (`examples/windows_player`) is also MIT. It links the portable core, LVGL and TinyCBOR; it does not include the GPL board/editor adaptations from the S3 example.
+
 | Material | License / notice |
 | --- | --- |
 | Frontend, including shell adaptations from ESP32-yaidfws | GPL-3.0-only; [frontend/LICENSE](frontend/LICENSE) |

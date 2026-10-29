@@ -1,5 +1,7 @@
 # Документация NaCBORUIforLVGL
 
+- [Windows-проигрыватель: настоящий LVGL, JSON/CBOR, общие биндинги и события](readme_windows_player_ru.md)
+
 - [SeMaps: архитектура, потоки данных и локальные MCP](readme_semaps_ru.md)
 
 - [Сборка на новом TCP-стеке NaWServer](readme_nawserver_tcp_ru.md)

@@ -19,7 +19,7 @@ Repository name: `NaCBORUIforLVGL`.
 - Device capability discovery and live project updates over WebSocket.
 - Separate preview and save operations; connecting or selecting a page does not change the device screen.
 - An optional host-side MCP adapter using the existing device API and shared codecs.
-- A browser simulator and an ESP32-S3 UI example.
+- A browser simulator, a real LVGL Windows player, and an ESP32-S3 UI example.
 
 ## Try the editor
 
@@ -31,6 +31,8 @@ npm run sim
 ```
 
 On Windows, `RunSimulator.cmd` also starts the simulator. The browser preview approximates layout with CSS; it does **not** execute LVGL. Hardware behavior must be checked on a device.
+
+To run **real LVGL** on Windows, build the [desktop player](examples/windows_player/README.md), then use `npm run player -- interface.json` (or `.cbor`). It reuses the same CBOR runtime, bindings and events. Add `--watch` to reload saved files. This target requires C++ Build Tools, CMake and the documented LVGL/TinyCBOR sources; it does not require ESP-IDF or a connected board.
 
 ```sh
 npm test
@@ -58,6 +60,7 @@ Existing identifiers `lvgl_cbor`, `LVGL_CBOR_*`, `@lvgl-cbor/*`, and browser dra
 Most detailed guides are currently in Russian:
 
 - [Documentation index](docs/README.md)
+- [Windows player: real LVGL, JSON/CBOR and application data](examples/windows_player/README.md)
 - [Projects, storage, API, and MCP](docs/readme_projects_ru.md)
 - [SeMaps architecture maps and local MCP setup (Russian)](docs/readme_semaps_ru.md)
 - [Data bindings and events](docs/readme_bindings_ru.md)

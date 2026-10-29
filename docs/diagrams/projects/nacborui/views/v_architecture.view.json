@@ -116,6 +116,14 @@
       "y": 470,
       "width": 260,
       "height": 80
+    },
+    {
+      "entity": "e_windows_player",
+      "parent": "e_pc",
+      "x": 190,
+      "y": 430,
+      "width": 260,
+      "height": 80
     }
   ],
   "routing": "orthogonal"

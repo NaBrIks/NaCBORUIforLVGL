@@ -112,6 +112,20 @@
       "to": "e_web_live",
       "type": "event",
       "origin": "authored"
+    },
+    {
+      "id": "r_codecs_windows_player_data_flow",
+      "from": "e_codecs",
+      "to": "e_windows_player",
+      "type": "data-flow",
+      "origin": "authored"
+    },
+    {
+      "id": "r_windows_player_projects_call",
+      "from": "e_windows_player",
+      "to": "e_projects",
+      "type": "call",
+      "origin": "authored"
     }
   ]
 }

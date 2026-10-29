@@ -96,6 +96,12 @@
       "kind": "component",
       "origin": "authored",
       "status": "present"
+    },
+    {
+      "id": "e_windows_player",
+      "kind": "app",
+      "origin": "authored",
+      "status": "present"
     }
   ]
 }

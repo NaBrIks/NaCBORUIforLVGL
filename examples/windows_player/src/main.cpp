@@ -1,0 +1,172 @@
+#include "application.hpp"
+#include <windows.h>
+#include <commdlg.h>
+#include <atomic>
+#include <cstdio>
+#include <iostream>
+#include <mutex>
+#include <stdexcept>
+#include <thread>
+#include <algorithm>
+
+using namespace lvgl_cbor;
+#if LVGL_VERSION_MAJOR != 9 || LVGL_VERSION_MINOR != 6 || LVGL_VERSION_PATCH != 0
+#error The player must use the same LVGL 9.6.0 contract as the portable runtime.
+#endif
+namespace {
+std::atomic<bool> stopping{};
+WNDPROC original_proc{};
+lv_indev_t *pointer{}; // Accessed only under the LVGL lock.
+std::mutex output_mutex;
+std::string last_error;
+constexpr UINT open_id=100, reload_id=101, exit_id=102, details_id=103;
+void emit(const DataValue &value) {
+  std::lock_guard<std::mutex> guard(output_mutex);
+  std::cout<<data_value_json(value)<<std::endl;
+}
+std::wstring wide(const std::string &text) {
+  if(text.empty()) return {};
+  int n=MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,text.data(),int(text.size()),nullptr,0);
+  if(!n) throw std::runtime_error("Invalid UTF-8");
+  std::wstring result(size_t(n),L'\0');
+  MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,text.data(),int(text.size()),result.data(),n);
+  return result;
+}
+std::string utf8(const wchar_t *text) { return std::filesystem::path(text).u8string(); }
+LRESULT CALLBACK window_proc(HWND window,UINT message,WPARAM wparam,LPARAM lparam) {
+  if(message==WM_CLOSE) {stopping=true;return 0;}
+  if(message==WM_KEYDOWN) {
+    if(wparam==VK_F5) {emit(DataValue::Object{{"event","reload"}});return 0;}
+    if(wparam=='O'&&(GetKeyState(VK_CONTROL)&0x8000)) {message=WM_COMMAND;wparam=open_id;}
+  }
+  if(message==WM_COMMAND) {
+    switch(LOWORD(wparam)) {
+      case open_id: {
+        wchar_t path[32768]{};OPENFILENAMEW dialog{};dialog.lStructSize=sizeof(dialog);
+        dialog.hwndOwner=window;dialog.lpstrFile=path;dialog.nMaxFile=32768;
+        dialog.lpstrFilter=L"LVGL project (*.json;*.cbor)\0*.json;*.cbor\0All files\0*.*\0";
+        dialog.Flags=OFN_FILEMUSTEXIST|OFN_PATHMUSTEXIST|OFN_NOCHANGEDIR;
+        if(GetOpenFileNameW(&dialog)) emit(DataValue::Object{{"event","open"},{"path",utf8(path)}});
+        return 0;
+      }
+      case reload_id: emit(DataValue::Object{{"event","reload"}});return 0;
+      case exit_id: stopping=true;return 0;
+      case details_id: {
+        std::string diagnostic;
+        {std::lock_guard<std::mutex> guard(output_mutex);diagnostic=last_error;}
+        MessageBoxW(window,wide(diagnostic.empty()?"LVGL 9.6 / shared CBOR runtime\nOpen: Ctrl+O. Reload: F5.\nApplication data and actions: see README.":diagnostic).c_str(),L"NaCBORUIforLVGL",MB_OK);
+        return 0;
+      }
+    }
+  }
+  const auto result=CallWindowProcW(original_proc,window,message,wparam,lparam);
+  if(message==WM_LBUTTONDOWN||message==WM_LBUTTONUP) {
+    // The upstream backend retains the latest pointer state. Read both edges so
+    // a quick down/up between timer ticks still becomes an ordinary LVGL click.
+    lv_lock();if(pointer)lv_indev_read(pointer);lv_unlock();
+  }
+  return result;
+}
+class UiLock {
+public: UiLock(){lv_lock();}~UiLock(){lv_unlock();}
+};
+// Host bridge only: length-prefixed CBOR values. No project/binding interpreter here.
+class Input {
+  std::vector<uint8_t> buffer_;
+public:
+  template<class F> void poll(F receive) {
+    DWORD available{};auto pipe=GetStdHandle(STD_INPUT_HANDLE);
+    if(!PeekNamedPipe(pipe,nullptr,0,nullptr,&available,nullptr)) {stopping=true;return;}
+    if(available) {
+      uint8_t chunk[16384];DWORD count{};
+      if(!ReadFile(pipe,chunk,std::min<DWORD>(available,sizeof(chunk)),&count,nullptr)) {stopping=true;return;}
+      buffer_.insert(buffer_.end(),chunk,chunk+count);
+    }
+    while(buffer_.size()>=4) {
+      const size_t size=size_t(buffer_[0])|(size_t(buffer_[1])<<8)|(size_t(buffer_[2])<<16)|(size_t(buffer_[3])<<24);
+      if(!size||size>65536) throw std::runtime_error("Player command size (1..65536)");
+      if(buffer_.size()<size+4) return;
+      DataValue command;std::string error;
+      if(!decode_data_value(buffer_.data()+4,size,command,error,65536)) throw std::runtime_error(error);
+      buffer_.erase(buffer_.begin(),buffer_.begin()+size+4);
+      receive(command);
+    }
+  }
+};
+}
+int wmain(int argc,wchar_t **argv) {
+  try {
+    bool catalog=false,bridge=false;int width=800,height=480;
+    std::filesystem::path path;std::string entry,title="NaCBORUIforLVGL";
+    for(int i=1;i<argc;++i) {
+      std::wstring option=argv[i];
+      if(option==L"--capabilities") catalog=true;
+      else if(option==L"--stdio") bridge=true;
+      else if(i+1<argc&&option==L"--project") path=argv[++i];
+      else if(i+1<argc&&option==L"--entry") entry=utf8(argv[++i]);
+      else if(i+1<argc&&option==L"--title") title=utf8(argv[++i]);
+      else if(i+1<argc&&option==L"--width") width=std::stoi(argv[++i]);
+      else if(i+1<argc&&option==L"--height") height=std::stoi(argv[++i]);
+      else throw std::runtime_error("Usage: nacborui_player --project FILE.cbor [--width N --height N --entry SCREEN] or --capabilities. Use run.mjs to open JSON.");
+    }
+    if(width<64||height<64||width>4096||height>4096||int64_t(width)*height>8*1024*1024) throw std::runtime_error("Display dimensions out of range");
+    lv_init();
+    if(catalog) {Application app;std::cout<<app.capabilities()<<std::endl;return 0;}
+    if(path.empty()) throw std::runtime_error("No project. Use node examples/windows_player/run.mjs [project.json|project.cbor].");
+    auto *display=lv_windows_create_display(wide(title).c_str(),width,height,100,false,true);
+    if(!display) throw std::runtime_error("Cannot create LVGL Windows display");
+    const auto window=lv_windows_get_display_window_handle(display);
+    original_proc=reinterpret_cast<WNDPROC>(GetWindowLongPtrW(window,GWLP_WNDPROC));
+    SetWindowLongPtrW(window,GWLP_WNDPROC,reinterpret_cast<LONG_PTR>(window_proc));
+    auto menu=CreateMenu(),file=CreatePopupMenu(),help=CreatePopupMenu();
+    AppendMenuW(file,MF_STRING,open_id,L"&Open...\tCtrl+O");AppendMenuW(file,MF_STRING,reload_id,L"&Reload\tF5");
+    AppendMenuW(file,MF_SEPARATOR,0,nullptr);AppendMenuW(file,MF_STRING,exit_id,L"E&xit");
+    AppendMenuW(help,MF_STRING,details_id,L"&Details");
+    AppendMenuW(menu,MF_POPUP,reinterpret_cast<UINT_PTR>(file),L"&File");
+    AppendMenuW(menu,MF_POPUP,reinterpret_cast<UINT_PTR>(help),L"&Help");SetMenu(window,menu);
+    // Recalculate the nonclient area; the backend preserves the logical resolution.
+    SetWindowPos(window,nullptr,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER|SWP_FRAMECHANGED);
+    // The launcher hides the console, not the LVGL window (SW_SHOWDEFAULT inherits STARTUPINFO).
+    ShowWindow(window,SW_SHOW);
+    std::unique_ptr<Application> app;
+    {
+      UiLock lock;app=std::make_unique<Application>();std::string error;
+      if(!app->load(path,entry,error)) throw std::runtime_error(error);
+      pointer=lv_windows_acquire_pointer_indev(display);
+      lv_windows_acquire_keypad_indev(display);
+      lv_windows_acquire_encoder_indev(display);
+    }
+    emit(DataValue::Object{{"event","ready"},{"width",width},{"height",height}});
+    Input input;
+    while(!stopping) {
+      if(bridge) input.poll([&](const DataValue &command) {
+        auto object=std::get_if<DataValue::Object>(&command.value);
+        auto id=object?object->find("id"):DataValue::Object::const_iterator{};
+        DataValue request_id=object&&id!=object->end()?id->second:DataValue{};
+        try {
+          if(object&&object->count("op")&&std::get<std::string>(object->at("op").value)=="quit") {stopping=true;return;}
+          if(object&&object->count("op")&&std::get<std::string>(object->at("op").value)=="error")
+            throw std::runtime_error(std::get<std::string>(object->at("message").value));
+          DataValue result;{UiLock lock;result=app->command(command);}
+          if(object&&object->count("op")&&std::get<std::string>(object->at("op").value)=="load"&&object->count("title"))
+            title=std::get<std::string>(object->at("title").value);
+          std::get<DataValue::Object>(result.value)["id"]=request_id;emit(result);
+          {std::lock_guard<std::mutex> guard(output_mutex);last_error.clear();}
+          SetWindowTextW(window,wide(title).c_str());
+        } catch(const std::exception &e) {
+          {std::lock_guard<std::mutex> guard(output_mutex);last_error=e.what();}
+          emit(DataValue::Object{{"event","result"},{"ok",false},{"id",request_id},{"error",e.what()}});
+          SetWindowTextW(window,wide(title+" [error - Help / Details]").c_str());
+        }
+      });
+      {UiLock lock;app->data.tick();}
+      lv_timer_handler();Sleep(5);
+    }
+    {UiLock lock;pointer=nullptr;app.reset();}
+    emit(DataValue::Object{{"event","closed"}});
+    // The process owns the backend thread; no board/network resource is involved.
+    return 0;
+  } catch(const std::exception &e) {
+    emit(DataValue::Object{{"event","fatal"},{"error",e.what()}});return 1;
+  }
+}

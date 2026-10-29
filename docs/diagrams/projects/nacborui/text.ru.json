@@ -9,8 +9,8 @@
         "origin": "authored"
       },
       "doc": {
-        "v": "Реализованная архитектура, подтверждённая исходниками на 2026-10-28. Узлы — логические обязанности, не автоматически извлечённый C++ граф. HTTP/WS адаптеры передают команды в UI-контекст; браузер и MCP разделяют API/кодеки. Preview и save независимы. Подробности: docs/readme_projects_ru.md, docs/readme_bindings_ru.md, docs/readme_nawserver_tcp_ru.md. Исходники каждого узла перечислены в его описании.",
-        "at": "2026-10-28T07:58:17Z",
+        "v": "Реализованная архитектура, сверена с кодом на 2026-10-29. Узлы — логические обязанности, не извлечённый C++ граф. Браузер, MCP и Windows launcher разделяют кодеки. Настоящий Win32 LVGL player исполняет CBOR тем же C++ runtime, что S3; источники/действия принадлежат приложению. HTTP/WS адаптеры используются аппаратным приложением, desktop пока работает с файлами и локальным stdio. Preview и save независимы. См. docs/readme_windows_player_ru.md, docs/readme_projects_ru.md и docs/readme_bindings_ru.md.",
+        "at": "2026-10-29T11:07:44Z",
         "origin": "authored"
       }
     },
@@ -45,8 +45,8 @@
         "origin": "authored"
       },
       "description": {
-        "v": "S3-пример собирает сервисы, сеть и LVGL; переносимое ядро не владеет ESP-задачами или драйверами.",
-        "at": "2026-10-28T07:58:08Z",
+        "v": "Общие ProjectService, ScreenRuntime, StyleService, DataRegistry и LVGL используются S3-приложением и Windows-проигрывателем. Переносимое ядро не владеет ESP-задачами, Win32-окнами или сетевым транспортом; платформенные адаптеры принадлежат приложениям.",
+        "at": "2026-10-29T11:07:44Z",
         "origin": "authored"
       }
     },
@@ -215,6 +215,18 @@
       "description": {
         "v": "frontend/src/state/live-data.js и modules/bindings/preview-bindings.js: разовый bootstrap /api/data на connect, затем CBOR /ws. Shared evaluator/formatter; runtime-проекция не меняет Project/dirty/autoapply. Нативная графика остаётся на МК; браузер показывает параметры биндинга.",
         "at": "2026-10-28T07:58:08Z",
+        "origin": "authored"
+      }
+    },
+    "e_windows_player": {
+      "name": {
+        "v": "Windows-проигрыватель",
+        "at": "2026-10-29T11:07:44Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "examples/windows_player: настоящий LVGL 9.6 Win32 backend. Node launcher проверяет JSON/CBOR общими document-io/project-codec, C++ получает CBOR и использует тот же ProjectService/ScreenRuntime/StyleService/DataRegistry. DemoData принадлежит приложению. Файловые Open/F5/watch; разрешение из screen.size. Сетевого HTTP/WS сервера здесь пока нет. S3 не используется. Руководство: docs/readme_windows_player_ru.md.",
+        "at": "2026-10-29T11:07:44Z",
         "origin": "authored"
       }
     }
