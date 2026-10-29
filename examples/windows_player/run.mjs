@@ -1,39 +1,56 @@
 import {spawn,execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {mkdtemp,writeFile,rm,stat} from 'node:fs/promises';
+import {mkdtemp,writeFile,rm,stat,readFile,mkdir,rename} from 'node:fs/promises';
 import {watch} from 'node:fs';
-import {tmpdir} from 'node:os';
+import {tmpdir,homedir} from 'node:os';
 import {dirname,join,resolve,basename} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createInterface} from 'node:readline';
 import {encode} from 'cborg';
 import {loadProject} from './loader.mjs';
+import {compileSchemes} from './schemes.mjs';
 
 const here=dirname(fileURLToPath(import.meta.url)),root=resolve(here,'../..');
-let path=join(here,'demo.json'),exe=join(root,'local/windows-player-build/Release/nacborui_player.exe');
-let entry,watchEnabled=false,control=false;
+let path=join(here,'demo.json'),exe=join(root,'local/windows-player/Release/nacborui_player.exe');
+let entry,watchEnabled=false,control=false,hidden=false,selectedScheme;
+let settings=join(process.env.LOCALAPPDATA??join(homedir(),'.config'),'NaCBORUIforLVGL','player.json');
 for(let i=2;i<process.argv.length;i++) {
   const arg=process.argv[i];
   if(arg==='--exe'&&process.argv[i+1])exe=resolve(process.argv[++i]);
   else if(arg==='--entry'&&process.argv[i+1])entry=process.argv[++i];
   else if(arg==='--watch')watchEnabled=true;
   else if(arg==='--control')control=true;
-  else if(arg==='--help'){console.log('node examples/windows_player/run.mjs [project.json|project.cbor] [--entry SCREEN] [--watch] [--control] [--exe PATH]');process.exit(0);}
+  else if(arg==='--hidden')hidden=true;
+  else if(arg==='--scheme'&&process.argv[i+1])selectedScheme=process.argv[++i];
+  else if(arg==='--settings'&&process.argv[i+1])settings=resolve(process.argv[++i]);
+  else if(arg==='--no-settings')settings=null;
+  else if(arg==='--help'){console.log('node examples/windows_player/run.mjs [project.json|project.cbor] [--entry SCREEN] [--watch] [--scheme ID] [--control] [--hidden] [--settings PATH|--no-settings] [--exe PATH]');process.exit(0);}
   else if(arg.startsWith('--'))throw Error('Unknown option '+arg);
   else path=resolve(arg);
 }
 const emit=value=>process.stdout.write(JSON.stringify(value)+'\n');
 let directory,current,watcher,debounce,lines,closing=false,serial=Promise.resolve(),generation=0,queued=0;
 const sessions=new Set();
+let schemeFile,schemeCatalog,settingsWork=Promise.resolve();
+function rememberScheme(id) {
+  selectedScheme=id;
+  if(!settings)return;
+  settingsWork=settingsWork.then(async()=>{
+    await mkdir(dirname(settings),{recursive:true});
+    const temp=settings+'.tmp';await writeFile(temp,JSON.stringify({scheme:id})+'\n');await rename(temp,settings);
+  }).catch(error=>emit({event:'error',error:'Appearance settings: '+error.message}));
+}
 async function shutdown(code=0) {
   if(closing)return;closing=true;clearTimeout(debounce);watcher?.close();lines?.close();process.stdin.pause();
   await Promise.allSettled([...sessions].map(session=>session.stop()));
+  await settingsWork;
   if(directory)await rm(directory,{recursive:true,force:true});process.exitCode=code;
 }
 async function sessionFor(packet) {
   const file=join(directory,`${++generation}.cbor`);await writeFile(file,packet.bytes);
   const child=spawn(exe,['--project',file,'--entry',packet.entry,'--width',String(packet.width),
-    '--height',String(packet.height),'--title',`NaCBORUIforLVGL - ${packet.project.manifest.name}`,'--stdio'],{windowsHide:true,stdio:['pipe','pipe','pipe']});
+    '--height',String(packet.height),'--title',`NaCBORUIforLVGL - ${packet.project.manifest.name}`,
+    '--schemes',schemeFile,'--scheme',selectedScheme,'--stdio',...(hidden?['--hidden']:[])],{windowsHide:true,stdio:['pipe','pipe','pipe']});
   let next=0,readyResolve,readyReject,exitedResolve;
   const ready=new Promise((yes,no)=>{readyResolve=yes;readyReject=no;});
   const exited=new Promise(yes=>exitedResolve=yes),pending=new Map();
@@ -65,6 +82,7 @@ async function sessionFor(packet) {
     let event;try{event=JSON.parse(line);}catch{process.stderr.write(line+'\n');return;}
     if(event.event==='ready'){clearTimeout(startup);readyResolve();}
     else if(event.event==='fatal'){readyReject(Error(event.error));emit(event);}
+    else if(event.event==='scheme_changed'){rememberScheme(event.scheme);emit(event);}
     else if(event.event==='result') {
       const waiting=pending.get(event.id);if(waiting){clearTimeout(waiting.timer);pending.delete(event.id);waiting.yes(event);}
     } else if(event.event==='open')enqueue(()=>open(event.path));
@@ -115,7 +133,14 @@ try {
   if(!(await stat(exe)).isFile())throw Error('Player executable not found');
   const {stdout}=await promisify(execFile)(exe,['--capabilities'],{windowsHide:true,maxBuffer:2*1024*1024});
   capabilities=JSON.parse(stdout.trim());
+  schemeCatalog=await compileSchemes();
+  if(selectedScheme===undefined&&settings)try{selectedScheme=JSON.parse(await readFile(settings,'utf8')).scheme;}catch{}
+  if(!schemeCatalog.choices.some(c=>c.id===selectedScheme)) {
+    if(selectedScheme!==undefined&&process.argv.includes('--scheme'))throw Error('Unknown scheme '+selectedScheme);
+    selectedScheme=schemeCatalog.default;
+  }
   directory=await mkdtemp(join(tmpdir(),'nacborui-player-'));
+  schemeFile=join(directory,'appearance.cbor');await writeFile(schemeFile,schemeCatalog.bytes);
   await open(path);
   if(control) {
     lines=createInterface({input:process.stdin});

@@ -15,11 +15,13 @@ using namespace lvgl_cbor;
 #endif
 namespace {
 std::atomic<bool> stopping{};
+std::atomic<int> requested_scheme{-1};
 WNDPROC original_proc{};
 lv_indev_t *pointer{}; // Accessed only under the LVGL lock.
 std::mutex output_mutex;
 std::string last_error;
 constexpr UINT open_id=100, reload_id=101, exit_id=102, details_id=103;
+constexpr UINT scheme_first=200;
 void emit(const DataValue &value) {
   std::lock_guard<std::mutex> guard(output_mutex);
   std::cout<<data_value_json(value)<<std::endl;
@@ -40,6 +42,9 @@ LRESULT CALLBACK window_proc(HWND window,UINT message,WPARAM wparam,LPARAM lpara
     if(wparam=='O'&&(GetKeyState(VK_CONTROL)&0x8000)) {message=WM_COMMAND;wparam=open_id;}
   }
   if(message==WM_COMMAND) {
+    if(LOWORD(wparam)>=scheme_first&&LOWORD(wparam)<scheme_first+8) {
+      requested_scheme=int(LOWORD(wparam)-scheme_first);return 0;
+    }
     switch(LOWORD(wparam)) {
       case open_id: {
         wchar_t path[32768]{};OPENFILENAMEW dialog{};dialog.lStructSize=sizeof(dialog);
@@ -96,12 +101,15 @@ public:
 }
 int wmain(int argc,wchar_t **argv) {
   try {
-    bool catalog=false,bridge=false;int width=800,height=480;
-    std::filesystem::path path;std::string entry,title="NaCBORUIforLVGL";
+    bool catalog=false,bridge=false,hidden=false;int width=800,height=480;
+    std::filesystem::path path,schemes;std::string entry,scheme,title="NaCBORUIforLVGL";
     for(int i=1;i<argc;++i) {
       std::wstring option=argv[i];
       if(option==L"--capabilities") catalog=true;
       else if(option==L"--stdio") bridge=true;
+      else if(option==L"--hidden") hidden=true;
+      else if(i+1<argc&&option==L"--schemes") schemes=argv[++i];
+      else if(i+1<argc&&option==L"--scheme") scheme=utf8(argv[++i]);
       else if(i+1<argc&&option==L"--project") path=argv[++i];
       else if(i+1<argc&&option==L"--entry") entry=utf8(argv[++i]);
       else if(i+1<argc&&option==L"--title") title=utf8(argv[++i]);
@@ -126,19 +134,44 @@ int wmain(int argc,wchar_t **argv) {
     AppendMenuW(menu,MF_POPUP,reinterpret_cast<UINT_PTR>(help),L"&Help");SetMenu(window,menu);
     // Recalculate the nonclient area; the backend preserves the logical resolution.
     SetWindowPos(window,nullptr,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER|SWP_FRAMECHANGED);
-    // The launcher hides the console, not the LVGL window (SW_SHOWDEFAULT inherits STARTUPINFO).
-    ShowWindow(window,SW_SHOW);
     std::unique_ptr<Application> app;
     {
       UiLock lock;app=std::make_unique<Application>();std::string error;
+      if(!schemes.empty())app->load_schemes(schemes,scheme);
       if(!app->load(path,entry,error)) throw std::runtime_error(error);
       pointer=lv_windows_acquire_pointer_indev(display);
       lv_windows_acquire_keypad_indev(display);
       lv_windows_acquire_encoder_indev(display);
     }
+    auto appearance_menu=CreatePopupMenu();
+    AppendMenuW(appearance_menu,MF_STRING|MF_GRAYED,0,L"Цветовая схема");
+    AppendMenuW(appearance_menu,MF_SEPARATOR,0,nullptr);
+    const auto &choices=app->appearance.choices();
+    for(size_t i=0;i<choices.size();++i)AppendMenuW(appearance_menu,MF_STRING,scheme_first+i,wide(choices[i].title).c_str());
+    InsertMenuW(menu,1,MF_BYPOSITION|MF_POPUP,reinterpret_cast<UINT_PTR>(appearance_menu),L"Оформление");
+    std::string displayed_scheme;
+    const auto refresh_scheme_menu=[&]() {
+      const auto &selected=app->appearance.selected();
+      if(selected==displayed_scheme)return;
+      for(size_t i=0;i<choices.size();++i)if(choices[i].id==selected) {
+        CheckMenuRadioItem(appearance_menu,scheme_first,scheme_first+UINT(choices.size())-1,scheme_first+UINT(i),MF_BYCOMMAND);
+        ModifyMenuW(menu,1,MF_BYPOSITION|MF_POPUP,reinterpret_cast<UINT_PTR>(appearance_menu),wide("Оформление: "+choices[i].title).c_str());
+        break;
+      }
+      displayed_scheme=selected;DrawMenuBar(window);
+      emit(DataValue::Object{{"event","scheme_changed"},{"scheme",selected}});
+    };
+    refresh_scheme_menu();
+    // Test/snapshot sessions remain invisible. Normal launches never activate the window.
+    ShowWindow(window,hidden?SW_HIDE:SW_SHOWNOACTIVATE);
     emit(DataValue::Object{{"event","ready"},{"width",width},{"height",height}});
     Input input;
     while(!stopping) {
+      const auto requested=requested_scheme.exchange(-1);
+      if(requested>=0&&size_t(requested)<choices.size()) {
+        {UiLock lock;app->command(DataValue::Object{{"op","scheme"},{"scheme",choices[size_t(requested)].id}});}
+        refresh_scheme_menu();
+      }
       if(bridge) input.poll([&](const DataValue &command) {
         auto object=std::get_if<DataValue::Object>(&command.value);
         auto id=object?object->find("id"):DataValue::Object::const_iterator{};
@@ -150,6 +183,15 @@ int wmain(int argc,wchar_t **argv) {
           DataValue result;{UiLock lock;result=app->command(command);}
           if(object&&object->count("op")&&std::get<std::string>(object->at("op").value)=="load"&&object->count("title"))
             title=std::get<std::string>(object->at("title").value);
+          refresh_scheme_menu();
+          std::get<DataValue::Object>(result.value)["menuScheme"]=displayed_scheme;
+          std::get<DataValue::Object>(result.value)["windowVisible"]=bool(IsWindowVisible(window));
+          std::get<DataValue::Object>(result.value)["foreground"]=GetForegroundWindow()==window;
+          DataValue::Array scheme_menu_state;
+          for(size_t i=0;i<choices.size();++i)scheme_menu_state.emplace_back(DataValue::Object{
+            {"id",choices[i].id},{"title",choices[i].title},
+            {"checked",bool(GetMenuState(appearance_menu,scheme_first+UINT(i),MF_BYCOMMAND)&MF_CHECKED)}});
+          std::get<DataValue::Object>(result.value)["schemeMenu"]=std::move(scheme_menu_state);
           std::get<DataValue::Object>(result.value)["id"]=request_id;emit(result);
           {std::lock_guard<std::mutex> guard(output_mutex);last_error.clear();}
           SetWindowTextW(window,wide(title).c_str());

@@ -225,8 +225,8 @@
         "origin": "authored"
       },
       "description": {
-        "v": "examples/windows_player: настоящий LVGL 9.6 Win32 backend. Node launcher проверяет JSON/CBOR общими document-io/project-codec, C++ получает CBOR и использует тот же ProjectService/ScreenRuntime/StyleService/DataRegistry. DemoData принадлежит приложению. Файловые Open/F5/watch; разрешение из screen.size. Сетевого HTTP/WS сервера здесь пока нет. S3 не используется. Руководство: docs/readme_windows_player_ru.md.",
-        "at": "2026-10-29T11:07:44Z",
+        "v": "examples/windows_player: настоящий LVGL 9.6 Win32 backend. Node launcher проверяет JSON/CBOR общими document-io/project-codec; C++ использует те же ProjectService/ScreenRuntime/StyleService/DataRegistry. Appearance готовит четыре палитры UI-стандарта через обычный CBOR project/style-каталог и StyleRuntime. Статические ресурсы global-static:ui.* сохраняют адреса при StyleValue::replace: страницы/кэш/данные не пересоздаются. Выбор в нативном меню сохраняется отдельно от проекта. Тесты выполняются в скрытом окне, снимают framebuffer через LVGL и не активируют рабочий стол. Сетевого HTTP/WS сервера нет; S3 не используется. Руководство: docs/readme_windows_player_ru.md.",
+        "at": "2026-10-29T12:22:38Z",
         "origin": "authored"
       }
     }

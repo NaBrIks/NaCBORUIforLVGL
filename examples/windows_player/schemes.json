@@ -1,0 +1,30 @@
+{
+  "format": "nacborui-windows-schemes-1",
+  "default": "cream",
+  "schemes": {
+    "light": {
+      "name": "Светлая",
+      "canvas": "#ffffff", "surface": "#f8f9fa", "surfaceAlt": "#f1f3f5",
+      "border": "#dcdcdc", "text": "#1f2328", "muted": "#57606a",
+      "bar": "#1f2328", "barText": "#ffffff", "primary": "#2563eb", "hover": "#1d4ed8"
+    },
+    "cream": {
+      "name": "Кремовая",
+      "canvas": "#fdfbf7", "surface": "#f5f2eb", "surfaceAlt": "#efeadd",
+      "border": "#ddd2b9", "text": "#4a3b2c", "muted": "#7c6b5b",
+      "bar": "#eae5d8", "barText": "#4a3b2c", "primary": "#e18f2f", "hover": "#c87a20"
+    },
+    "emerald": {
+      "name": "Изумрудная",
+      "canvas": "#0f1714", "surface": "#16221d", "surfaceAlt": "#1c2e27",
+      "border": "#233d31", "text": "#e6f6ee", "muted": "#a6cbb8",
+      "bar": "#0a110e", "barText": "#e6f6ee", "primary": "#10b981", "hover": "#059669"
+    },
+    "dark": {
+      "name": "Тёмная",
+      "canvas": "#1e1e1e", "surface": "#252526", "surfaceAlt": "#2d2d30",
+      "border": "#444448", "text": "#f0f0f0", "muted": "#b0b8c0",
+      "bar": "#181818", "barText": "#f0f0f0", "primary": "#4ea1ff", "hover": "#3a8fe6"
+    }
+  }
+}

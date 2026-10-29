@@ -1,5 +1,5 @@
 import {spawn} from 'node:child_process';
-import {readFile,writeFile,mkdtemp,rm} from 'node:fs/promises';
+import {readFile,writeFile,mkdtemp,rm,mkdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -12,7 +12,8 @@ const dir=await mkdtemp(join(tmpdir(),'nacborui-window-test-'));
 const json=join(dir,'проект with spaces.json'),cbor=join(dir,'project.cbor');
 const original=JSON.parse(await readFile(join(here,'demo.json'),'utf8'));
 await writeFile(json,JSON.stringify(original));await writeFile(cbor,encodeProject(original));
-const child=spawn(process.execPath,[join(here,'run.mjs'),json,'--control','--watch'],{cwd:root,stdio:['pipe','pipe','pipe'],windowsHide:true});
+const settings=join(dir,'player-settings.json');
+const child=spawn(process.execPath,[join(here,'run.mjs'),json,'--control','--watch','--hidden','--settings',settings],{cwd:root,stdio:['pipe','pipe','pipe'],windowsHide:true});
 let stderr='',next=0,closed=false;
 child.stderr.on('data',bytes=>stderr+=bytes);
 const events=[],waiters=[];
@@ -35,6 +36,7 @@ const inspect=(instance,...ids)=>command({op:'inspect',nodes:ids.map(id=>({id,in
 try {
   await take(e=>e.event==='loaded');
   let r=await command({op:'inspect'});assert.equal(r.ok,true);assert.equal(r.views[0].selected,'overview');
+  assert.equal(r.windowVisible,false);assert.equal(r.foreground,false);
   let instance=r.views[0].pageInstance;
   r=await inspect(instance,'speed','counter','speed_arc');assert.equal(r.nodes[1].text,'Actions: 0');
   assert.match(r.nodes[0].text,/\d+\.\d km\/h/);assert.ok(r.nodes[2].value>=0);
@@ -57,6 +59,32 @@ try {
   r=await command({op:'publish',source:'demo.speed',value:{kmh:42.5,unit:'km/h',sequence:7}});assert.equal(r.ok,true);
   await new Promise(yes=>setTimeout(yes,100));
   r=await inspect(instance,'speed','speed_arc');assert.equal(r.nodes[0].text,'42.5 km/h');assert.equal(r.nodes[1].value,43);
+  const palettes=JSON.parse(await readFile(join(here,'schemes.json'),'utf8')).schemes;
+  const snapshots=join(root,'local/windows-schemes');await mkdir(snapshots,{recursive:true});
+  const before=await inspect(instance,'speed','counter','running');
+  for(const [id,palette] of Object.entries(palettes)) {
+    r=await command({op:'scheme',scheme:id});assert.equal(r.ok,true);assert.equal(r.scheme,id);assert.equal(r.menuScheme,id);
+    assert.equal(r.windowVisible,false);assert.equal(r.foreground,false);
+    assert.deepEqual(r.schemeMenu.filter(s=>s.checked).map(s=>s.id),[id]);
+    assert.equal(r.views[0].pageInstance,instance,'switching schemes preserves instances');
+    r=await inspect(instance,'root','speed','counter','running','speed_arc');
+    assert.equal(r.nodes[0].background,parseInt(palette.canvas.slice(1),16));
+    assert.equal(r.nodes[1].foreground,parseInt(palette.text.slice(1),16));
+    assert.equal(r.nodes[4].arcColor,parseInt(palette.primary.slice(1),16));
+    assert.equal(r.nodes[3].indicatorOpacity,0,'off switch must keep its neutral track');
+    assert.equal(r.nodes[1].text,'42.5 km/h');assert.equal(r.nodes[2].text,'Actions: 12345');
+    for(let i=0;i<3;i++)assert.deepEqual(r.nodes[i+1].bounds,before.nodes[i].bounds,'palette keeps geometry');
+    r=await command({op:'snapshot',path:join(snapshots,id+'.bmp')});assert.equal(r.ok,true);
+  }
+  r=await command({op:'scheme',scheme:'absent'});assert.equal(r.ok,false);
+  r=await command({op:'inspect'});assert.equal(r.scheme,'dark');assert.equal(r.menuScheme,'dark');
+  await command({op:'click',node:'go_details'});
+  r=await command({op:'scheme',scheme:'emerald'});assert.equal(r.views[0].selected,'details');
+  const detailsInstance=r.views[0].pageInstance;
+  r=await inspect(detailsInstance,'counter');assert.equal(r.nodes[0].text,'Actions: 12345');
+  await command({op:'click',node:'go_overview'});
+  r=await command({op:'inspect'});assert.equal(r.views[0].pageInstance,instance);
+  r=await inspect(instance,'counter');assert.equal(r.nodes[0].foreground,parseInt(palettes.emerald.text.slice(1),16));
   const corrupt=join(dir,'corrupt.cbor');await writeFile(corrupt,new Uint8Array([1,2,3]));
   r=await command({op:'load',path:corrupt,entry:'shell'});assert.equal(r.ok,false);
   r=await inspect(instance,'counter');assert.equal(r.nodes[0].text,'Actions: 12345');
@@ -91,9 +119,26 @@ try {
   const smaller=structuredClone(original);smaller.screens.shell.size={width:640,height:360};
   const small=join(dir,'small.json');await writeFile(small,JSON.stringify(smaller));
   const loaded=await open(small);assert.deepEqual([loaded.width,loaded.height],[640,360]);
-  const image=await command({op:'inspect'});assert.equal(image.ok,true);
+  const image=await command({op:'inspect'});assert.equal(image.ok,true);assert.equal(image.scheme,'emerald');
   child.stdin.write('{"op":"quit"}\n');assert.equal(await exit,0);
-  console.log('PASS: real Win32 LVGL, JSON/CBOR, CBOR source updates, bindings, actions, nested pages, retention, watch reload, invalid-file preservation, resize, clean shutdown');
+  assert.deepEqual(JSON.parse(await readFile(settings,'utf8')),{scheme:'emerald'});
+  // Restart a separate hidden process with the saved setting, without a CLI override.
+  await new Promise((yes,no)=>{
+    const restored=spawn(process.execPath,[join(here,'run.mjs'),cbor,'--control','--hidden','--settings',settings],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
+    const timeout=setTimeout(()=>{restored.kill();no(Error('Settings restart timeout'));},15000);
+    let checked=false;
+    createInterface({input:restored.stdout}).on('line',line=>{
+      const e=JSON.parse(line);
+      if(e.event==='loaded')restored.stdin.write('{"op":"inspect","id":1}\n');
+      if(e.event==='fatal'){restored.kill();no(Error(e.error));}
+      if(e.event==='result'&&e.id===1) {
+        try{assert.equal(e.scheme,'emerald');assert.equal(e.menuScheme,'emerald');checked=true;restored.stdin.write('{"op":"quit"}\n');}
+        catch(error){restored.kill();no(error);}
+      }
+    });
+    restored.once('close',code=>{clearTimeout(timeout);if(checked&&code===0)yes();else no(Error('Settings restart failed'));});
+  });
+  console.log('PASS: hidden Win32 LVGL, JSON/CBOR, sources/bindings/actions, all four schemes, checked menu, native snapshots, stable instances/geometry, nested retention, reload, errors, resize, shutdown');
 } finally {
   if(!closed){child.stdin.end();await Promise.race([exit,new Promise(yes=>setTimeout(()=>{child.kill();yes();},3000))]);}
   for(const waiter of waiters)clearTimeout(waiter.timer);

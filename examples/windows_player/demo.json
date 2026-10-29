@@ -20,11 +20,9 @@
         "type": "obj",
         "props": {},
         "style": {
-          "bg_color": "#fdfbf7",
           "bg_opa": 255,
           "pad_all": 0,
           "border_width": 0,
-          "text_color": "#4a3b2c",
           "text_font": "montserrat_20"
         },
         "children": [
@@ -39,8 +37,7 @@
               "height": 28,
               "pad_all": 0,
               "border_width": 0,
-              "radius": 0,
-              "bg_color": "#eae5d8"
+              "radius": 0
             },
             "children": [
               {
@@ -78,6 +75,13 @@
                   }
                 ]
               }
+            ],
+            "styles": [
+              {
+                "ref": "global-static:ui.status",
+                "part": "MAIN",
+                "state": []
+              }
             ]
           },
           {
@@ -110,7 +114,14 @@
               ],
               "initial": "overview",
               "sizing": "fill"
-            }
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.canvas",
+                "part": "MAIN",
+                "state": []
+              }
+            ]
           },
           {
             "id": "go_overview",
@@ -132,6 +143,34 @@
                   "view": "content",
                   "screen": "overview"
                 }
+              }
+            ],
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
               }
             ]
           },
@@ -156,12 +195,47 @@
                   "screen": "details"
                 }
               }
+            ],
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              }
             ]
           }
         ],
         "flags": {
           "SCROLLABLE": false
-        }
+        },
+        "styles": [
+          {
+            "ref": "global-static:ui.canvas",
+            "part": "MAIN",
+            "state": []
+          }
+        ]
       }
     },
     "overview": {
@@ -178,11 +252,9 @@
         "type": "obj",
         "props": {},
         "style": {
-          "bg_color": "#fdfbf7",
           "bg_opa": 255,
           "pad_all": 0,
           "border_width": 0,
-          "text_color": "#4a3b2c",
           "text_font": "montserrat_20"
         },
         "children": [
@@ -218,6 +290,23 @@
                     }
                   ]
                 }
+              }
+            ],
+            "styles": [
+              {
+                "ref": "global-static:ui.arc_track",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.arc_value",
+                "part": "INDICATOR",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "KNOB",
+                "state": []
               }
             ]
           },
@@ -320,6 +409,23 @@
                   "event": "value"
                 }
               }
+            ],
+            "styles": [
+              {
+                "ref": "global-static:ui.track",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "INDICATOR",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.knob",
+                "part": "KNOB",
+                "state": []
+              }
             ]
           },
           {
@@ -342,6 +448,34 @@
                 "args": {
                   "literal": 1
                 }
+              }
+            ],
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
               }
             ]
           },
@@ -366,6 +500,34 @@
                   "literal": null
                 }
               }
+            ],
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              }
             ]
           },
           {
@@ -378,12 +540,26 @@
               "x": 22,
               "y": 346
             },
-            "children": []
+            "children": [],
+            "styles": [
+              {
+                "ref": "global-static:ui.muted",
+                "part": "MAIN",
+                "state": []
+              }
+            ]
           }
         ],
         "flags": {
           "SCROLLABLE": false
-        }
+        },
+        "styles": [
+          {
+            "ref": "global-static:ui.canvas",
+            "part": "MAIN",
+            "state": []
+          }
+        ]
       }
     },
     "details": {
@@ -400,11 +576,9 @@
         "type": "obj",
         "props": {},
         "style": {
-          "bg_color": "#fdfbf7",
           "bg_opa": 255,
           "pad_all": 0,
           "border_width": 0,
-          "text_color": "#4a3b2c",
           "text_font": "montserrat_20"
         },
         "children": [
@@ -491,6 +665,34 @@
                   "literal": 10
                 }
               }
+            ],
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              }
             ]
           },
           {
@@ -503,12 +705,26 @@
               "x": 24,
               "y": 300
             },
-            "children": []
+            "children": [],
+            "styles": [
+              {
+                "ref": "global-static:ui.muted",
+                "part": "MAIN",
+                "state": []
+              }
+            ]
           }
         ],
         "flags": {
           "SCROLLABLE": false
-        }
+        },
+        "styles": [
+          {
+            "ref": "global-static:ui.canvas",
+            "part": "MAIN",
+            "state": []
+          }
+        ]
       }
     }
   },

@@ -1,6 +1,7 @@
 # Документация NaCBORUIforLVGL
 
 - [Windows-проигрыватель: настоящий LVGL, JSON/CBOR, общие биндинги и события](readme_windows_player_ru.md)
+- [Проверка четырёх цветовых схем в Windows](reviews/REVIEW_20261029_windows-schemes.md)
 
 - [SeMaps: архитектура, потоки данных и локальные MCP](readme_semaps_ru.md)
 

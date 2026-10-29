@@ -28,7 +28,45 @@ npm run player -- '<projects>/interface.json' --entry details
 Sources: [LVGL v9.6.0](https://github.com/lvgl/lvgl/tree/v9.6.0) and
 [TinyCBOR v0.6.1](https://github.com/intel/tinycbor/tree/v0.6.1).
 Do not point `TinyCborSource` at its inner `src` directory.
-Build output is ignored under `local/windows-player-build`.
+Build output is ignored under `local/windows-player`. The earlier build directory
+is left untouched, so a running older player need not be stopped to build this version.
+
+## Color schemes
+
+The application menu **Оформление: Кремовая → Цветовая схема** offers **Светлая,
+Кремовая, Изумрудная, Тёмная**, in the UI-standard order, with the current choice
+checked. The default is Cream. Only color appearance is implemented in this
+Windows prototype; screen geometry, density and radius profiles are unchanged.
+
+The palette data in `schemes.json` comes from TechnicalShell's standard color
+tokens. These are data values, not a copy of its CSS or frontend implementation.
+`schemes.mjs` compiles every variant through the shared project/style codecs.
+The application exposes stable `const lv_style_t *` resources named `ui.canvas`,
+`ui.panel`, `ui.status`, `ui.text`, `ui.muted`, `ui.button`, `ui.button_pressed`,
+`ui.button_focus`, `ui.button_disabled`, `ui.indicator`, `ui.track`, `ui.knob`,
+`ui.arc_track`, and `ui.arc_value`. Pages attach them with ordinary
+`global-static:ui.*` style references and LVGL parts/states. The included project
+uses this mechanism; there are no widget-ID branches in the runtime.
+
+Switching replaces the shared style values at their existing addresses in the
+serialized UI context. It preserves pages, cached instances, data, bindings and
+focus. Local properties still override a shared role; copy/merge still makes a
+snapshot. Hardcoded/custom-drawn colors need their own explicit adaptation.
+Existing projects must attach these resources to opt into this appearance;
+the player does not guess semantic roles from RGB values.
+
+The choice is stored separately in `%LOCALAPPDATA%/NaCBORUIforLVGL/player.json`;
+it does not modify the project. Use `--scheme dark` for a startup choice,
+`--settings PATH` for another preference file, or `--no-settings` to disable it.
+The four variants are loaded once from a compiled resource project; its tiny
+screen entries carry catalog labels and are never displayed. Preparing the
+catalog uses the existing `parse_project` / `StyleRuntime`; applying a choice
+uses the existing `StyleValue::replace`. Core code and ABI are unchanged.
+
+Native LVGL snapshots: [Light](../../docs/images/windows-scheme-light.png),
+[Cream](../../docs/images/windows-scheme-cream.png),
+[Emerald](../../docs/images/windows-scheme-emerald.png),
+[Dark](../../docs/images/windows-scheme-dark.png).
 
 `File → Open` / **Ctrl+O** opens a whole JSON/CBOR project. **F5** reloads it.
 `--watch` listens to filesystem notifications with a short debounce. It also
@@ -77,6 +115,7 @@ It opens no port and never connects to a device. Examples:
 {"op":"write","source":"demo.running","value":false,"id":1}
 {"op":"publish","source":"demo.speed","value":{"kmh":42.5,"unit":"km/h","sequence":1},"id":2}
 {"op":"invoke","action":"demo.step","value":10,"id":3}
+{"op":"scheme","scheme":"emerald","id":5}
 {"op":"inspect","nodes":[{"id":"clock"}],"id":4}
 {"op":"open","path":"<absolute-project-path>"}
 {"op":"quit"}
@@ -105,11 +144,17 @@ npm test
 npm run player:test
 ```
 
-The second command opens real Win32 LVGL windows. It checks JSON/CBOR equivalence,
+The second command uses hidden Win32 LVGL windows without activating them or
+sending keyboard/mouse input. It checks JSON/CBOR equivalence,
 CBOR source updates, formatted/fractional bindings, writable sources, actions,
 nested navigation/retention, reload, missing resources, failure preservation,
 different display sizes and shutdown. It requires the Release executable built
-above. Physical mouse/keyboard acceptance is separate from injected LVGL events.
+above. It additionally checks all four palettes, menu checkmarks, persistence,
+instance/geometry preservation, cache/reactivation, and exports real LVGL BMP
+snapshots to ignored `local/windows-schemes`. `--hidden` is also available for
+other automation. Physical mouse/keyboard acceptance is separate from injected
+LVGL events. A control `snapshot` command with `path` writes the current screen
+using LVGL's own snapshot renderer; it does not capture the user's desktop.
 
 This is the first desktop target. It does not yet host the editor's HTTP/WS API,
 package a standalone Node runtime, or claim MCU memory/timing equivalence.

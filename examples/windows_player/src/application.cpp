@@ -9,9 +9,32 @@ const DataValue &field(const DataValue &v,const char *name) {
   return it->second;
 }
 std::string text(const DataValue &v) { return std::get<std::string>(v.value); }
+void snapshot(lv_obj_t *root,const std::filesystem::path &path) {
+  if(!root)throw std::runtime_error("No project");
+  lv_obj_update_layout(root);
+  auto *image=lv_snapshot_take(root,LV_COLOR_FORMAT_XRGB8888);
+  if(!image)throw std::runtime_error("LVGL snapshot failed");
+  const auto width=image->header.w,height=image->header.h;
+  std::vector<uint8_t> header(54,0);
+  const auto put=[&](size_t at,uint32_t n){for(int i=0;i<4;++i)header[at+i]=uint8_t(n>>(8*i));};
+  header[0]='B';header[1]='M';put(2,54+width*height*4);put(10,54);put(14,40);
+  put(18,width);put(22,uint32_t(-int32_t(height)));header[26]=1;header[28]=32;
+  std::ofstream file(path,std::ios::binary);
+  file.write(reinterpret_cast<const char *>(header.data()),header.size());
+  for(uint32_t y=0;y<height;++y)file.write(reinterpret_cast<const char *>(image->data+y*image->header.stride),width*4);
+  lv_draw_buf_destroy(image);
+  if(!file)throw std::runtime_error("Snapshot file write failed");
+}
+}
+Application::Application():resources_(appearance.resources()) {
+  resources_.push_back({"montserrat_20","const lv_font_t *",&lv_font_montserrat_20});
+  resources_.push_back({"montserrat_28","const lv_font_t *",&lv_font_montserrat_28});
+}
+void Application::load_schemes(const std::filesystem::path &path,const std::string &initial) {
+  appearance.load(path,initial,resources_.data(),resources_.size());
 }
 std::string Application::capabilities() const {
-  return runtime_capabilities_json(resources_,2,{},nullptr,&data.registry);
+  return runtime_capabilities_json(resources_.data(),resources_.size(),{},nullptr,&data.registry);
 }
 bool Application::load(const std::filesystem::path &path,const std::string &entry,std::string &error) {
   std::ifstream input(path,std::ios::binary|std::ios::ate);
@@ -23,7 +46,7 @@ bool Application::load(const std::filesystem::path &path,const std::string &entr
   auto source=std::make_unique<ConstProjectSource>(candidate.data(),candidate.size(),
     ProjectStorageInfo{"desktop","opened document",false,false,"available"});
   auto project=std::make_unique<ProjectService>(*source,nullptr,ProjectPolicy{},
-    ProjectLimits{project_limit,128},resources_,2,nullptr,std::vector<ProjectStorageInfo>{},&data.registry);
+    ProjectLimits{project_limit,128},resources_.data(),resources_.size(),nullptr,std::vector<ProjectStorageInfo>{},&data.registry);
   if(!project->begin(error)) return false;
   ScreenReply reply{};
   if(!project->load_screen(entry.empty()?project->status().entry:entry,reply)) {error=reply.error;return false;}
@@ -34,6 +57,10 @@ DataValue Application::command(const DataValue &request) {
   const auto op=text(field(request,"op"));std::string error;
   if(op=="load") {
     if(!load(std::filesystem::u8path(text(field(request,"path"))),text(field(request,"entry")),error)) throw std::runtime_error(error);
+  } else if(op=="scheme") {
+    appearance.select(text(field(request,"scheme")));
+  } else if(op=="snapshot") {
+    snapshot(project_?project_->root():nullptr,std::filesystem::u8path(text(field(request,"path"))));
   } else if(op=="publish") {
     if(!data.registry.publish(text(field(request,"source")),field(request,"value"),error)) throw std::runtime_error(error);
     data.registry.flush();
@@ -78,6 +105,10 @@ DataValue Application::command(const DataValue &request) {
         lv_obj_update_layout(node);lv_area_t area;lv_obj_get_coords(node,&area);
         result["bounds"]=DataValue::Array{area.x1,area.y1,area.x2,area.y2};
         result["state"]=int(lv_obj_get_state(node));
+        result["background"]=lv_color_to_u32(lv_obj_get_style_bg_color(node,LV_PART_MAIN))&0xffffff;
+        result["foreground"]=lv_color_to_u32(lv_obj_get_style_text_color(node,LV_PART_MAIN))&0xffffff;
+        result["arcColor"]=lv_color_to_u32(lv_obj_get_style_arc_color(node,LV_PART_INDICATOR))&0xffffff;
+        result["indicatorOpacity"]=lv_obj_get_style_bg_opa(node,LV_PART_INDICATOR);
         if(lv_obj_check_type(node,&lv_label_class)) result["text"]=lv_label_get_text(node);
         if(lv_obj_check_type(node,&lv_arc_class)) result["value"]=lv_arc_get_value(node);
         if(lv_obj_check_type(node,&lv_slider_class)) result["value"]=lv_slider_get_value(node);
@@ -86,5 +117,5 @@ DataValue Application::command(const DataValue &request) {
     }
   }
   return DataValue::Object{{"event","result"},{"op",op},{"ok",true},{"views",std::move(views)},
-    {"nodes",std::move(nodes)},{"dataJson",data.registry.snapshot_json()}};
+    {"nodes",std::move(nodes)},{"dataJson",data.registry.snapshot_json()},{"scheme",appearance.selected()}};
 }

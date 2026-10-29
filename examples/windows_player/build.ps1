@@ -1,7 +1,7 @@
 param([string]$Configuration='Release',[string]$LvglSource='', [string]$TinyCborSource='')
 $ErrorActionPreference='Stop'
 $root=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$build=Join-Path $root 'local/windows-player-build'
+$build=Join-Path $root 'local/windows-player'
 $options=@('-S',$PSScriptRoot,'-B',$build)
 if($LvglSource){$options+="-DLVGL_SOURCE_DIR=$LvglSource"}
 if($TinyCborSource){$options+="-DTINYCBOR_SOURCE_DIR=$TinyCborSource"}
