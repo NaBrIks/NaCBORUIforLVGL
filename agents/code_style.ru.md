@@ -16,11 +16,16 @@
 Из корня репозитория в PowerShell:
 
 ```powershell
-powershell -NoProfile -File tools/format_cpp.ps1 -Mode Check
-powershell -NoProfile -File tools/format_cpp.ps1 -Mode Apply
+.\uncrustify-check.cmd
+.\uncrustify-apply.cmd --check
+.\uncrustify-apply.cmd
+.\uncrustify-apply.cmd --help
 powershell -NoProfile -File tools/format_cpp.ps1 -Mode List
 ```
 
+CMD-файлы — тонкие обёртки над тем же PowerShell-скриптом. Работают при вызове
+полным путём из другого каталога и по пути с пробелами. Неизвестные/лишние
+аргументы завершаются с кодом 2 до обработки файлов.
 Check проверяет, Apply меняет файлы, List показывает точный список.
 Git и Uncrustify находятся через PATH; программу можно задать через `UNCRUSTIFY`
 или `-FormatterPath`, не записывая машинный путь в репозиторий.
@@ -29,8 +34,9 @@ vendor, third_party, managed_components, node_modules, .pio, fonts, generated
 и SIG на любом уровне, генерируемые контракты/каталоги, assets.hpp,
 sample_image.hpp и сторонняя адаптация LilyGO board.cpp. Новый файл сначала
 нужно добавить в Git. Другие языки не форматируются. Коммиты не создаются;
-Apply не создаёт резервных копий и MD5. Код 0 — успех, ненулевой — ошибка
-настройки/обработки либо отличия при Check. Проверка продолжает работу после
+Apply не создаёт резервных копий и MD5. Код 0 — успех, 1 — ошибка обработки
+или отличия Check, 2 — ошибка настройки/версии/конфигурации либо аргументов
+обёртки. Проверка продолжает работу после
 отличий и сообщает итоговое число ошибок.
 
 Установить именно Uncrustify 0.83.0_f и использовать PATH или параметр программы.

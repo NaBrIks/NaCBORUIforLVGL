@@ -16,11 +16,16 @@ run Apply twice when importing existing source and verify Check afterwards.
 From the repository root in PowerShell:
 
 ```powershell
-powershell -NoProfile -File tools/format_cpp.ps1 -Mode Check
-powershell -NoProfile -File tools/format_cpp.ps1 -Mode Apply
+.\uncrustify-check.cmd
+.\uncrustify-apply.cmd --check
+.\uncrustify-apply.cmd
+.\uncrustify-apply.cmd --help
 powershell -NoProfile -File tools/format_cpp.ps1 -Mode List
 ```
 
+The CMD files are thin wrappers around the same PowerShell helper; they also
+work when invoked by full path from another directory or a path containing spaces.
+Unknown/extra arguments exit with code 2 before any file is processed.
 Check reports differences; Apply changes files; List prints the exact scope.
 Git and Uncrustify are found through PATH. `UNCRUSTIFY` or `-FormatterPath`
 can select an executable without storing machine paths in the repository.
@@ -30,7 +35,8 @@ directories are excluded. So are generated contracts/catalogs, assets.hpp,
 sample_image.hpp and the third-party LilyGO board.cpp adaptation. New files
 must be staged before they enter the scope. Other languages are not formatted.
 No command creates a commit; Apply creates no backup or MD5 files.
-Exit code 0 means success; nonzero means setup, processing or Check differences.
+Exit codes: 0 = success, 1 = processing errors or Check differences,
+2 = setup/version/configuration or wrapper argument errors.
 File checks continue after differences and report the total failure count.
 
 Install the exact Uncrustify 0.83.0_f version and use PATH or the executable option.

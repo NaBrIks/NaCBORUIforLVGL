@@ -127,7 +127,8 @@ Detailed guides are mainly Russian: [index](docs/README.md),
 
 C/C++ contributions use [Uncrustify 0.83.0_f](agents/code_style.md) and the
 unchanged NaWServer profile in `uncrustify.cfg`. Run
-`powershell -NoProfile -File tools/format_cpp.ps1 -Mode Check` before review.
+`.\uncrustify-check.cmd` before review; `.\uncrustify-apply.cmd` formats source,
+and `.\uncrustify-apply.cmd --help` describes the options.
 Generated/vendor code and other languages are excluded.
 
 Project-owned code is [MIT](LICENSE), including the owner-authored frontend/RGB

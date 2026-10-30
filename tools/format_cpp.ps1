@@ -6,6 +6,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
+try {
 $names=((& git -C $root -c core.quotepath=false ls-files -z) -join "`n").Split([char]0,[StringSplitOptions]::RemoveEmptyEntries)
 if($LASTEXITCODE){throw 'Cannot list tracked source files'}
 $generated=@(
@@ -24,6 +25,14 @@ if($Mode -eq 'List'){$files;exit 0}
 if(!$FormatterPath){$FormatterPath=(Get-Command uncrustify -CommandType Application -ErrorAction Stop).Source}
 $version=(& $FormatterPath --version) -join ''
 if($LASTEXITCODE -or $version -notmatch '^Uncrustify-0\.83\.0_f$'){throw 'Install the pinned Uncrustify 0.83.0_f; use PATH, UNCRUSTIFY or -FormatterPath'}
+$config=Join-Path $root 'uncrustify.cfg'
+if(!(Test-Path -LiteralPath $config -PathType Leaf)){throw 'Cannot find uncrustify.cfg'}
+& $FormatterPath -q -c $config --update-config *> $null
+if($LASTEXITCODE){throw 'Cannot load uncrustify.cfg'}
+} catch {
+  Write-Error -Message $_.Exception.Message -ErrorAction Continue
+  exit 2
+}
 $failures=0
 foreach($file in $files){
   $source=Join-Path $root $file

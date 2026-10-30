@@ -128,7 +128,8 @@ UTF-8. Число объектов, размеры значений, вложе�
 
 Для C/C++ принят [Uncrustify 0.83.0_f](agents/code_style.ru.md) с неизменённым
 профилем NaWServer в `uncrustify.cfg`. Перед проверкой изменений выполнить
-`powershell -NoProfile -File tools/format_cpp.ps1 -Mode Check`.
+`.\uncrustify-check.cmd`; форматирование — `.\uncrustify-apply.cmd`,
+справка — `.\uncrustify-apply.cmd --help`.
 Генерируемые/сторонние файлы и другие языки исключены.
 
 Собственный код — [MIT](LICENSE), включая собственные frontend/RGB-файлы,
