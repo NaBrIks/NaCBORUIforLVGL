@@ -9,7 +9,7 @@
 Редактор, MCP и Windows launcher используют общие кодеки; Windows и МК исполняют
 одно ядро C++. Само ядро не привязано к ESP32.
 
-Канонический репозиторий: [KOE73/NaCBORUIforLVGL](https://github.com/KOE73/NaCBORUIforLVGL).
+Канонический репозиторий: [NaBrIks/NaCBORUIforLVGL](https://github.com/NaBrIks/NaCBORUIforLVGL).
 Он приватный; для клонирования нужен разрешённый доступ.
 
 ## Модули и лицензии
@@ -53,7 +53,7 @@ IDF-компонент не подключает их автоматически
 ## Сборка из чистого checkout
 
 ```sh
-gh repo clone KOE73/NaCBORUIforLVGL
+gh repo clone NaBrIks/NaCBORUIforLVGL
 cd NaCBORUIforLVGL
 npm ci
 npm test

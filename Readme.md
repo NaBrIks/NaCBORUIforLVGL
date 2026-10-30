@@ -9,7 +9,7 @@ styles, typed data bindings, events and nested pages. The editor, MCP adapter
 and Windows launcher share codecs; devices and Windows execute the same C++
 runtime. The core is not tied to ESP32.
 
-Canonical repository: [KOE73/NaCBORUIforLVGL](https://github.com/KOE73/NaCBORUIforLVGL).
+Canonical repository: [NaBrIks/NaCBORUIforLVGL](https://github.com/NaBrIks/NaCBORUIforLVGL).
 It is private; cloning requires authorized access.
 
 ## Modules and licenses
@@ -52,7 +52,7 @@ the root IDF component.
 ## Clean-checkout setup
 
 ```sh
-gh repo clone KOE73/NaCBORUIforLVGL
+gh repo clone NaBrIks/NaCBORUIforLVGL
 cd NaCBORUIforLVGL
 npm ci
 npm test
