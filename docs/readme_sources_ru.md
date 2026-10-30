@@ -60,3 +60,11 @@ LVGL 9.6.0 / espressif-cbor 0.6.1~4 переиспользуются как ис
 новых копий библиотек в Git нет. Общие Appearance и DemoData написаны в этом
 проекте. Для USB-тестов используется внешний pyserial (BSD-3-Clause), устанавливаемый
 в окружение Python; его исходники не копируются в репозиторий.
+
+## Системные показатели Windows (добавлено 2026-10-30)
+
+Пример `examples/windows_player/src/system_metrics.cpp` — собственный MIT-код,
+использующий штатные Windows SDK API PDH/DXGI/GlobalMemoryStatusEx. Сторонние
+реализации, vendor SDK, WMI и новые пакеты не добавлялись; системные DLL и файлы
+Segoe UI в репозиторий не копируются. Первичные API-справочники и семантика
+показателей перечислены в [отчёте](reviews/REVIEW_20261030_windows-system.md).

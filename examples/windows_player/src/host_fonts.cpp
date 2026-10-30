@@ -15,10 +15,11 @@ HostFonts::HostFonts() {
   if(!file.read(reinterpret_cast<char *>(bytes_.data()),size))throw std::runtime_error("Cannot read Segoe UI");
   small_=lv_tiny_ttf_create_data(bytes_.data(),bytes_.size(),20);
   large_=lv_tiny_ttf_create_data(bytes_.data(),bytes_.size(),28);
+  compact_=lv_tiny_ttf_create_data(bytes_.data(),bytes_.size(),14);
   lv_font_glyph_dsc_t glyph{};
-  if(!small_||!large_||!lv_font_get_glyph_dsc(small_,&glyph,0x041d,0)||glyph.is_placeholder) {
-    lv_tiny_ttf_destroy(small_);lv_tiny_ttf_destroy(large_);
+  if(!small_||!large_||!compact_||!lv_font_get_glyph_dsc(small_,&glyph,0x041d,0)||glyph.is_placeholder) {
+    lv_tiny_ttf_destroy(small_);lv_tiny_ttf_destroy(large_);lv_tiny_ttf_destroy(compact_);
     throw std::runtime_error("Cyrillic font initialization failed");
   }
 }
-HostFonts::~HostFonts() {lv_tiny_ttf_destroy(small_);lv_tiny_ttf_destroy(large_);}
+HostFonts::~HostFonts() {lv_tiny_ttf_destroy(small_);lv_tiny_ttf_destroy(large_);lv_tiny_ttf_destroy(compact_);}

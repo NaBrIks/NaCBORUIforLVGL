@@ -32,7 +32,7 @@ npm run sim
 
 On Windows, `RunSimulator.cmd` also starts the simulator. The browser preview approximates layout with CSS; it does **not** execute LVGL. Hardware behavior must be checked on a device.
 
-To run **real LVGL** on Windows, build the [desktop player](examples/windows_player/README.md), then use `npm run player -- interface.json` (or `.cbor`). It reuses the same CBOR runtime, bindings and events. The application offers Light, Cream, Emerald and Dark schemes; switching shared styles preserves page instances and data. Add `--watch` to reload saved files. This target requires C++ Build Tools, CMake and the documented LVGL/TinyCBOR sources; it does not require ESP-IDF or a connected board.
+To run **real LVGL** on Windows, build the [desktop player](examples/windows_player/README.md), then use `npm run player -- interface.json` (or `.cbor`). It reuses the same CBOR runtime, bindings and events. The bundled demo includes real CPU/per-processor graphs, RAM and GPU load/memory through Windows SDK APIs. The application offers Light, Cream, Emerald and Dark schemes; switching shared styles preserves page instances and data. Add `--watch` to reload saved files. This target requires C++ Build Tools, CMake and the documented LVGL/TinyCBOR sources; it does not require ESP-IDF or a connected board.
 
 ```sh
 npm test

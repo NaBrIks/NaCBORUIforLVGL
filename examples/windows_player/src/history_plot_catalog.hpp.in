@@ -1,0 +1,2 @@
+#pragma once
+inline constexpr char history_plot_catalog[]=R"catalog(@HISTORY_PLOT_CATALOG@)catalog";

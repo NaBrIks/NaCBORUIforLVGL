@@ -44,7 +44,7 @@
                 "id": "platform",
                 "type": "label",
                 "props": {
-                  "text": "Windows / LVGL 9.6 - autonomous demo"
+                  "text": "Windows / LVGL 9.6"
                 },
                 "style": {
                   "x": 8,
@@ -112,11 +112,15 @@
                   "retention": "cache"
                 },
                 {
+                  "screen": "system",
+                  "retention": "cache"
+                },
+                {
                   "screen": "settings",
                   "retention": "cache"
                 }
               ],
-              "initial": "settings",
+              "initial": "system",
               "sizing": "fill"
             },
             "styles": [
@@ -136,7 +140,7 @@
             "style": {
               "x": 0,
               "y": 436,
-              "width": 266,
+              "width": 200,
               "height": 44,
               "text_font": "ui_20"
             },
@@ -215,9 +219,9 @@
               "text": "Данные"
             },
             "style": {
-              "x": 266,
+              "x": 200,
               "y": 436,
-              "width": 267,
+              "width": 200,
               "height": 44,
               "text_font": "ui_20"
             },
@@ -290,15 +294,96 @@
             ]
           },
           {
+            "id": "go_system",
+            "type": "button",
+            "props": {
+              "text": "Система"
+            },
+            "style": {
+              "x": 400,
+              "y": 436,
+              "width": 200,
+              "height": 44,
+              "text_font": "ui_20"
+            },
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "navigate": {
+                  "view": "content",
+                  "screen": "system"
+                }
+              }
+            ],
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED",
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              }
+            ]
+          },
+          {
             "id": "go_settings",
             "type": "button",
             "props": {
               "text": "Настройки"
             },
             "style": {
-              "x": 533,
+              "x": 600,
               "y": 436,
-              "width": 267,
+              "width": 200,
               "height": 44,
               "text_font": "ui_20"
             },
@@ -2151,6 +2236,1916 @@
             "ref": "global-static:ui.canvas",
             "part": "MAIN",
             "state": []
+          }
+        ]
+      }
+    },
+    "system": {
+      "format": "lvgl-screen-draft-1",
+      "id": "system",
+      "name": "Windows system monitor",
+      "size": {
+        "width": 800,
+        "height": 408
+      },
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "props": {},
+        "style": {
+          "x": 0,
+          "y": 0,
+          "width": 800,
+          "height": 408,
+          "pad_all": 0,
+          "border_width": 0,
+          "radius": 0,
+          "text_font": "ui_14"
+        },
+        "styles": [
+          {
+            "ref": "global-static:ui.canvas",
+            "part": "MAIN",
+            "state": []
+          }
+        ],
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "children": [
+          {
+            "id": "cpu_history",
+            "type": "demo:history_plot",
+            "props": {},
+            "style": {
+              "x": 8,
+              "y": 6,
+              "width": 240,
+              "height": 108,
+              "pad_all": 0,
+              "border_width": 0,
+              "radius": 0,
+              "text_font": "ui_14"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.panel",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "INDICATOR",
+                "state": []
+              }
+            ],
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": [],
+            "bindings": [
+              {
+                "method": "series",
+                "value": {
+                  "source": "system.cpu",
+                  "path": [
+                    "series"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "ram_history",
+            "type": "demo:history_plot",
+            "props": {},
+            "style": {
+              "x": 256,
+              "y": 6,
+              "width": 240,
+              "height": 108,
+              "pad_all": 0,
+              "border_width": 0,
+              "radius": 0,
+              "text_font": "ui_14"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.panel",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "INDICATOR",
+                "state": []
+              }
+            ],
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": [],
+            "bindings": [
+              {
+                "method": "series",
+                "value": {
+                  "source": "system.memory",
+                  "path": [
+                    "series"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "ram_summary",
+            "type": "label",
+            "props": {
+              "text": "RAM —",
+              "long_mode": 1
+            },
+            "style": {
+              "x": 256,
+              "y": 119,
+              "width": 240,
+              "height": 18,
+              "pad_all": 0,
+              "border_width": 0,
+              "radius": 0,
+              "text_font": "ui_14"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.text",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": [],
+            "bindings": [
+              {
+                "method": "text",
+                "value": {
+                  "source": "system.memory",
+                  "path": [
+                    "summary"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "core_count",
+            "type": "label",
+            "props": {
+              "text": "Logical processors: —",
+              "long_mode": 1
+            },
+            "style": {
+              "x": 8,
+              "y": 119,
+              "width": 240,
+              "height": 18,
+              "pad_all": 0,
+              "border_width": 0,
+              "radius": 0,
+              "text_font": "ui_14"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.text",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": [],
+            "bindings": [
+              {
+                "method": "text",
+                "value": {
+                  "source": "system.cpu",
+                  "path": [
+                    "count"
+                  ]
+                },
+                "format": {
+                  "prefix": "Logical processors: "
+                }
+              }
+            ]
+          },
+          {
+            "id": "interval",
+            "type": "label",
+            "props": {
+              "text": "1 s samples · 32 samples · scale 0–100%",
+              "long_mode": 1
+            },
+            "style": {
+              "x": 8,
+              "y": 140,
+              "width": 488,
+              "height": 18,
+              "pad_all": 0,
+              "border_width": 0,
+              "radius": 0,
+              "text_font": "ui_14"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.text",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": []
+          },
+          {
+            "id": "gpu_list",
+            "type": "obj",
+            "props": {},
+            "style": {
+              "x": 512,
+              "y": 6,
+              "width": 280,
+              "height": 150,
+              "pad_all": 0,
+              "border_width": 0,
+              "radius": 0,
+              "text_font": "ui_14"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.canvas",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": [
+              {
+                "id": "gpu_name_0",
+                "type": "label",
+                "props": {
+                  "text": "GPU —",
+                  "long_mode": 1
+                },
+                "style": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 280,
+                  "height": 18,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.text",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "text",
+                    "value": {
+                      "source": "system.gpus",
+                      "path": [
+                        0,
+                        "name"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "gpu_history_0",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 0,
+                  "y": 18,
+                  "width": 280,
+                  "height": 38,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.gpus",
+                      "path": [
+                        0,
+                        "series"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "gpu_memory_0",
+                "type": "label",
+                "props": {
+                  "text": "VRAM —",
+                  "long_mode": 1
+                },
+                "style": {
+                  "x": 0,
+                  "y": 57,
+                  "width": 280,
+                  "height": 18,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.text",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "text",
+                    "value": {
+                      "source": "system.gpus",
+                      "path": [
+                        0,
+                        "memoryLabel"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "gpu_name_1",
+                "type": "label",
+                "props": {
+                  "text": "GPU —",
+                  "long_mode": 1
+                },
+                "style": {
+                  "x": 0,
+                  "y": 75,
+                  "width": 280,
+                  "height": 18,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.text",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "text",
+                    "value": {
+                      "source": "system.gpus",
+                      "path": [
+                        1,
+                        "name"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "gpu_history_1",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 0,
+                  "y": 93,
+                  "width": 280,
+                  "height": 38,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.gpus",
+                      "path": [
+                        1,
+                        "series"
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "gpu_memory_1",
+                "type": "label",
+                "props": {
+                  "text": "VRAM —",
+                  "long_mode": 1
+                },
+                "style": {
+                  "x": 0,
+                  "y": 132,
+                  "width": 280,
+                  "height": 18,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.text",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "text",
+                    "value": {
+                      "source": "system.gpus",
+                      "path": [
+                        1,
+                        "memoryLabel"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "logical_heading",
+            "type": "label",
+            "props": {
+              "text": "Logical processors · CPU time / %",
+              "long_mode": 1
+            },
+            "style": {
+              "x": 8,
+              "y": 165,
+              "width": 784,
+              "height": 18,
+              "pad_all": 0,
+              "border_width": 0,
+              "radius": 0,
+              "text_font": "ui_14"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.text",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": []
+          },
+          {
+            "id": "core_grid",
+            "type": "obj",
+            "props": {},
+            "style": {
+              "x": 8,
+              "y": 187,
+              "width": 784,
+              "height": 213,
+              "pad_all": 0,
+              "border_width": 0,
+              "radius": 0,
+              "text_font": "ui_14"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.canvas",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "children": [
+              {
+                "id": "core_0",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        0
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_1",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 98,
+                  "y": 0,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        1
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_2",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 196,
+                  "y": 0,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        2
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_3",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 294,
+                  "y": 0,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        3
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_4",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 392,
+                  "y": 0,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        4
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_5",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 490,
+                  "y": 0,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        5
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_6",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 588,
+                  "y": 0,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        6
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_7",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 686,
+                  "y": 0,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        7
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_8",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 0,
+                  "y": 53,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        8
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_9",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 98,
+                  "y": 53,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        9
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_10",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 196,
+                  "y": 53,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        10
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_11",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 294,
+                  "y": 53,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        11
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_12",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 392,
+                  "y": 53,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        12
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_13",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 490,
+                  "y": 53,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        13
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_14",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 588,
+                  "y": 53,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        14
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_15",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 686,
+                  "y": 53,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        15
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_16",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 0,
+                  "y": 106,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        16
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_17",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 98,
+                  "y": 106,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        17
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_18",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 196,
+                  "y": 106,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        18
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_19",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 294,
+                  "y": 106,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        19
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_20",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 392,
+                  "y": 106,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        20
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_21",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 490,
+                  "y": 106,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        21
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_22",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 588,
+                  "y": 106,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        22
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_23",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 686,
+                  "y": 106,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        23
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_24",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 0,
+                  "y": 159,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        24
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_25",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 98,
+                  "y": 159,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        25
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_26",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 196,
+                  "y": 159,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        26
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_27",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 294,
+                  "y": 159,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        27
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_28",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 392,
+                  "y": 159,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        28
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_29",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 490,
+                  "y": 159,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        29
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_30",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 588,
+                  "y": 159,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        30
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "core_31",
+                "type": "demo:history_plot",
+                "props": {},
+                "style": {
+                  "x": 686,
+                  "y": 159,
+                  "width": 94,
+                  "height": 49,
+                  "pad_all": 0,
+                  "border_width": 0,
+                  "radius": 0,
+                  "text_font": "ui_14"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "flags": {
+                  "SCROLLABLE": false
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "series",
+                    "value": {
+                      "source": "system.cores",
+                      "path": [
+                        31
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       }

@@ -9,6 +9,7 @@ import {createInterface} from 'node:readline';
 import {encode} from 'cborg';
 import {loadProject} from './loader.mjs';
 import {compileSchemes} from './schemes.mjs';
+import {adaptSystemPage} from './system-page.mjs';
 
 const here=dirname(fileURLToPath(import.meta.url)),root=resolve(here,'../..');
 let path=join(here,'demo.json'),exe=join(root,'local/windows-player/Release/nacborui_player.exe');
@@ -107,7 +108,8 @@ function monitor() {
 }
 async function open(candidate) {
   // Validate completely before touching the current native composition.
-  const packet=await loadProject(candidate,capabilities,{entry});
+  const packet=await loadProject(candidate,capabilities,{entry,
+    ...(resolve(candidate)===join(here,'demo.json')?{prepare:adaptSystemPage}:{})});
   if(!current||current.width!==packet.width||current.height!==packet.height) {
     const previous=current,next=await sessionFor(packet);current=next;
     if(previous)await previous.stop();

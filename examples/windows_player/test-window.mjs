@@ -7,14 +7,21 @@ import {createInterface} from 'node:readline';
 import assert from 'node:assert/strict';
 import {encodeProject} from '../../packages/project-codec/index.js';
 import {screenContract} from '../../packages/screen-codec/index.js';
+import {exampleCapabilities} from './system-page.mjs';
+const encodeExample=project=>{
+  const capabilities=exampleCapabilities();
+  // Deliberate native-resource rejection scenarios must reach the C++ loader.
+  capabilities.resources.push({name:'missing_font',type:'const lv_font_t *'});
+  return encodeProject(project,capabilities);
+};
 const here=dirname(fileURLToPath(import.meta.url)),root=resolve(here,'../..');
 const executableArgs=process.argv[2]?['--exe',resolve(process.argv[2])]:[];
 const dir=await mkdtemp(join(tmpdir(),'nacborui-window-test-'));
 const json=join(dir,'проект with spaces.json'),cbor=join(dir,'project.cbor');
 const original=JSON.parse(await readFile(join(here,'demo.json'),'utf8'));
-// The shipped demo lands on Settings for review; legacy scenarios start on Overview.
+// The shipped demo lands on System; legacy scenarios start on Overview.
 original.screens.shell.root.children.find(node=>node.id==='content').view.initial='overview';
-await writeFile(json,JSON.stringify(original));await writeFile(cbor,encodeProject(original));
+await writeFile(json,JSON.stringify(original));await writeFile(cbor,encodeExample(original));
 const settings=join(dir,'player-settings.json');
 const child=spawn(process.execPath,[join(here,'run.mjs'),json,'--control','--watch','--hidden','--settings',settings,...executableArgs],{cwd:root,stdio:['pipe','pipe','pipe'],windowsHide:true});
 let stderr='',next=0,closed=false,lastRequest;
@@ -202,7 +209,7 @@ try {
   // A packet can be structurally valid but fail actual LVGL/resource validation.
   const nativeInvalid=structuredClone(original);
   nativeInvalid.screens.overview.root.style.text_font='missing_font';
-  const invalidPacket=join(dir,'missing-resource.cbor');await writeFile(invalidPacket,encodeProject(nativeInvalid));
+  const invalidPacket=join(dir,'missing-resource.cbor');await writeFile(invalidPacket,encodeExample(nativeInvalid));
   r=await command({op:'load',path:invalidPacket,entry:'shell'});
   // Nested page failure uses the existing runtime placeholder; root remains usable.
   assert.equal(r.ok,true);assert.ok(r.views[0].error);
@@ -210,7 +217,7 @@ try {
   r=await command({op:'inspect'});instance=r.views[0].pageInstance;
   r=await inspect(instance,'running');assert.equal(r.nodes[0].state&screenContract.states.CHECKED,0);
   const rootInvalid=structuredClone(original);rootInvalid.screens.shell.root.style.text_font='missing_font';
-  const rootPacket=join(dir,'bad-root.cbor');await writeFile(rootPacket,encodeProject(rootInvalid));
+  const rootPacket=join(dir,'bad-root.cbor');await writeFile(rootPacket,encodeExample(rootInvalid));
   r=await command({op:'load',path:rootPacket,entry:'shell'});assert.equal(r.ok,false);
   r=await inspect(instance,'counter');assert.equal(r.nodes[0].text,'Actions: 12345');
   r=await command({op:'publish',source:'demo.clicks',value:'invalid'});assert.equal(r.ok,false);
@@ -274,11 +281,14 @@ try {
       if(e.event==='loaded')restored.stdin.write('{"op":"inspect","id":1}\n');
       if(e.event==='fatal'){restored.kill();no(Error(e.error));}
       if(e.event==='result'&&e.id===1) {
-        try{assert.equal(e.scheme,'emerald');assert.equal(e.menuScheme,'emerald');assert.equal(e.views[0].selected,'settings');
-          restored.stdin.write(JSON.stringify({op:'inspect',id:2,nodes:[{id:'current_scheme',instance:e.views[0].pageInstance}]})+'\n');}
+        try{assert.equal(e.scheme,'emerald');assert.equal(e.menuScheme,'emerald');assert.equal(e.views[0].selected,'system');
+          restored.stdin.write(JSON.stringify({op:'click',id:2,node:'go_settings'})+'\n');}
         catch(error){restored.kill();no(error);}
       }
       if(e.event==='result'&&e.id===2) {
+        restored.stdin.write(JSON.stringify({op:'inspect',id:3,nodes:[{id:'current_scheme',instance:e.views[0].pageInstance}]})+'\n');
+      }
+      if(e.event==='result'&&e.id===3) {
         try{assert.equal(e.nodes[0].text,'Текущая: Изумрудная');checked=true;restored.stdin.write('{"op":"quit"}\n');}
         catch(error){restored.kill();no(error);}
       }

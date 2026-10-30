@@ -162,6 +162,7 @@ int wmain(int argc,wchar_t **argv) {
       emit(DataValue::Object{{"event","scheme_changed"},{"scheme",selected}});
     };
     refresh_scheme_menu();
+    app->metrics.start();
     // Test/snapshot sessions remain invisible. Normal launches never activate the window.
     ShowWindow(window,hidden?SW_HIDE:SW_SHOWNOACTIVATE);
     emit(DataValue::Object{{"event","ready"},{"width",width},{"height",height}});
@@ -201,7 +202,7 @@ int wmain(int argc,wchar_t **argv) {
           SetWindowTextW(window,wide(title+" [error - Help / Details]").c_str());
         }
       });
-      {UiLock lock;app->data.tick();}
+      {UiLock lock;app->tick();}
       refresh_scheme_menu(); // Scheme actions from CBOR pages share the native menu/persistence path.
       lv_timer_handler();Sleep(5);
     }

@@ -1,5 +1,7 @@
 # Документация NaCBORUIforLVGL
 
+- [Windows: реальные CPU/RAM/GPU и история по логическим процессорам](reviews/REVIEW_20261030_windows-system.md)
+
 - [T-Display-S3: общие схемы, полный flash и аппаратная проверка 320×170](reviews/REVIEW_20261030_lilygo.md)
 
 - [Windows-проигрыватель: настоящий LVGL, JSON/CBOR, общие биндинги и события](readme_windows_player_ru.md)

@@ -225,8 +225,8 @@
         "origin": "authored"
       },
       "description": {
-        "v": "examples/windows_player: настоящий LVGL 9.6 Win32 backend; JSON/CBOR проходят общие кодеки и тот же ProjectService/ScreenRuntime/StyleService/DataRegistry. Appearance и DemoData вынесены в examples/common и собираются одними исходниками в Windows и T-Display-S3. Windows владеет файловым адаптером, меню и Segoe UI через TinyTTF. Стабильные ресурсы global-static:ui.* сохраняют страницы, данные и биндинги при смене схем. Settings содержит 12 типов текущего контракта; проверены CHECKED, FOCUS_KEY/EDITED, popup dropdown и writeback. Компактный проект T-Display-S3 320x170 также проверяется скрытым Windows LVGL. HTTP/WS сервера в проигрывателе нет. docs/readme_windows_player_ru.md, docs/reviews/REVIEW_20261030_lilygo.md.",
-        "at": "2026-10-30T03:11:31Z",
+        "v": "examples/windows_player: настоящий LVGL 9.6 Win32 backend; JSON/CBOR проходят общие кодеки и тот же ProjectService/ScreenRuntime/StyleService/DataRegistry. Appearance и DemoData вынесены в examples/common и собираются одними исходниками в Windows и T-Display-S3. Windows владеет файловым адаптером, меню и Segoe UI через TinyTTF. Стабильные ресурсы global-static:ui.* сохраняют страницы, данные и биндинги при смене схем. Settings содержит 12 типов текущего контракта; проверены CHECKED, FOCUS_KEY/EDITED, popup dropdown и writeback. Компактный проект T-Display-S3 320x170 также проверяется скрытым Windows LVGL. HTTP/WS сервера в проигрывателе нет. docs/readme_windows_player_ru.md, docs/reviews/REVIEW_20261030_lilygo.md. SystemMetrics собирает CPU по логическим процессорам, RAM, GPU и память GPU через Windows SDK PDH/DXGI. Один worker заменяет ограниченный CBOR-снимок; только UI-поток вызывает DataRegistry.publish_cbor. Истории 32 отсчёта живут вне страницы. demo:history_plot — зарегистрированный компонент самого примера с ограниченным методом series; схемы и данные используют общий runtime. docs/reviews/REVIEW_20261030_windows-system.md.",
+        "at": "2026-10-30T05:06:27Z",
         "origin": "authored"
       }
     }

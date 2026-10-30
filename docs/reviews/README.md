@@ -2,6 +2,8 @@
 
 Здесь сохраняются обзоры и результаты с версиями, условиями, источниками и ограничениями.
 
+- [Windows: CPU/RAM/GPU, CBOR, история и схемы](REVIEW_20261030_windows-system.md)
+
 - [T-Display-S3: прошивка, общие модули, CBOR и камера](REVIEW_20261030_lilygo.md)
 
 - [Windows-проигрыватель: настоящий LVGL, JSON/CBOR, биндинги и события](REVIEW_20261029_windows-player.md)

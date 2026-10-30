@@ -3,10 +3,12 @@ import {parseDocument,maxDocumentBytes} from '../../packages/document-io/index.j
 import {encodeProject} from '../../packages/project-codec/index.js';
 
 // This is the same authoring compiler used by the editor/MCP, not a JSON renderer.
-export async function loadProject(path,capabilities,{entry}={}) {
+export async function loadProject(path,capabilities,{entry,prepare}={}) {
   const info=await stat(path);
   if(!info.isFile()||info.size<1||info.size>maxDocumentBytes)throw Error('Project file size: 1 byte to 2 MiB');
-  const project=parseDocument('project',new Uint8Array(await readFile(path)),{capabilities});
+  let bytes=new Uint8Array(await readFile(path));
+  if(prepare)bytes=new TextEncoder().encode(JSON.stringify(prepare(JSON.parse(new TextDecoder().decode(bytes)),capabilities)));
+  const project=parseDocument('project',bytes,{capabilities});
   entry??=project.manifest.entry;
   if(!Object.hasOwn(project.screens,entry))throw Error('Unknown entry screen '+entry);
   const {width,height}=project.screens[entry].size??{width:800,height:480};

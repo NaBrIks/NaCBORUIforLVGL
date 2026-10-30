@@ -1,4 +1,5 @@
 #include "application.hpp"
+#include "history_plot.hpp"
 #include "../../common/sample_image.hpp"
 #include <fstream>
 #include <array>
@@ -38,12 +39,14 @@ void snapshot(lv_obj_t *root,const std::filesystem::path &path) {
   if(!file)throw std::runtime_error("Snapshot file write failed");
 }
 }
-Application::Application():resources_(appearance.resources()) {
+Application::Application():metrics(data.registry),resources_(appearance.resources()) {
+  if(!history_plot::register_widget(widgets_))throw std::runtime_error("Cannot register history plot");
   resources_.push_back({"montserrat_12","const lv_font_t *",&lv_font_montserrat_12});
   resources_.push_back({"montserrat_14","const lv_font_t *",&lv_font_montserrat_14});
   resources_.push_back({"montserrat_20","const lv_font_t *",&lv_font_montserrat_20});
   resources_.push_back({"montserrat_28","const lv_font_t *",&lv_font_montserrat_28});
   resources_.push_back({"ui_20","const lv_font_t *",fonts_.small()});
+  resources_.push_back({"ui_14","const lv_font_t *",fonts_.compact()});
   resources_.push_back({"ui_28","const lv_font_t *",fonts_.large()});
   resources_.push_back({"ui_sample_image","const void *",&sample_image});
   resources_.push_back({"ui_sample_image_small","const void *",&demo_small_image::image});
@@ -69,8 +72,9 @@ void Application::load_schemes(const std::filesystem::path &path,const std::stri
   data.registry.flush();
 }
 std::string Application::capabilities() const {
-  return runtime_capabilities_json(resources_.data(),resources_.size(),{},nullptr,&data.registry);
+  return runtime_capabilities_json(resources_.data(),resources_.size(),{},&widgets_,&data.registry);
 }
+void Application::tick() {metrics.drain();data.tick();}
 bool Application::load(const std::filesystem::path &path,const std::string &entry,std::string &error) {
   std::ifstream input(path,std::ios::binary|std::ios::ate);
   if(!input) {error="Cannot open project";return false;}
@@ -81,7 +85,7 @@ bool Application::load(const std::filesystem::path &path,const std::string &entr
   auto source=std::make_unique<ConstProjectSource>(candidate.data(),candidate.size(),
     ProjectStorageInfo{"desktop","opened document",false,false,"available"});
   auto project=std::make_unique<ProjectService>(*source,nullptr,ProjectPolicy{},
-    ProjectLimits{project_limit,128},resources_.data(),resources_.size(),nullptr,std::vector<ProjectStorageInfo>{},&data.registry);
+    ProjectLimits{project_limit,128},resources_.data(),resources_.size(),&widgets_,std::vector<ProjectStorageInfo>{},&data.registry);
   if(!project->begin(error)) return false;
   ScreenReply reply{};
   if(!project->load_screen(entry.empty()?project->status().entry:entry,reply)) {error=reply.error;return false;}
@@ -171,6 +175,7 @@ DataValue Application::command(const DataValue &request) {
         result["indicatorBorder"]=lv_color_to_u32(lv_obj_get_style_border_color(node,LV_PART_INDICATOR))&0xffffff;
         result["knobColor"]=lv_color_to_u32(lv_obj_get_style_bg_color(node,LV_PART_KNOB))&0xffffff;
         result["lineColor"]=lv_color_to_u32(lv_obj_get_style_line_color(node,LV_PART_MAIN))&0xffffff;
+        result["indicatorLineColor"]=lv_color_to_u32(lv_obj_get_style_line_color(node,LV_PART_INDICATOR))&0xffffff;
         result["imageRecolor"]=lv_color_to_u32(lv_obj_get_style_image_recolor(node,LV_PART_MAIN))&0xffffff;
         result["cursorBorder"]=lv_color_to_u32(lv_obj_get_style_border_color(node,LV_PART_CURSOR))&0xffffff;
         if(lv_obj_check_type(node,&lv_label_class)) result["text"]=lv_label_get_text(node);
