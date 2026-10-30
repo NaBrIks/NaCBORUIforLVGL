@@ -14,6 +14,7 @@ transfer or history rewrite by itself is not a relicensing operation.
 
 | Material | Terms and location |
 | --- | --- |
+| RGB reset/init portions in `examples/s3_style_lab/main/board.cpp` | Own MIT integration plus upstream CC0-1.0, attribution 2022 Espressif Systems (Shanghai) CO LTD. File marked `MIT AND CC0-1.0`; pinned source and full terms in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). |
 | Tabler SVG/CSS/webfont assets in `frontend/src/design/icons` | Upstream MIT; copyright 2020-2024 Paweł Kuna, original [LICENSE.txt](frontend/src/design/icons/LICENSE.txt). Do not replace with the project author's header. |
 | Adapted T-Display-S3 panel parameters in `examples/lilygo_t_display_s3/main/board.cpp` | Upstream MIT, copyright 2024 Shenzhen Xinyuan Electronic Technology Co., Ltd.; full [NOTICE](examples/lilygo_t_display_s3/NOTICE) and file header retained. |
 | LVGL-derived API names/signatures/reference text in generated contracts/catalogs | Upstream LVGL MIT notice; provenance/SHA records and [source register](docs/readme_sources_ru.md). Generated files are not relabelled as solely project-authored. |

@@ -11,6 +11,11 @@ LICENSE и metadata приведены к MIT; исторические GPL-ве
 production build после шапок — PASS. Это отдельный лицензионный коммит перед
 оформлением C/C++, а не следствие переноса репозитория.
 
+После уточнения цепочки RGB board дополнительно сохранены CC0-1.0 и
+`SPDX-FileCopyrightText: 2022 Espressif Systems (Shanghai) CO LTD` для reset/init.
+`THIRD_PARTY_NOTICES.md` содержит точный pinned Waveshare-файл и полный CC0;
+`board.cpp` — `MIT AND CC0-1.0`. Это не возврат прежней GPL собственного кода.
+
 Дата: 2026-10-30. По поручению владельца сохраняется история NaCBORUIforLVGL,
 включаются завершённые изменения Windows responsive/Flex/ScreenViewport и
 документация. Удаление истории задано другому проекту, не этой библиотеке.

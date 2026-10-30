@@ -1,5 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT AND CC0-1.0
 // Copyright (c) 2026 Oleg Kozhevnikov
+// SPDX-FileCopyrightText: 2022 Espressif Systems (Shanghai) CO LTD
+// Reset/init portions follow the CC0 Waveshare/Espressif example.
+// See the root THIRD_PARTY_NOTICES.md for pinned origin and CC0 text.
 // RGB wiring and frame ownership adapted from ESP32-yaidfws touch_lcd7.
 // Owner-authored adaptation; licensed under MIT by the owner on 2026-10-30.
 #include "board.hpp"
