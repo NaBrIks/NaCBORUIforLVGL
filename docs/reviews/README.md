@@ -2,6 +2,10 @@
 
 Здесь сохраняются обзоры и результаты с версиями, условиями, источниками и ограничениями.
 
+- [NaBrIks: README, clean checkout, лицензии и перенос](REVIEW_20261030_publication.md)
+
+- [Windows: изменяемое окно, Grid и сохранение состояния](REVIEW_20261030_windows-resize.md)
+
 - [Windows: CPU/RAM/GPU, CBOR, история и схемы](REVIEW_20261030_windows-system.md)
 
 - [T-Display-S3: прошивка, общие модули, CBOR и камера](REVIEW_20261030_lilygo.md)

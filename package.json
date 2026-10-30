@@ -20,6 +20,7 @@
     "player:build": "powershell -NoProfile -File examples/windows_player/build.ps1",
     "player:test": "node examples/windows_player/test-window.mjs",
     "player:test-system": "node examples/windows_player/test-system.mjs",
+    "player:test-resize": "node examples/windows_player/test-resize.mjs",
     "contract:check": "node tools/style_contract.mjs --check && node tools/screen_contract.mjs --check && node tools/binding_contract.mjs --check && node tools/composition_contract.mjs --check && node tools/capabilities.mjs --check"
   },
   "license": "MIT",

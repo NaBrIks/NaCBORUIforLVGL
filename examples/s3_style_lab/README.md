@@ -76,4 +76,9 @@ entry. [Новый TCP HTTP/WS стек, полная прошивка и про
 генератор скорости работает через CBOR event queue и DataRegistry; дробная
 стрелка управляется биндингом. [Данные, размеры и live WS](../../docs/readme_demo_events_ru.md).
 
-Текущая серверная зависимость — **NaWServer**, GPL-3.0-only. Разместите её рядом с checkout NaCBORUIforLVGL, в папке `NaWServer`. Это отдельный приватный репозиторий: для сборки демки требуется доступ к нему. Перенос include/namespace и адаптеров описан в [отчёте миграции](../../docs/reviews/REVIEW_20261023_nawserver.md).
+Серверная зависимость — отдельный [NaWServer](https://github.com/KOE73/NaWServer).
+Разместите разрешённый checkout рядом с NaCBORUIforLVGL, в папке `NaWServer`.
+Проверяйте LICENSE выбранной ревизии сервера: его лицензирование изменяется
+отдельно от этой демки. Существующие GPL-3.0-only адаптации RGB-платы и оболочки
+редактора здесь сохраняются. Перенос include/namespace описан в
+[историческом отчёте миграции](../../docs/reviews/REVIEW_20261023_nawserver.md).

@@ -188,6 +188,7 @@ executable alone can open a compiled `.cbor` via `--project`, `--width`, `--heig
 npm test
 npm run player:test
 npm run player:test-system
+npm run player:test-resize
 ```
 
 The second command uses hidden Win32 LVGL windows without activating them or
@@ -216,6 +217,39 @@ To build without replacing a running executable, use `build.ps1 -BuildDirectory
 local/windows-player-staging` and pass that executable as the optional first
 argument to `test-window.mjs`.
 
+## Resizable window
+
+The player uses the regular LVGL Win32 desktop backend: drag the frame or maximize
+the window. Status and bottom navigation keep their height; all remaining client
+space belongs to the page. The bundled pages use ordinary LVGL Grid/Flex, percentages
+and FR tracks, so graphs/columns/containers follow the viewport while fonts and
+ordinary control heights remain readable. No CBOR recompilation or project reload
+occurs during resize. Data, histories, current page, bindings and form values stay
+alive. A square arc in the settings mini-example keeps its aspect and size.
+
+For the bundled demo the minimum client area is 800×480. A smaller standalone
+document may start with its smaller minimum. Window tracking is bounded to 4096
+pixels on either side. Existing larger CPU/GPU lists scroll inside their region
+when needed; the shell stays fixed. Size is not saved to the project/preferences.
+
+`screen.size` remains the authored initial size. The player explicitly selects
+`ScreenViewport::Display` on the existing ProjectService; the portable runtime's
+default `Declared` mode still validates the declared size at load. Nested `fill`
+views already follow their container. Opening an arbitrary fixed-coordinate
+project does not automatically make its internal layout responsive: the author
+uses the same Grid/Flex/percentage styles. Wire ABI is unchanged.
+
+The optional control command `{op:"resize",width:1200,height:800}` resizes the
+actual native client area without activation. Backend resolution changes on its
+next LVGL timer pass; `inspect` reports `clientWidth/Height`, `displayWidth/Height`
+and `resizable`. Invalid sizes preserve the active page. The command is a local
+Windows adapter, not a new MCU API.
+
+`player:test-resize` runs hidden native windows at four distinct sizes, returns
+to the initial size, visits every page, checks parent/viewport bounds, stable
+instances/values and CBOR reload in a resized display. It exports measurements
+and snapshots under ignored `local/windows-resize` without OS mouse/key input.
+
 This is the first desktop target. It does not yet host the editor's HTTP/WS API,
 package a standalone Node runtime, or claim MCU memory/timing equivalence.
 
@@ -223,6 +257,10 @@ package a standalone Node runtime, or claim MCU memory/timing equivalence.
 
 System shows real CPU load, one history per logical processor (including SMT),
 physical RAM usage, GPU load and dedicated/shared GPU memory on one page.
+Four Flex blocks keep related values together: CPU (total and logical processors),
+RAM, GPU load, and GPU memory. CPU fills the upper region; the other three share
+the lower row with equal width. Plots grow with the viewport; GPU memory rows
+remain compact. Thin palette-aware borders separate the blocks.
 It uses Windows SDK **PDH + DXGI + GlobalMemoryStatusEx**, linked as system
 libraries `pdh` and `dxgi`. No vendor SDK, WMI, new package, driver installation
 or administrator privilege is required. GPU counters require a compatible

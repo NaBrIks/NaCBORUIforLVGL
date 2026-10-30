@@ -19,6 +19,15 @@ board-parameter notice in its `NOTICE`; it does not adapt the GPL RGB-board code
 | LVGL-derived API reference material | MIT under the upstream LVGL notice; see the source register and generated reference provenance |
 | External dependencies | Their own licenses and copyright notices; versions are recorded in lock files and the source register |
 
-The GPL example uses the external NaWServer server (formerly ESP32-yaidfws). This dependency remains outside the portable core. Combining or distributing the example or frontend must retain their applicable GPL terms; the root MIT license does not remove them.
+The GPL example uses the external NaWServer server (formerly ESP32-yaidfws).
+This dependency remains outside the portable core; check the license of the
+specific revision selected by your application. A later server license change
+does not relicense the GPL-derived frontend or RGB board/display adaptations
+already in this repository. Combining or distributing those materials must
+retain their applicable GPL terms; the root MIT license does not remove them.
+
+MIT permits commercial use and sale subject to its notice requirements.
+Voluntary donations do not change that license or the obligations applying to
+third-party/GPL material. No payment account or donation URL is configured here.
 
 The [source and dependency register](docs/readme_sources_ru.md) records origins, versions, and notice locations. Existing upstream copyright notices must be preserved.

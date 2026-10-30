@@ -29,10 +29,10 @@ struct ScreenRuntime::Impl {
 ScreenRuntime::ScreenRuntime(const Resource *r, size_t n, ScreenLimits limits,
                              StyleService *service, ScreenStyleRetention retention,
                              WidgetRegistry *registry, DataRegistry *data, ScreenResolver *resolver,
-                             CompositionLimits composition)
+                             CompositionLimits composition, ScreenViewport viewport)
     : owned_service_(service ? nullptr : std::make_unique<StyleService>(r, n)),
       service_(service ? service : owned_service_.get()), retention_(retention), resources_(r),
-      resource_count_(n), limits_(limits), registry_(registry), data_(data), resolver_(resolver),
+      resource_count_(n), limits_(limits), viewport_(viewport), registry_(registry), data_(data), resolver_(resolver),
       composition_(detail::composition_state(composition)) {
   instance_id_ = next_instance_id();
 }
@@ -172,8 +172,9 @@ bool ScreenRuntime::replace(const uint8_t *packet, size_t length, lv_obj_t *pare
     auto *display = lv_display_get_default();
     if (!display)
       return fail("standalone_root_or_display");
-    if (lv_display_get_horizontal_resolution(display) != plan.width ||
-        lv_display_get_vertical_resolution(display) != plan.height)
+    if (viewport_ == ScreenViewport::Declared &&
+        (lv_display_get_horizontal_resolution(display) != plan.width ||
+         lv_display_get_vertical_resolution(display) != plan.height))
       return fail("display_size_mismatch");
   }
   detail::DecodeContext execution{plan, resources_, resource_count_, limits_, reply};
@@ -198,7 +199,10 @@ bool ScreenRuntime::replace(const uint8_t *packet, size_t length, lv_obj_t *pare
   plan.binding_envelope={};
   plan.program = {};
   plan.parser = {};
-  lv_obj_set_size(plan.root->object, plan.width, plan.height);
+  auto *display = lv_obj_get_display(plan.root->object);
+  lv_obj_set_size(plan.root->object,
+                 activate && viewport_ == ScreenViewport::Display ? lv_display_get_horizontal_resolution(display) : plan.width,
+                 activate && viewport_ == ScreenViewport::Display ? lv_display_get_vertical_resolution(display) : plan.height);
   lv_obj_update_layout(plan.root->object);
   if (activate) {
     auto *previous = lv_screen_active();

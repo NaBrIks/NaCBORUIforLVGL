@@ -85,7 +85,7 @@ bool Application::load(const std::filesystem::path &path,const std::string &entr
   auto source=std::make_unique<ConstProjectSource>(candidate.data(),candidate.size(),
     ProjectStorageInfo{"desktop","opened document",false,false,"available"});
   auto project=std::make_unique<ProjectService>(*source,nullptr,ProjectPolicy{},
-    ProjectLimits{project_limit,128},resources_.data(),resources_.size(),&widgets_,std::vector<ProjectStorageInfo>{},&data.registry);
+    ProjectLimits{project_limit,128},resources_.data(),resources_.size(),&widgets_,std::vector<ProjectStorageInfo>{},&data.registry,ScreenViewport::Display);
   if(!project->begin(error)) return false;
   ScreenReply reply{};
   if(!project->load_screen(entry.empty()?project->status().entry:entry,reply)) {error=reply.error;return false;}
@@ -165,6 +165,13 @@ DataValue Application::command(const DataValue &request) {
       if(node) {
         lv_obj_update_layout(node);lv_area_t area;lv_obj_get_coords(node,&area);
         result["bounds"]=DataValue::Array{area.x1,area.y1,area.x2,area.y2};
+        result["scrollBottom"]=lv_obj_get_scroll_bottom(node);
+        result["scrollRight"]=lv_obj_get_scroll_right(node);
+        result["fontHeight"]=lv_font_get_line_height(lv_obj_get_style_text_font(node,LV_PART_MAIN));
+        if(auto *parent=lv_obj_get_parent(node)) {
+          lv_area_t bounds;lv_obj_get_coords(parent,&bounds);
+          result["parentBounds"]=DataValue::Array{bounds.x1,bounds.y1,bounds.x2,bounds.y2};
+        }
         result["state"]=int(lv_obj_get_state(node));
         result["background"]=lv_color_to_u32(lv_obj_get_style_bg_color(node,LV_PART_MAIN))&0xffffff;
         result["foreground"]=lv_color_to_u32(lv_obj_get_style_text_color(node,LV_PART_MAIN))&0xffffff;

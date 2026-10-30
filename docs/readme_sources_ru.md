@@ -19,7 +19,7 @@
 |---|---|---|
 | LVGL | 9.6.0, IDF managed component `lvgl/lvgl` | MIT, `managed_components/lvgl__lvgl/LICENCE.txt` |
 | TinyCBOR | `espressif/cbor` 0.6.1~4, IDF managed component | MIT, LICENSE компонента и `tinycbor/LICENSE` |
-| HTTP/WS сервер | Компонент `ESP32-yaidfws`, [исходный проект](https://github.com/KOE73/ESP32-yaidfws) | GPL-3.0-only, `idf_component.yml` и LICENSE исходного проекта |
+| HTTP/WS сервер | Историческое имя компонента `ESP32-yaidfws`, ныне [NaWServer](https://github.com/KOE73/NaWServer) | На дату этой реализации GPL-3.0-only, `idf_component.yml` и LICENSE исходного проекта |
 | Плата и дисплей демки | Адаптация `examples/touch_lcd7/main/board.cpp`, `graphics.cpp` того же проекта, текущая интеграция LVGL 9.6 | GPL-3.0-only, `examples/s3_style_lab/LICENSE` |
 | Оболочка фронтенда | Адаптированы themes, appearance state/menu, Icon, tooltip и CSS из `examples/touch_lcd7/frontend/src` | GPL-3.0-only, `frontend/LICENSE`; CSS сокращён до нужной заготовки |
 | Локальные иконки Tabler | Перенесены вместе с исходной оболочкой | Уведомление `frontend/src/design/icons/LICENSE.txt` |
@@ -68,3 +68,12 @@ LVGL 9.6.0 / espressif-cbor 0.6.1~4 переиспользуются как ис
 реализации, vendor SDK, WMI и новые пакеты не добавлялись; системные DLL и файлы
 Segoe UI в репозиторий не копируются. Первичные API-справочники и семантика
 показателей перечислены в [отчёте](reviews/REVIEW_20261030_windows-system.md).
+
+## Подготовка переноса в NaBrIks, 2026-10-30
+
+Самостоятельные модули сохраняют MIT; существующие GPL-маркировки frontend/RGB
+примера и notices сторонних компонентов не снимались. Лицензию новой ревизии
+внешнего NaWServer следует читать в его собственном LICENSE. Исторические таблицы
+выше описывают состояние на свои даты, а не лицензию всех будущих версий сервера.
+Переименование или смена истории внешней зависимости не перелицензирует уже
+адаптированные здесь материалы. Платёжных реквизитов и donation URL не добавлено.

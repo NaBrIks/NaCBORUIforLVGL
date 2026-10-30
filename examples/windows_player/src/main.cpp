@@ -22,6 +22,21 @@ std::mutex output_mutex;
 std::string last_error;
 constexpr UINT open_id=100, reload_id=101, exit_id=102, details_id=103;
 constexpr UINT scheme_first=200;
+int minimum_width=800,minimum_height=480;
+RECT window_extent(HWND window,int width,int height) {
+  RECT area{0,0,width,height};
+  if(!AdjustWindowRectExForDpi(&area,DWORD(GetWindowLongPtrW(window,GWL_STYLE)),GetMenu(window)!=nullptr,
+       DWORD(GetWindowLongPtrW(window,GWL_EXSTYLE)),GetDpiForWindow(window)))
+    throw std::runtime_error("Cannot calculate window frame");
+  return area;
+}
+void resize_client(HWND window,int width,int height) {
+  if(width<minimum_width||height<minimum_height||width>4096||height>4096)
+    throw std::runtime_error("Client size outside supported bounds");
+  const auto area=window_extent(window,width,height);
+  if(!SetWindowPos(window,nullptr,0,0,area.right-area.left,area.bottom-area.top,
+       SWP_NOMOVE|SWP_NOZORDER|SWP_NOACTIVATE))throw std::runtime_error("Cannot resize window");
+}
 void emit(const DataValue &value) {
   std::lock_guard<std::mutex> guard(output_mutex);
   std::cout<<data_value_json(value)<<std::endl;
@@ -65,6 +80,14 @@ LRESULT CALLBACK window_proc(HWND window,UINT message,WPARAM wparam,LPARAM lpara
     }
   }
   const auto result=CallWindowProcW(original_proc,window,message,wparam,lparam);
+  if(message==WM_GETMINMAXINFO) {
+    // The normal desktop backend owns WM_SIZE, framebuffer allocation and input
+    // coordinates. Apply only host bounds here; never resize LVGL from this thread.
+    const auto minimum=window_extent(window,minimum_width,minimum_height),maximum=window_extent(window,4096,4096);
+    auto *limits=reinterpret_cast<MINMAXINFO *>(lparam);
+    limits->ptMinTrackSize={minimum.right-minimum.left,minimum.bottom-minimum.top};
+    limits->ptMaxTrackSize={maximum.right-maximum.left,maximum.bottom-maximum.top};
+  }
   if(message==WM_LBUTTONDOWN||message==WM_LBUTTONUP) {
     // The upstream backend retains the latest pointer state. Read both edges so
     // a quick down/up between timer ticks still becomes an ordinary LVGL click.
@@ -121,7 +144,8 @@ int wmain(int argc,wchar_t **argv) {
     lv_init();
     if(catalog) {Application app;std::cout<<app.capabilities()<<std::endl;return 0;}
     if(path.empty()) throw std::runtime_error("No project. Use node examples/windows_player/run.mjs [project.json|project.cbor].");
-    auto *display=lv_windows_create_display(wide(title).c_str(),width,height,100,false,true);
+    minimum_width=std::min(800,width);minimum_height=std::min(480,height);
+    auto *display=lv_windows_create_display(wide(title).c_str(),width,height,100,false,false);
     if(!display) throw std::runtime_error("Cannot create LVGL Windows display");
     const auto window=lv_windows_get_display_window_handle(display);
     original_proc=reinterpret_cast<WNDPROC>(GetWindowLongPtrW(window,GWLP_WNDPROC));
@@ -132,8 +156,8 @@ int wmain(int argc,wchar_t **argv) {
     AppendMenuW(help,MF_STRING,details_id,L"&Details");
     AppendMenuW(menu,MF_POPUP,reinterpret_cast<UINT_PTR>(file),L"&File");
     AppendMenuW(menu,MF_POPUP,reinterpret_cast<UINT_PTR>(help),L"&Help");SetMenu(window,menu);
-    // Recalculate the nonclient area; the backend preserves the logical resolution.
-    SetWindowPos(window,nullptr,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOZORDER|SWP_FRAMECHANGED);
+    // Keep the requested client dimensions after adding the native menu.
+    resize_client(window,width,height);
     std::unique_ptr<Application> app;
     {
       UiLock lock;app=std::make_unique<Application>();std::string error;
@@ -181,7 +205,24 @@ int wmain(int argc,wchar_t **argv) {
           if(object&&object->count("op")&&std::get<std::string>(object->at("op").value)=="quit") {stopping=true;return;}
           if(object&&object->count("op")&&std::get<std::string>(object->at("op").value)=="error")
             throw std::runtime_error(std::get<std::string>(object->at("message").value));
-          DataValue result;{UiLock lock;result=app->command(command);}
+          const bool resizing=object&&object->count("op")&&std::get<std::string>(object->at("op").value)=="resize";
+          if(resizing) {
+            const auto read_size=[&](const char *key){
+              const auto value=std::get<int64_t>(object->at(key).value);
+              if(value<1||value>4096)throw std::runtime_error("Window dimension range");return int(value);
+            };
+            // Cross-thread Win32 messages must run outside the LVGL lock.
+            resize_client(window,read_size("width"),read_size("height"));
+          }
+          DataValue result;{
+            UiLock lock;result=app->command(resizing?DataValue(DataValue::Object{{"op","inspect"}}):command);
+            std::get<DataValue::Object>(result.value)["displayWidth"]=lv_display_get_horizontal_resolution(display);
+            std::get<DataValue::Object>(result.value)["displayHeight"]=lv_display_get_vertical_resolution(display);
+          }
+          RECT client{};GetClientRect(window,&client);
+          std::get<DataValue::Object>(result.value)["clientWidth"]=client.right;
+          std::get<DataValue::Object>(result.value)["clientHeight"]=client.bottom;
+          std::get<DataValue::Object>(result.value)["resizable"]=bool(GetWindowLongPtrW(window,GWL_STYLE)&WS_THICKFRAME);
           if(object&&object->count("op")&&std::get<std::string>(object->at("op").value)=="load"&&object->count("title"))
             title=std::get<std::string>(object->at("title").value);
           refresh_scheme_menu();

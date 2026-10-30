@@ -130,7 +130,8 @@ public:
   ProjectService(const ProjectSource &, ProjectStore *changes = nullptr,
                  ProjectPolicy = {}, ProjectLimits = {}, const Resource * = nullptr,
                  size_t resource_count = 0, WidgetRegistry * = nullptr,
-                 std::vector<ProjectStorageInfo> media = {}, DataRegistry *data = nullptr);
+                 std::vector<ProjectStorageInfo> media = {}, DataRegistry *data = nullptr,
+                 ScreenViewport viewport = ScreenViewport::Declared);
   ~ProjectService();
   ProjectService(const ProjectService &) = delete;
   ProjectService &operator=(const ProjectService &) = delete;

@@ -113,3 +113,8 @@ DataRegistry. `demo:history_plot` относится только к приме�
 через существующий каталог. Связи и геометрия карты остаются прежними.
 Сохранение подтверждено, `semaps check` не нашёл замечаний. Подробности —
 [приёмка системного обзора](reviews/REVIEW_20261030_windows-system.md).
+
+В тот же день описания `e_runtime`, `e_projects`, `e_windows_player` обновлены
+через MCP для явного ScreenViewport и изменяемого окна. Модель сохранена,
+`semaps check` без замечаний. Геометрия и связи не менялись. См.
+[проверку resize](reviews/REVIEW_20261030_windows-resize.md).

@@ -1,4 +1,4 @@
-param([string]$Configuration='Release')
+param([string]$Configuration='Release',[string]$LvglSource='', [string]$TinyCborSource='')
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 Push-Location $root
@@ -7,7 +7,10 @@ try {
   & node $script
   if ($LASTEXITCODE) { throw "Generation failed: $script" }
  }
- & cmake -S tests/native -B local/native-build
+ $options=@('-S','tests/native','-B','local/native-build')
+ if($LvglSource){$options+="-DLVGL_SOURCE_DIR=$LvglSource"}
+ if($TinyCborSource){$options+="-DTINYCBOR_SOURCE_DIR=$TinyCborSource"}
+ & cmake @options
  if ($LASTEXITCODE) { throw 'Native configuration failed' }
  & cmake --build local/native-build --config $Configuration -j 8
  if ($LASTEXITCODE) { throw 'Native build failed' }

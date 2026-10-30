@@ -50,9 +50,24 @@ test('System overview compiles bounded core/GPU topology without changing the en
   for(const [cores,gpus] of [[0,0],[32,2],[64,4]]) {
     p.screens.system=systemPage(cores,gpus);
     assert.ok(encodeProject(p,capabilities).length>0);
-    const grid=p.screens.system.root.children.find(n=>n.id==='core_grid');
-    assert.equal(grid.children.length,cores);
-    assert.equal(grid.flags.SCROLLABLE,cores>32);
+    const area=p.screens.system.root.children.find(n=>n.id==='cpu_group').children.find(n=>n.id==='core_area');
+    const grid=area.children.find(n=>n.id==='core_grid');
+    assert.equal(grid.children.flatMap(row=>row.children).filter(n=>/^core_\d+$/.test(n.id)).length,cores);
+    assert.equal(area.flags.SCROLLABLE,true);
+    assert.equal(grid.style.min_height,cores?Math.ceil(cores/8)*36-4:0);
   }
   assert.throws(()=>systemPage(65,2),/limits/);
+});
+
+test('Windows pages declare responsive LVGL layouts and preserve design dimensions',async()=>{
+  const p=JSON.parse(await readFile(example,'utf8'));
+  assert.deepEqual(p.screens.shell.size,{width:800,height:480});
+  assert.deepEqual(p.screens.shell.root.style.grid_row_dsc_array,[28,{fr:1},44]);
+  for(const [name,screen] of Object.entries(p.screens))assert.equal(screen.root.style.layout,name==='system'?'LV_LAYOUT_FLEX':'LV_LAYOUT_GRID');
+  const content=p.screens.shell.root.children.find(n=>n.id==='content');
+  assert.equal(content.view.sizing,'fill');assert.deepEqual(content.style.width,{pct:100});
+  assert.deepEqual([p.screens.system.root.children[0].id,...p.screens.system.root.children[1].children.map(n=>n.id)],
+    ['cpu_group','ram_group','gpu_group','gpumem_group']);
+  assert.equal(p.screens.system.root.children[1].style.flex_flow,'LV_FLEX_FLOW_ROW');
+  assert.equal(p.screens.settings.root.children.find(n=>n.id==='preview').style.grid_cell_column_span,4);
 });

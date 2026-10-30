@@ -33,6 +33,9 @@ struct ScreenLimits {
   size_t packet_bytes = screen_packet_bytes, nodes = screen_max_nodes, depth = screen_max_depth,
          styles = screen_max_styles, text_bytes = screen_text_bytes;
 };
+// Declared keeps the device-size check. Display uses the current host viewport
+// for a standalone root; child views keep their existing fill/declared policy.
+enum class ScreenViewport { Declared, Display };
 // Independent instances; no global mutable dispatch/parser state. All LVGL operations and
 // destruction must be serialized in the application's UI context. Resource pointers outlive every
 // mounted instance.
@@ -42,7 +45,8 @@ public:
                          ScreenLimits limits = {}, StyleService *service = nullptr,
                          ScreenStyleRetention retention = ScreenStyleRetention::Release,
                           WidgetRegistry *registry = nullptr, DataRegistry *data = nullptr,
-                          ScreenResolver *resolver = nullptr, CompositionLimits composition = {});
+                          ScreenResolver *resolver = nullptr, CompositionLimits composition = {},
+                          ScreenViewport viewport = ScreenViewport::Declared);
   ~ScreenRuntime();
   ScreenRuntime(const ScreenRuntime &) = delete;
   ScreenRuntime &operator=(const ScreenRuntime &) = delete;
@@ -72,6 +76,7 @@ private:
   const Resource *resources_;
   size_t resource_count_;
   ScreenLimits limits_;
+  ScreenViewport viewport_;
   WidgetRegistry *registry_;
   DataRegistry *data_;
   lv_obj_t *fallback_{};

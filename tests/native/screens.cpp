@@ -279,6 +279,24 @@ int main(int argc, char **argv) {
     require(!runtime.load(packet.data(), packet.size(), reply) && runtime.root() == live,
             "non-consuming custom handler fails at command boundary with rollback");
   }
+  {
+    auto packet=fixture(dir,"absolute");
+    lvgl_cbor::ScreenReply reply;
+    lv_display_set_resolution(display,1024,768);
+    lvgl_cbor::ScreenRuntime strict(resources,2);
+    require(!strict.load(packet.data(),packet.size(),reply)&&std::string(reply.error)=="display_size_mismatch",
+            "default viewport preserves declared display-size validation");
+    lvgl_cbor::ScreenRuntime adaptive(resources,2,{},nullptr,lvgl_cbor::ScreenStyleRetention::Release,
+      nullptr,nullptr,nullptr,{},lvgl_cbor::ScreenViewport::Display);
+    require(adaptive.load(packet.data(),packet.size(),reply),"display viewport accepts a different declared size");
+    auto *root=adaptive.root();const auto instance=adaptive.instance_id();
+    lv_obj_update_layout(root);
+    require(lv_obj_get_width(root)==1024&&lv_obj_get_height(root)==768,"standalone root fills current display");
+    lv_display_set_resolution(display,1200,800);lv_obj_update_layout(root);
+    require(adaptive.root()==root&&adaptive.instance_id()==instance&&lv_obj_get_width(root)==1200&&lv_obj_get_height(root)==800,
+            "display resize preserves instance and follows LVGL screen sizing");
+    require(adaptive.load(packet.data(),packet.size(),reply),"reload works in resized display viewport");
+  }
   lv_display_delete(display);
   lv_deinit();
   std::puts("Native screen MVP passed: manual/Flex/Grid/nesting, instance isolation, owned "

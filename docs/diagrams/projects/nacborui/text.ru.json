@@ -105,8 +105,8 @@
         "origin": "authored"
       },
       "description": {
-        "v": "src/project_service.cpp: целый проект, named screens, ROM base + один changes layer. Preview временный; save не переключает LCD. Полная загрузка заменяет текущую композицию и кэш.",
-        "at": "2026-10-28T07:58:08Z",
+        "v": "src/project_service.cpp: целый проект, named screens, ROM base + один changes layer. Preview временный; save не переключает LCD. Полная загрузка заменяет текущую композицию и кэш. Параметр ScreenViewport передаётся в Presentation/ScreenRuntime без изменения данных проекта и wire ABI. Windows выбирает Display, остальные хосты сохраняют Declared по умолчанию.",
+        "at": "2026-10-30T06:47:28Z",
         "origin": "authored"
       }
     },
@@ -129,8 +129,8 @@
         "origin": "authored"
       },
       "description": {
-        "v": "src/screen_runtime.cpp, screen_views.cpp, screen_bindings.cpp: курсорный исполнитель, дерево экземпляров страниц. Каждый владеет локальными IDs, объектами, биндингами, событиями и потомками; release/cache/retain, пауза скрытых привязок.",
-        "at": "2026-10-28T07:58:08Z",
+        "v": "src/screen_runtime.cpp, screen_views.cpp, screen_bindings.cpp: курсорный исполнитель, дерево экземпляров страниц. Каждый владеет локальными IDs, объектами, биндингами, событиями и потомками; release/cache/retain, пауза скрытых привязок. ScreenViewport::Declared по умолчанию проверяет совпадение размеров при standalone load; явный Display подгоняет корень под текущий LVGL display. Изменение дисплея обрабатывается LVGL и декларативными раскладками, не пересозданием runtime. Вложенные fill-страницы сохраняют прежнюю семантику. docs/adr/ADR_20261030_display-viewport.md.",
+        "at": "2026-10-30T06:47:28Z",
         "origin": "authored"
       }
     },
@@ -225,8 +225,8 @@
         "origin": "authored"
       },
       "description": {
-        "v": "examples/windows_player: настоящий LVGL 9.6 Win32 backend; JSON/CBOR проходят общие кодеки и тот же ProjectService/ScreenRuntime/StyleService/DataRegistry. Appearance и DemoData вынесены в examples/common и собираются одними исходниками в Windows и T-Display-S3. Windows владеет файловым адаптером, меню и Segoe UI через TinyTTF. Стабильные ресурсы global-static:ui.* сохраняют страницы, данные и биндинги при смене схем. Settings содержит 12 типов текущего контракта; проверены CHECKED, FOCUS_KEY/EDITED, popup dropdown и writeback. Компактный проект T-Display-S3 320x170 также проверяется скрытым Windows LVGL. HTTP/WS сервера в проигрывателе нет. docs/readme_windows_player_ru.md, docs/reviews/REVIEW_20261030_lilygo.md. SystemMetrics собирает CPU по логическим процессорам, RAM, GPU и память GPU через Windows SDK PDH/DXGI. Один worker заменяет ограниченный CBOR-снимок; только UI-поток вызывает DataRegistry.publish_cbor. Истории 32 отсчёта живут вне страницы. demo:history_plot — зарегистрированный компонент самого примера с ограниченным методом series; схемы и данные используют общий runtime. docs/reviews/REVIEW_20261030_windows-system.md.",
-        "at": "2026-10-30T05:06:27Z",
+        "v": "examples/windows_player: настоящий LVGL 9.6 Win32 backend; JSON/CBOR проходят общие кодеки и тот же ProjectService/ScreenRuntime/StyleService/DataRegistry. Appearance и DemoData вынесены в examples/common и собираются одними исходниками в Windows и T-Display-S3. Windows владеет файловым адаптером, меню и Segoe UI через TinyTTF. Стабильные ресурсы global-static:ui.* сохраняют страницы, данные и биндинги при смене схем. Settings содержит 12 типов текущего контракта; проверены CHECKED, FOCUS_KEY/EDITED, popup dropdown и writeback. Компактный проект T-Display-S3 320x170 также проверяется скрытым Windows LVGL. HTTP/WS сервера в проигрывателе нет. docs/readme_windows_player_ru.md, docs/reviews/REVIEW_20261030_lilygo.md. SystemMetrics собирает CPU по логическим процессорам, RAM, GPU и память GPU через Windows SDK PDH/DXGI. Один worker заменяет ограниченный CBOR-снимок; только UI-поток вызывает DataRegistry.publish_cbor. Истории 32 отсчёта живут вне страницы. demo:history_plot — зарегистрированный компонент самого примера с ограниченным методом series; схемы и данные используют общий runtime. docs/reviews/REVIEW_20261030_windows-system.md. Окно использует обычный изменяемый Win32 backend. Shell и демо-страницы применяют Grid/PCT/FR без повторной компиляции CBOR при resize. Прикладной ProjectService выбирает ScreenViewport::Display. Источники, текущие экземпляры и поля ввода сохраняются. docs/reviews/REVIEW_20261030_windows-resize.md. Системный обзор сгруппирован четырьмя Flex-блоками: CPU (общий и логические процессоры), RAM, GPU и GPU memory. Это авторская компоновка JSON/CBOR; источники и компоненты не изменяются.",
+        "at": "2026-10-30T07:06:34Z",
         "origin": "authored"
       }
     }

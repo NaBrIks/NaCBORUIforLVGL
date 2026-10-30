@@ -1,5 +1,7 @@
 # Документация NaCBORUIforLVGL
 
+- [Windows: размер окна, адаптивные страницы и сохранение состояния](reviews/REVIEW_20261030_windows-resize.md)
+
 - [Windows: реальные CPU/RAM/GPU и история по логическим процессорам](reviews/REVIEW_20261030_windows-system.md)
 
 - [T-Display-S3: общие схемы, полный flash и аппаратная проверка 320×170](reviews/REVIEW_20261030_lilygo.md)
@@ -14,7 +16,7 @@
 - [Компоновка 800×408 и автономные CBOR-события скорости](readme_demo_events_ru.md)
 - [Полная прошивка S3 и аппаратная проверка TCP HTTP/WS, MCP и вложенных страниц](reviews/REVIEW_20261028_tcp-hardware.md)
 
-[English overview](../README.md) · [Обзор на русском](../readme.ru.md) · [Лицензии](../LICENSES.md)
+[English overview](../Readme.md) · [Обзор на русском](../Readme.ru.md) · [Лицензии](../LICENSES.md)
 
 Сетевые адреса, серийные порты и MAC в публичных примерах и отчётах условные. Для запуска подставьте параметры своего устройства; исходные журналы и снимки конкретного окружения не публикуются.
 

@@ -29,6 +29,7 @@ bool reorder(const CborValue &root, const char *key, std::vector<ProjectDocument
 struct ProjectService::Impl {
   const ProjectSource &source; ProjectStore *store; ProjectPolicy policy; ProjectLimits limits;
   const Resource *resources; size_t count; WidgetRegistry *registry; DataRegistry *data;
+  ScreenViewport viewport;
   std::vector<ProjectStorageInfo> media;
   mutable std::mutex mutex;
   ProjectBundle base, effective; std::string base_revision, revision; bool ready{}, changed{};
@@ -41,8 +42,8 @@ struct ProjectService::Impl {
     StyleService styles;
     ScreenRuntime runtime;
     std::function<void()> changed;
-    Presentation(ProjectBundle project, const Resource *r, size_t n, WidgetRegistry *registry, DataRegistry *data)
-      : bundle(std::move(project)), styles(r, n, 128), runtime(r, n, {}, &styles, ScreenStyleRetention::Release, registry, data, this) {}
+    Presentation(ProjectBundle project, const Resource *r, size_t n, WidgetRegistry *registry, DataRegistry *data, ScreenViewport viewport)
+      : bundle(std::move(project)), styles(r, n, 128), runtime(r, n, {}, &styles, ScreenStyleRetention::Release, registry, data, this, {}, viewport) {}
     bool resolve_screen(const std::string &name, const uint8_t *&bytes, size_t &size) const override {
       auto *doc = project_detail::find(bundle.screens, name);
       if (!doc) return false;
@@ -51,8 +52,8 @@ struct ProjectService::Impl {
     void composition_changed() override { if (changed) changed(); }
   };
   std::unique_ptr<Presentation> presentation;
-  Impl(const ProjectSource &s, ProjectStore *w, ProjectPolicy p, ProjectLimits l, const Resource *r, size_t n, WidgetRegistry *registry, std::vector<ProjectStorageInfo> media, DataRegistry *data)
-    : source(s), store(w), policy(p), limits(l), resources(r), count(n), registry(registry), data(data), media(std::move(media)) {}
+  Impl(const ProjectSource &s, ProjectStore *w, ProjectPolicy p, ProjectLimits l, const Resource *r, size_t n, WidgetRegistry *registry, std::vector<ProjectStorageInfo> media, DataRegistry *data, ScreenViewport viewport)
+    : source(s), store(w), policy(p), limits(l), resources(r), count(n), registry(registry), data(data), viewport(viewport), media(std::move(media)) {}
   std::vector<uint8_t> delta(const ProjectBundle &next) const {
     Writer w; w.head(5, 7); w.text("format"); w.text("lvgl-project-overlay-1"); w.text("base"); w.text(base_revision);
     w.text("manifest"); w.bytes(next.manifest); w.text("screens"); w.docs(changes(base.screens, next.screens), true); w.text("styles"); w.docs(changes(base.styles, next.styles), true);
@@ -100,7 +101,7 @@ struct ProjectService::Impl {
     if (!document) { std::snprintf(reply.error, sizeof(reply.error), "project_screen_not_found"); return false; }
     const auto bytes = document->bytes;
     const auto screen_name = document->name, shown_revision = fingerprint(encode_project(bundle));
-    auto next = std::make_unique<Presentation>(std::move(bundle), resources, count, registry, data);
+    auto next = std::make_unique<Presentation>(std::move(bundle), resources, count, registry, data, viewport);
     StyleRuntime compiler(nullptr, resources, count, &next->styles);
     for (const auto &style : next->bundle.styles) { Reply result; if (!compiler.apply(style.bytes.data, style.bytes.size, result)) { std::snprintf(reply.error, sizeof(reply.error), "project style %s: %.100s", style.name.c_str(), result.error); return false; } }
     if (!next->runtime.load(bytes.data, bytes.size, reply)) return false;
@@ -115,8 +116,8 @@ struct ProjectService::Impl {
     return true;
   }
 };
-ProjectService::ProjectService(const ProjectSource &source, ProjectStore *store, ProjectPolicy policy, ProjectLimits limits, const Resource *resources, size_t count, WidgetRegistry *registry, std::vector<ProjectStorageInfo> media, DataRegistry *data)
-  : impl_(std::make_unique<Impl>(source, store, policy, limits, resources, count, registry, std::move(media), data)) {}
+ProjectService::ProjectService(const ProjectSource &source, ProjectStore *store, ProjectPolicy policy, ProjectLimits limits, const Resource *resources, size_t count, WidgetRegistry *registry, std::vector<ProjectStorageInfo> media, DataRegistry *data, ScreenViewport viewport)
+  : impl_(std::make_unique<Impl>(source, store, policy, limits, resources, count, registry, std::move(media), data, viewport)) {}
 ProjectService::~ProjectService() = default;
 bool ProjectService::begin(std::string &error) {
   auto &p = *impl_; std::lock_guard<std::mutex> lock(p.mutex);

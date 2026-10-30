@@ -63,7 +63,7 @@ try {
   }
   assert.ok(source(r,'system.cpu').series.history.every(n=>n>=0));
   const instance=r.views[0].pageInstance;
-  const ids=['root','cpu_history','ram_history','ram_summary','core_count','interval','logical_heading','core_grid',
+  const ids=['root','cpu_group','ram_group','gpu_group','gpumem_group','cpu_history','ram_history','ram_summary','core_count','interval','logical_heading','core_grid',
     ...cores.map((_,i)=>'core_'+i),...gpus.flatMap((_,i)=>['gpu_name_'+i,'gpu_history_'+i,'gpu_memory_'+i])];
   const inspect=()=>command({op:'inspect',nodes:ids.map(id=>({id,instance}))});
   r=await inspect();healthy(r);const bounds=r.nodes.map(n=>n.bounds);
