@@ -35,7 +35,7 @@ CC0-1.0 Espressif 2022 из Waveshare, а не корневая Apache прои�
 | Плата и дисплей демки | Адаптация `examples/touch_lcd7/main/board.cpp`, `graphics.cpp` того же проекта, текущая интеграция LVGL 9.6 | GPL-3.0-only, `examples/s3_style_lab/LICENSE` |
 | Оболочка фронтенда | Адаптированы themes, appearance state/menu, Icon, tooltip и CSS из `examples/touch_lcd7/frontend/src` | GPL-3.0-only, `frontend/LICENSE`; CSS сокращён до нужной заготовки |
 | Локальные иконки Tabler | Перенесены вместе с исходной оболочкой | Уведомление `frontend/src/design/icons/LICENSE.txt` |
-| JS CBOR | cborg 6.1.3 из npm | Apache-2.0, copyright 2020 Rod Vagg; `node_modules/cborg/LICENSE`, `LICENSES/Apache-2.0.txt` |
+| JS CBOR | cborg 6.1.3 (style/screen) и 4.5.8 (project), из npm lock | Apache-2.0, copyright 2020 Rod Vagg; одинаковые package notices, `LICENSES/Apache-2.0.txt` |
 | UI и сборка | Vue 3.5.22, Vite 7.1.12, @vitejs/plugin-vue 6.0.1 | Уведомления соответствующих npm-пакетов; точные зависимости в package-lock.json |
 
 Кодек и C++-исполнитель написаны отдельно; они вызывают публичные API LVGL и TinyCBOR. GPL-демка использует GPL-сервер и адаптированные файлы, поэтому её нельзя описывать как полностью независимый MIT-пример. Для самостоятельных исходников ядра 2026-10-23 выбрана MIT. Сторонний и адаптированный код не перелицензирован; публикация репозитория пока не выполнялась.

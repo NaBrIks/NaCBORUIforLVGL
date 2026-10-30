@@ -79,7 +79,8 @@ ProjectService header в удалённом дереве. Конечный SHA �
 
 ## Уточнение npm notices
 
-Фактический `cborg` 6.1.3 — Apache-2.0 (Rod Vagg, 2020), исправлена старая
+Фактические `cborg` 6.1.3 (style/screen) и 4.5.8 (project) — Apache-2.0
+(Rod Vagg, 2020), исправлена старая
 запись MIT в реестре источников. Полные Apache terms и notices cborg/Vue/Tabler
 включаются в production-редактор через `frontend/public/licenses`. Это сторонние
 условия, MIT собственного кода их не заменяет.

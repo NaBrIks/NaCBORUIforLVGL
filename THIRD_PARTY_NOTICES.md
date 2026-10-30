@@ -17,7 +17,7 @@ it does not change the license of ESP-IDF or the external touch-driver component
 
 ## Browser runtime dependencies
 
-- cborg 6.1.3 is Apache-2.0, copyright 2020 Rod Vagg. The package notice and
+- cborg 6.1.3 and 4.5.8 are Apache-2.0, copyright 2020 Rod Vagg. Their identical package notice and
   [full Apache terms](LICENSES/Apache-2.0.txt) are retained. It is not MIT.
 - Vue 3.5.44 and Tabler assets retain their upstream MIT notices.
 - Browser builds include these notices at `/licenses/` from
