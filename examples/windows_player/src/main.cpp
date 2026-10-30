@@ -202,6 +202,7 @@ int wmain(int argc,wchar_t **argv) {
         }
       });
       {UiLock lock;app->data.tick();}
+      refresh_scheme_menu(); // Scheme actions from CBOR pages share the native menu/persistence path.
       lv_timer_handler();Sleep(5);
     }
     {UiLock lock;pointer=nullptr;app.reset();}

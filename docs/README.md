@@ -1,7 +1,10 @@
 # Документация NaCBORUIforLVGL
 
+- [T-Display-S3: общие схемы, полный flash и аппаратная проверка 320×170](reviews/REVIEW_20261030_lilygo.md)
+
 - [Windows-проигрыватель: настоящий LVGL, JSON/CBOR, общие биндинги и события](readme_windows_player_ru.md)
 - [Проверка четырёх цветовых схем в Windows](reviews/REVIEW_20261029_windows-schemes.md)
+- [Схемы оформления: проверка идеи, состояния и границы переносимости](reviews/REVIEW_20261029_appearance-design.md)
 
 - [SeMaps: архитектура, потоки данных и локальные MCP](readme_semaps_ru.md)
 

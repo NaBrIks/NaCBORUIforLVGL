@@ -1,5 +1,7 @@
 #include "application.hpp"
+#include "../../common/sample_image.hpp"
 #include <fstream>
+#include <array>
 #include <stdexcept>
 using namespace lvgl_cbor;
 namespace {
@@ -9,6 +11,16 @@ const DataValue &field(const DataValue &v,const char *name) {
   return it->second;
 }
 std::string text(const DataValue &v) { return std::get<std::string>(v.value); }
+const std::array<uint8_t,24*24> sample_pixels=[] {
+  std::array<uint8_t,24*24> data{};
+  for(size_t y=0;y<24;++y)for(size_t x=0;x<24;++x)data[y*24+x]=((x/6+y/6)%2)?255:40;
+  return data;
+}();
+const lv_image_dsc_t sample_image=[] {
+  lv_image_dsc_t image{};image.header.magic=LV_IMAGE_HEADER_MAGIC;image.header.cf=LV_COLOR_FORMAT_A8;
+  image.header.w=24;image.header.h=24;image.header.stride=24;
+  image.data_size=uint32_t(sample_pixels.size());image.data=sample_pixels.data();return image;
+}();
 void snapshot(lv_obj_t *root,const std::filesystem::path &path) {
   if(!root)throw std::runtime_error("No project");
   lv_obj_update_layout(root);
@@ -27,11 +39,34 @@ void snapshot(lv_obj_t *root,const std::filesystem::path &path) {
 }
 }
 Application::Application():resources_(appearance.resources()) {
+  resources_.push_back({"montserrat_12","const lv_font_t *",&lv_font_montserrat_12});
+  resources_.push_back({"montserrat_14","const lv_font_t *",&lv_font_montserrat_14});
   resources_.push_back({"montserrat_20","const lv_font_t *",&lv_font_montserrat_20});
   resources_.push_back({"montserrat_28","const lv_font_t *",&lv_font_montserrat_28});
+  resources_.push_back({"ui_20","const lv_font_t *",fonts_.small()});
+  resources_.push_back({"ui_28","const lv_font_t *",fonts_.large()});
+  resources_.push_back({"ui_sample_image","const void *",&sample_image});
+  resources_.push_back({"ui_sample_image_small","const void *",&demo_small_image::image});
+  std::string error;
+  if(!data.registry.add_source({"ui.scheme",DataSchema::object({{"id",DataSchema::text(12)},
+       {"title",DataSchema::text(256)}})},error)||
+     !data.registry.add_action({"ui.select_scheme",DataSchema::text(12),
+       [this](const DataValue &value,std::string &e){return select_scheme(std::get<std::string>(value.value),e);}},error))
+    throw std::runtime_error(error);
+}
+bool Application::select_scheme(const std::string &id,std::string &error) {
+  try {
+    appearance.select(id);
+    for(const auto &choice:appearance.choices())if(choice.id==id)
+      return data.registry.publish("ui.scheme",DataValue::Object{{"id",id},{"title",choice.title}},error);
+    error="Unknown scheme";return false;
+  }catch(const std::exception &e){error=e.what();return false;}
 }
 void Application::load_schemes(const std::filesystem::path &path,const std::string &initial) {
-  appearance.load(path,initial,resources_.data(),resources_.size());
+  load_appearance_file(appearance,path,initial,resources_.data(),resources_.size());
+  appearance.install_popup_theme(lv_display_get_default(),fonts_.small());
+  std::string error;if(!select_scheme(initial,error))throw std::runtime_error(error);
+  data.registry.flush();
 }
 std::string Application::capabilities() const {
   return runtime_capabilities_json(resources_.data(),resources_.size(),{},nullptr,&data.registry);
@@ -58,7 +93,8 @@ DataValue Application::command(const DataValue &request) {
   if(op=="load") {
     if(!load(std::filesystem::u8path(text(field(request,"path"))),text(field(request,"entry")),error)) throw std::runtime_error(error);
   } else if(op=="scheme") {
-    appearance.select(text(field(request,"scheme")));
+    if(!select_scheme(text(field(request,"scheme")),error))throw std::runtime_error(error);
+    data.registry.flush();
   } else if(op=="snapshot") {
     snapshot(project_?project_->root():nullptr,std::filesystem::u8path(text(field(request,"path"))));
   } else if(op=="publish") {
@@ -81,14 +117,35 @@ DataValue Application::command(const DataValue &request) {
     }
     if(!data.registry.write(text(field(request,"source")),path,field(request,"value"),error)) throw std::runtime_error(error);
     data.registry.flush();
-  } else if(op=="click") {
+  } else if(op=="click"||op=="event") {
     if(!project_) throw std::runtime_error("No project");
     auto &obj=std::get<DataValue::Object>(request.value);
     auto instance=obj.find("instance");
     auto *node=instance==obj.end()?project_->find(text(field(request,"node")).c_str()):
       project_->find(uint32_t(std::get<int64_t>(instance->second.value)),text(field(request,"node")).c_str());
     if(!node) throw std::runtime_error("Unknown node");
-    lv_obj_send_event(node,LV_EVENT_CLICKED,nullptr);data.registry.flush();
+    lv_event_code_t code=LV_EVENT_CLICKED;uint32_t key=0;bool dispatch=true;
+    if(op=="event") {
+      const auto name=text(field(request,"event"));
+      if(name=="pressed")code=LV_EVENT_PRESSED;
+      else if(name=="released")code=LV_EVENT_RELEASED;
+      else if(name=="focus") {
+        lv_group_focus_obj(node);dispatch=false;
+      }
+      else if(name=="key") {
+        code=LV_EVENT_KEY;const auto &value=field(request,"key");
+        if(auto number=std::get_if<int64_t>(&value.value)) {
+          if(*number<1||*number>127)throw std::runtime_error("Test key must be ASCII or a named key");
+          key=uint32_t(*number);
+        } else {
+          const std::map<std::string,uint32_t> keys{{"left",LV_KEY_LEFT},{"right",LV_KEY_RIGHT},
+            {"up",LV_KEY_UP},{"down",LV_KEY_DOWN},{"enter",LV_KEY_ENTER},{"escape",LV_KEY_ESC},{"backspace",LV_KEY_BACKSPACE}};
+          auto found=keys.find(text(value));if(found==keys.end())throw std::runtime_error("Unknown test key");key=found->second;
+        }
+      } else throw std::runtime_error("Unknown test event");
+    }
+    if(dispatch)lv_obj_send_event(node,code,code==LV_EVENT_KEY?&key:nullptr);
+    data.registry.flush();
   } else if(op!="inspect") throw std::runtime_error("Unknown player command");
   DataValue::Array views,nodes;
   if(project_) {
@@ -107,11 +164,27 @@ DataValue Application::command(const DataValue &request) {
         result["state"]=int(lv_obj_get_state(node));
         result["background"]=lv_color_to_u32(lv_obj_get_style_bg_color(node,LV_PART_MAIN))&0xffffff;
         result["foreground"]=lv_color_to_u32(lv_obj_get_style_text_color(node,LV_PART_MAIN))&0xffffff;
+        result["outlineColor"]=lv_color_to_u32(lv_obj_get_style_outline_color(node,LV_PART_MAIN))&0xffffff;
         result["arcColor"]=lv_color_to_u32(lv_obj_get_style_arc_color(node,LV_PART_INDICATOR))&0xffffff;
         result["indicatorOpacity"]=lv_obj_get_style_bg_opa(node,LV_PART_INDICATOR);
+        result["indicatorColor"]=lv_color_to_u32(lv_obj_get_style_bg_color(node,LV_PART_INDICATOR))&0xffffff;
+        result["indicatorBorder"]=lv_color_to_u32(lv_obj_get_style_border_color(node,LV_PART_INDICATOR))&0xffffff;
+        result["knobColor"]=lv_color_to_u32(lv_obj_get_style_bg_color(node,LV_PART_KNOB))&0xffffff;
+        result["lineColor"]=lv_color_to_u32(lv_obj_get_style_line_color(node,LV_PART_MAIN))&0xffffff;
+        result["imageRecolor"]=lv_color_to_u32(lv_obj_get_style_image_recolor(node,LV_PART_MAIN))&0xffffff;
+        result["cursorBorder"]=lv_color_to_u32(lv_obj_get_style_border_color(node,LV_PART_CURSOR))&0xffffff;
         if(lv_obj_check_type(node,&lv_label_class)) result["text"]=lv_label_get_text(node);
         if(lv_obj_check_type(node,&lv_arc_class)) result["value"]=lv_arc_get_value(node);
         if(lv_obj_check_type(node,&lv_slider_class)) result["value"]=lv_slider_get_value(node);
+        if(lv_obj_check_type(node,&lv_bar_class)) result["value"]=lv_bar_get_value(node);
+        if(lv_obj_check_type(node,&lv_textarea_class))result["text"]=lv_textarea_get_text(node);
+        if(lv_obj_check_type(node,&lv_dropdown_class)) {
+          result["value"]=lv_dropdown_get_selected(node);result["open"]=lv_dropdown_is_open(node);
+          auto *popup=lv_dropdown_get_list(node);
+          result["listBackground"]=lv_color_to_u32(lv_obj_get_style_bg_color(popup,LV_PART_MAIN))&0xffffff;
+          lv_area_t popup_area;lv_obj_get_coords(popup,&popup_area);
+          result["listBounds"]=DataValue::Array{popup_area.x1,popup_area.y1,popup_area.x2,popup_area.y2};
+        }
       }
       nodes.emplace_back(std::move(result));
     }

@@ -13,7 +13,7 @@ test('Windows schemes use the standard palettes and the existing project/style c
   for(const [id,color] of Object.entries({light:'#ffffff',cream:'#fdfbf7',emerald:'#0f1714',dark:'#1e1e1e'})) {
     assert.equal(project.styles[id+'.canvas'].props.bg_color,color);
   }
-  assert.equal(Object.keys(project.styles).length,56);
+  assert.equal(Object.keys(project.styles).length,60);
 });
 test('Scheme text remains readable in normal and pressed button states',async()=>{
   const catalog=JSON.parse(await readFile(new URL('../examples/windows_player/schemes.json',import.meta.url),'utf8'));

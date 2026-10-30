@@ -110,9 +110,13 @@
                 {
                   "screen": "details",
                   "retention": "cache"
+                },
+                {
+                  "screen": "settings",
+                  "retention": "cache"
                 }
               ],
-              "initial": "overview",
+              "initial": "settings",
               "sizing": "fill"
             },
             "styles": [
@@ -127,13 +131,14 @@
             "id": "go_overview",
             "type": "button",
             "props": {
-              "text": "Overview"
+              "text": "Обзор"
             },
             "style": {
               "x": 0,
               "y": 436,
-              "width": 400,
-              "height": 44
+              "width": 266,
+              "height": 44,
+              "text_font": "ui_20"
             },
             "children": [],
             "events": [
@@ -171,6 +176,35 @@
                 "state": [
                   "DISABLED"
                 ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED",
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
               }
             ]
           },
@@ -178,13 +212,14 @@
             "id": "go_details",
             "type": "button",
             "props": {
-              "text": "Details"
+              "text": "Данные"
             },
             "style": {
-              "x": 400,
+              "x": 266,
               "y": 436,
-              "width": 400,
-              "height": 44
+              "width": 267,
+              "height": 44,
+              "text_font": "ui_20"
             },
             "children": [],
             "events": [
@@ -222,6 +257,116 @@
                 "state": [
                   "DISABLED"
                 ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED",
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "go_settings",
+            "type": "button",
+            "props": {
+              "text": "Настройки"
+            },
+            "style": {
+              "x": 533,
+              "y": 436,
+              "width": 267,
+              "height": 44,
+              "text_font": "ui_20"
+            },
+            "children": [],
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED",
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              }
+            ],
+            "events": [
+              {
+                "event": "clicked",
+                "navigate": {
+                  "view": "content",
+                  "screen": "settings"
+                }
               }
             ]
           }
@@ -307,6 +452,20 @@
                 "ref": "global-static:ui.indicator",
                 "part": "KNOB",
                 "state": []
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
               }
             ]
           },
@@ -425,6 +584,27 @@
                 "ref": "global-static:ui.knob",
                 "part": "KNOB",
                 "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "INDICATOR",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
               }
             ]
           },
@@ -476,6 +656,13 @@
                 "state": [
                   "DISABLED"
                 ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
               }
             ]
           },
@@ -526,6 +713,13 @@
                 "part": "MAIN",
                 "state": [
                   "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
                 ]
               }
             ]
@@ -692,6 +886,13 @@
                 "state": [
                   "DISABLED"
                 ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
               }
             ]
           },
@@ -713,6 +914,1233 @@
                 "state": []
               }
             ]
+          }
+        ],
+        "flags": {
+          "SCROLLABLE": false
+        },
+        "styles": [
+          {
+            "ref": "global-static:ui.canvas",
+            "part": "MAIN",
+            "state": []
+          }
+        ]
+      }
+    },
+    "settings": {
+      "format": "lvgl-screen-draft-1",
+      "id": "settings",
+      "name": "Настройки",
+      "size": {
+        "width": 800,
+        "height": 408
+      },
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "props": {},
+        "style": {
+          "pad_all": 0,
+          "border_width": 0,
+          "text_font": "ui_20"
+        },
+        "children": [
+          {
+            "id": "title",
+            "type": "label",
+            "props": {
+              "text": "Настройки"
+            },
+            "style": {
+              "x": 16,
+              "y": 8,
+              "text_font": "ui_28"
+            },
+            "children": []
+          },
+          {
+            "id": "scheme_light",
+            "type": "button",
+            "props": {
+              "text": "Светлая"
+            },
+            "style": {
+              "x": 16,
+              "y": 50,
+              "width": 176,
+              "height": 36
+            },
+            "children": [],
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              }
+            ],
+            "events": [
+              {
+                "event": "clicked",
+                "action": "ui.select_scheme",
+                "args": {
+                  "literal": "light"
+                }
+              }
+            ],
+            "bindings": [
+              {
+                "scope": "common",
+                "method": "state",
+                "value": [
+                  {
+                    "literal": 4
+                  },
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "source": "ui.scheme",
+                        "path": [
+                          "id"
+                        ]
+                      },
+                      {
+                        "literal": "light"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "scheme_cream",
+            "type": "button",
+            "props": {
+              "text": "Кремовая"
+            },
+            "style": {
+              "x": 208,
+              "y": 50,
+              "width": 176,
+              "height": 36
+            },
+            "children": [],
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              }
+            ],
+            "events": [
+              {
+                "event": "clicked",
+                "action": "ui.select_scheme",
+                "args": {
+                  "literal": "cream"
+                }
+              }
+            ],
+            "bindings": [
+              {
+                "scope": "common",
+                "method": "state",
+                "value": [
+                  {
+                    "literal": 4
+                  },
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "source": "ui.scheme",
+                        "path": [
+                          "id"
+                        ]
+                      },
+                      {
+                        "literal": "cream"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "scheme_emerald",
+            "type": "button",
+            "props": {
+              "text": "Изумрудная"
+            },
+            "style": {
+              "x": 400,
+              "y": 50,
+              "width": 176,
+              "height": 36
+            },
+            "children": [],
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              }
+            ],
+            "events": [
+              {
+                "event": "clicked",
+                "action": "ui.select_scheme",
+                "args": {
+                  "literal": "emerald"
+                }
+              }
+            ],
+            "bindings": [
+              {
+                "scope": "common",
+                "method": "state",
+                "value": [
+                  {
+                    "literal": 4
+                  },
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "source": "ui.scheme",
+                        "path": [
+                          "id"
+                        ]
+                      },
+                      {
+                        "literal": "emerald"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "scheme_dark",
+            "type": "button",
+            "props": {
+              "text": "Тёмная"
+            },
+            "style": {
+              "x": 592,
+              "y": 50,
+              "width": 176,
+              "height": 36
+            },
+            "children": [],
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              }
+            ],
+            "events": [
+              {
+                "event": "clicked",
+                "action": "ui.select_scheme",
+                "args": {
+                  "literal": "dark"
+                }
+              }
+            ],
+            "bindings": [
+              {
+                "scope": "common",
+                "method": "state",
+                "value": [
+                  {
+                    "literal": 4
+                  },
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "source": "ui.scheme",
+                        "path": [
+                          "id"
+                        ]
+                      },
+                      {
+                        "literal": "dark"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "current_scheme",
+            "type": "label",
+            "props": {
+              "text": "--",
+              "long_mode": 1
+            },
+            "style": {
+              "x": 16,
+              "y": 100,
+              "width": 768,
+              "height": 28
+            },
+            "children": [],
+            "bindings": [
+              {
+                "method": "text",
+                "value": {
+                  "source": "ui.scheme",
+                  "path": [
+                    "title"
+                  ]
+                },
+                "format": {
+                  "prefix": "Текущая: "
+                }
+              }
+            ]
+          },
+          {
+            "id": "preview",
+            "type": "obj",
+            "props": {},
+            "style": {
+              "x": 16,
+              "y": 132,
+              "width": 768,
+              "height": 254,
+              "border_width": 1,
+              "radius": 6,
+              "pad_all": 0
+            },
+            "children": [
+              {
+                "id": "preview_title",
+                "type": "label",
+                "props": {
+                  "text": "Стандартные компоненты"
+                },
+                "style": {
+                  "x": 16,
+                  "y": 8
+                },
+                "children": []
+              },
+              {
+                "id": "preview_count",
+                "type": "label",
+                "props": {
+                  "text": "--",
+                  "long_mode": 1
+                },
+                "style": {
+                  "x": 520,
+                  "y": 8,
+                  "width": 232,
+                  "height": 26,
+                  "text_align": "LV_TEXT_ALIGN_RIGHT"
+                },
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "text",
+                    "value": {
+                      "source": "demo.clicks"
+                    },
+                    "format": {
+                      "prefix": "Нажатия: "
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "preview_action",
+                "type": "button",
+                "props": {
+                  "text": "Добавить"
+                },
+                "style": {
+                  "x": 16,
+                  "y": 44,
+                  "width": 104,
+                  "height": 34
+                },
+                "children": [],
+                "styles": [
+                  {
+                    "ref": "global-static:ui.button",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.button_pressed",
+                    "part": "MAIN",
+                    "state": [
+                      "PRESSED"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.button_focus",
+                    "part": "MAIN",
+                    "state": [
+                      "FOCUSED"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.button_disabled",
+                    "part": "MAIN",
+                    "state": [
+                      "DISABLED"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "FOCUS_KEY"
+                    ]
+                  }
+                ],
+                "events": [
+                  {
+                    "event": "clicked",
+                    "action": "demo.step",
+                    "args": {
+                      "literal": 1
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "preview_disabled",
+                "type": "button",
+                "props": {
+                  "text": "Выкл."
+                },
+                "style": {
+                  "x": 128,
+                  "y": 44,
+                  "width": 104,
+                  "height": 34
+                },
+                "children": [],
+                "styles": [
+                  {
+                    "ref": "global-static:ui.button",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.button_pressed",
+                    "part": "MAIN",
+                    "state": [
+                      "PRESSED"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.button_focus",
+                    "part": "MAIN",
+                    "state": [
+                      "FOCUSED"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.button_disabled",
+                    "part": "MAIN",
+                    "state": [
+                      "DISABLED"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "FOCUS_KEY"
+                    ]
+                  }
+                ],
+                "events": [],
+                "common": {
+                  "add_state": 512
+                }
+              },
+              {
+                "id": "preview_running",
+                "type": "switch",
+                "props": {
+                  "checked": true
+                },
+                "style": {
+                  "x": 16,
+                  "y": 96,
+                  "width": 60,
+                  "height": 30
+                },
+                "children": [],
+                "styles": [
+                  {
+                    "ref": "global-static:ui.track",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.knob",
+                    "part": "KNOB",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": [
+                      "CHECKED"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "FOCUS_KEY"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "EDITED"
+                    ]
+                  }
+                ],
+                "bindings": [
+                  {
+                    "scope": "common",
+                    "method": "state",
+                    "value": [
+                      {
+                        "literal": 4
+                      },
+                      {
+                        "source": "demo.running"
+                      }
+                    ]
+                  }
+                ],
+                "events": [
+                  {
+                    "event": "value_changed",
+                    "write": {
+                      "source": "demo.running"
+                    },
+                    "value": {
+                      "event": "value"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "preview_running_title",
+                "type": "label",
+                "props": {
+                  "text": "Генератор"
+                },
+                "style": {
+                  "x": 90,
+                  "y": 100
+                },
+                "children": []
+              },
+              {
+                "id": "preview_checkbox",
+                "type": "checkbox",
+                "props": {
+                  "text": "Флажок"
+                },
+                "style": {
+                  "x": 16,
+                  "y": 137,
+                  "width": 216,
+                  "height": 36
+                },
+                "children": [],
+                "styles": [
+                  {
+                    "ref": "global-static:ui.track",
+                    "part": "INDICATOR",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": [
+                      "CHECKED"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "FOCUS_KEY"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "EDITED"
+                    ]
+                  }
+                ],
+                "styleRules": [
+                  {
+                    "part": "INDICATOR",
+                    "props": {
+                      "text_font": "montserrat_20"
+                    }
+                  }
+                ],
+                "bindings": [
+                  {
+                    "scope": "common",
+                    "method": "state",
+                    "value": [
+                      {
+                        "literal": 4
+                      },
+                      {
+                        "source": "demo.checked"
+                      }
+                    ]
+                  }
+                ],
+                "events": [
+                  {
+                    "event": "value_changed",
+                    "write": {
+                      "source": "demo.checked"
+                    },
+                    "value": {
+                      "event": "value"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "preview_line",
+                "type": "line",
+                "props": {
+                  "points": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      212,
+                      0
+                    ]
+                  ]
+                },
+                "style": {
+                  "x": 16,
+                  "y": 184,
+                  "line_width": 2
+                },
+                "children": [],
+                "styles": [
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ]
+              },
+              {
+                "id": "preview_image",
+                "type": "image",
+                "props": {
+                  "src": "ui_sample_image"
+                },
+                "style": {
+                  "x": 16,
+                  "y": 198,
+                  "width": 24,
+                  "height": 24
+                },
+                "children": [],
+                "styles": [
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ]
+              },
+              {
+                "id": "preview_image_title",
+                "type": "label",
+                "props": {
+                  "text": "Изображение"
+                },
+                "style": {
+                  "x": 56,
+                  "y": 198
+                },
+                "children": []
+              },
+              {
+                "id": "preview_slider_title",
+                "type": "label",
+                "props": {
+                  "text": "Ползунок"
+                },
+                "style": {
+                  "x": 268,
+                  "y": 38
+                },
+                "children": [],
+                "styles": [
+                  {
+                    "ref": "global-static:ui.muted",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ]
+              },
+              {
+                "id": "preview_slider",
+                "type": "slider",
+                "props": {
+                  "min": 0,
+                  "max": 100,
+                  "value": 65
+                },
+                "style": {
+                  "x": 272,
+                  "y": 72,
+                  "width": 208,
+                  "height": 16
+                },
+                "children": [],
+                "styles": [
+                  {
+                    "ref": "global-static:ui.track",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.knob",
+                    "part": "KNOB",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "FOCUS_KEY"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "EDITED"
+                    ]
+                  }
+                ],
+                "bindings": [
+                  {
+                    "method": "value",
+                    "value": {
+                      "source": "demo.level"
+                    }
+                  }
+                ],
+                "events": [
+                  {
+                    "event": "value_changed",
+                    "write": {
+                      "source": "demo.level"
+                    },
+                    "value": {
+                      "event": "value"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "preview_arc",
+                "type": "arc",
+                "props": {
+                  "min": 0,
+                  "max": 180,
+                  "value": 0
+                },
+                "style": {
+                  "x": 286,
+                  "y": 106,
+                  "width": 130,
+                  "height": 130
+                },
+                "children": [
+                  {
+                    "id": "preview_value",
+                    "type": "label",
+                    "props": {
+                      "text": "--"
+                    },
+                    "style": {
+                      "align": "LV_ALIGN_CENTER",
+                      "text_font": "ui_20",
+                      "width": 128,
+                      "height": 26,
+                      "text_align": "LV_TEXT_ALIGN_CENTER"
+                    },
+                    "children": [],
+                    "bindings": [
+                      {
+                        "method": "text",
+                        "value": {
+                          "source": "demo.speed",
+                          "path": [
+                            "kmh"
+                          ]
+                        },
+                        "format": {
+                          "precision": 1,
+                          "suffix": " km/h"
+                        }
+                      }
+                    ],
+                    "styles": [
+                      {
+                        "ref": "global-static:ui.text",
+                        "part": "MAIN",
+                        "state": []
+                      }
+                    ]
+                  }
+                ],
+                "flags": {
+                  "CLICKABLE": false
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.arc_track",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.arc_value",
+                    "part": "INDICATOR",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "KNOB",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "FOCUS_KEY"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "EDITED"
+                    ]
+                  }
+                ],
+                "bindings": [
+                  {
+                    "method": "value",
+                    "value": {
+                      "op": "round",
+                      "args": [
+                        {
+                          "source": "demo.speed",
+                          "path": [
+                            "kmh"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "preview_dropdown",
+                "type": "dropdown",
+                "props": {
+                  "options": [
+                    "Первый",
+                    "Второй",
+                    "Третий"
+                  ],
+                  "selected": 0
+                },
+                "style": {
+                  "x": 516,
+                  "y": 40,
+                  "width": 220,
+                  "height": 36
+                },
+                "children": [],
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "FOCUS_KEY"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "EDITED"
+                    ]
+                  }
+                ],
+                "styleRules": [
+                  {
+                    "part": "INDICATOR",
+                    "props": {
+                      "text_font": "montserrat_20"
+                    }
+                  }
+                ],
+                "bindings": [
+                  {
+                    "method": "selected",
+                    "value": {
+                      "source": "demo.choice"
+                    }
+                  }
+                ],
+                "events": [
+                  {
+                    "event": "value_changed",
+                    "write": {
+                      "source": "demo.choice"
+                    },
+                    "value": {
+                      "event": "value"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "preview_textarea",
+                "type": "textarea",
+                "props": {
+                  "text": "Текст",
+                  "max_length": 32
+                },
+                "style": {
+                  "x": 516,
+                  "y": 92,
+                  "width": 220,
+                  "height": 72
+                },
+                "children": [],
+                "styles": [
+                  {
+                    "ref": "global-static:ui.panel",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "CURSOR",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "FOCUS_KEY"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.focus_outline",
+                    "part": "MAIN",
+                    "state": [
+                      "EDITED"
+                    ]
+                  },
+                  {
+                    "ref": "global-static:ui.button",
+                    "part": "SELECTED",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "CURSOR",
+                    "state": [
+                      "FOCUSED"
+                    ]
+                  }
+                ],
+                "bindings": [
+                  {
+                    "method": "text",
+                    "value": {
+                      "source": "demo.text"
+                    }
+                  }
+                ],
+                "events": [
+                  {
+                    "event": "value_changed",
+                    "write": {
+                      "source": "demo.text"
+                    },
+                    "value": {
+                      "event": "value"
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "preview_level_title",
+                "type": "label",
+                "props": {
+                  "text": "Значение скорости"
+                },
+                "style": {
+                  "x": 516,
+                  "y": 178
+                },
+                "children": [],
+                "styles": [
+                  {
+                    "ref": "global-static:ui.muted",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ]
+              },
+              {
+                "id": "preview_level",
+                "type": "bar",
+                "props": {
+                  "min": 0,
+                  "max": 180,
+                  "value": 0
+                },
+                "style": {
+                  "x": 516,
+                  "y": 208,
+                  "width": 220,
+                  "height": 16
+                },
+                "children": [],
+                "styles": [
+                  {
+                    "ref": "global-static:ui.track",
+                    "part": "MAIN",
+                    "state": []
+                  },
+                  {
+                    "ref": "global-static:ui.indicator",
+                    "part": "INDICATOR",
+                    "state": []
+                  }
+                ],
+                "bindings": [
+                  {
+                    "method": "value",
+                    "value": {
+                      "op": "round",
+                      "args": [
+                        {
+                          "source": "demo.speed",
+                          "path": [
+                            "kmh"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "styles": [
+              {
+                "ref": "global-static:ui.panel",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "flags": {
+              "SCROLLABLE": false
+            }
           }
         ],
         "flags": {

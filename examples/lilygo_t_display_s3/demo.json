@@ -1,0 +1,1679 @@
+{
+  "format": "lvgl-project-1",
+  "manifest": {
+    "id": "lilygo-demo",
+    "name": "T-Display-S3 shared CBOR UI",
+    "entry": "shell",
+    "requirements": {
+      "screenABI": "88b890b59be1a2bc499022a2e23870779778bf58dff3430f0ef8f091ae9c557a",
+      "styleABI": "efdbe8aee4e961473bf8d671142361b1feb5ee8c582801d005acf1cd739acef2"
+    }
+  },
+  "screens": {
+    "shell": {
+      "format": "lvgl-screen-draft-1",
+      "id": "shell",
+      "name": "shell",
+      "size": {
+        "width": 320,
+        "height": 170
+      },
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "style": {
+          "width": 320,
+          "height": 170,
+          "pad_all": 0,
+          "border_width": 0,
+          "radius": 0,
+          "text_font": "montserrat_14"
+        },
+        "props": {},
+        "styles": [
+          {
+            "ref": "global-static:ui.canvas",
+            "part": "MAIN",
+            "state": []
+          }
+        ],
+        "children": [
+          {
+            "id": "status",
+            "type": "label",
+            "style": {
+              "x": 6,
+              "y": 1,
+              "width": 310,
+              "height": 16,
+              "text_font": "montserrat_14"
+            },
+            "props": {
+              "text": "LVGL 9.6 | T-Display-S3"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.text",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": []
+          },
+          {
+            "id": "content",
+            "type": "obj",
+            "style": {
+              "x": 0,
+              "y": 18,
+              "width": 320,
+              "height": 124,
+              "pad_all": 0,
+              "border_width": 0,
+              "radius": 0
+            },
+            "props": {},
+            "styles": [
+              {
+                "ref": "global-static:ui.canvas",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": [],
+            "flags": {
+              "SCROLLABLE": false
+            },
+            "view": {
+              "pages": [
+                {
+                  "screen": "home",
+                  "retention": "retain"
+                },
+                {
+                  "screen": "controls",
+                  "retention": "cache"
+                },
+                {
+                  "screen": "schemes",
+                  "retention": "cache"
+                }
+              ],
+              "initial": "home",
+              "sizing": "fill"
+            }
+          },
+          {
+            "id": "go_home",
+            "type": "button",
+            "style": {
+              "x": 0,
+              "y": 142,
+              "width": 107,
+              "height": 28,
+              "text_font": "montserrat_14",
+              "pad_all": 0
+            },
+            "props": {
+              "text": "Home"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "navigate": {
+                  "view": "content",
+                  "screen": "home"
+                }
+              }
+            ]
+          },
+          {
+            "id": "go_controls",
+            "type": "button",
+            "style": {
+              "x": 107,
+              "y": 142,
+              "width": 107,
+              "height": 28,
+              "text_font": "montserrat_14",
+              "pad_all": 0
+            },
+            "props": {
+              "text": "Controls"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "navigate": {
+                  "view": "content",
+                  "screen": "controls"
+                }
+              }
+            ]
+          },
+          {
+            "id": "go_schemes",
+            "type": "button",
+            "style": {
+              "x": 214,
+              "y": 142,
+              "width": 106,
+              "height": 28,
+              "text_font": "montserrat_14",
+              "pad_all": 0
+            },
+            "props": {
+              "text": "Schemes"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "navigate": {
+                  "view": "content",
+                  "screen": "schemes"
+                }
+              }
+            ]
+          }
+        ],
+        "flags": {
+          "SCROLLABLE": false
+        }
+      }
+    },
+    "home": {
+      "format": "lvgl-screen-draft-1",
+      "id": "home",
+      "name": "home",
+      "size": {
+        "width": 320,
+        "height": 124
+      },
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "style": {
+          "width": 320,
+          "height": 124,
+          "pad_all": 0,
+          "border_width": 0,
+          "radius": 0,
+          "text_font": "montserrat_14"
+        },
+        "props": {},
+        "styles": [
+          {
+            "ref": "global-static:ui.canvas",
+            "part": "MAIN",
+            "state": []
+          }
+        ],
+        "children": [
+          {
+            "id": "speed_arc",
+            "type": "arc",
+            "style": {
+              "x": 4,
+              "y": 4,
+              "width": 112,
+              "height": 112
+            },
+            "props": {
+              "min": 0,
+              "max": 180,
+              "value": 0
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.arc_track",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.arc_value",
+                "part": "INDICATOR",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "KNOB",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [
+              {
+                "id": "speed",
+                "type": "label",
+                "style": {
+                  "width": 102,
+                  "height": 24,
+                  "align": "LV_ALIGN_CENTER",
+                  "text_align": "LV_TEXT_ALIGN_CENTER",
+                  "text_font": "montserrat_20"
+                },
+                "props": {
+                  "text": "--"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.text",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ],
+                "children": [],
+                "bindings": [
+                  {
+                    "method": "text",
+                    "value": {
+                      "source": "demo.speed",
+                      "path": [
+                        "kmh"
+                      ]
+                    },
+                    "format": {
+                      "precision": 1
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "unit",
+                "type": "label",
+                "style": {
+                  "align": "LV_ALIGN_CENTER",
+                  "y": 21,
+                  "text_font": "montserrat_14"
+                },
+                "props": {
+                  "text": "km/h"
+                },
+                "styles": [
+                  {
+                    "ref": "global-static:ui.text",
+                    "part": "MAIN",
+                    "state": []
+                  }
+                ],
+                "children": []
+              }
+            ],
+            "flags": {
+              "CLICKABLE": false
+            },
+            "bindings": [
+              {
+                "method": "value",
+                "value": {
+                  "op": "round",
+                  "args": [
+                    {
+                      "source": "demo.speed",
+                      "path": [
+                        "kmh"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "id": "generator_label",
+            "type": "label",
+            "style": {
+              "x": 126,
+              "y": 9,
+              "text_font": "montserrat_14"
+            },
+            "props": {
+              "text": "Generator"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.text",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": []
+          },
+          {
+            "id": "running",
+            "type": "switch",
+            "style": {
+              "x": 258,
+              "y": 7,
+              "width": 48,
+              "height": 24
+            },
+            "props": {},
+            "styles": [
+              {
+                "ref": "global-static:ui.track",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "INDICATOR",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "INDICATOR",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.knob",
+                "part": "KNOB",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "bindings": [
+              {
+                "scope": "common",
+                "method": "state",
+                "value": [
+                  {
+                    "literal": 4
+                  },
+                  {
+                    "source": "demo.running"
+                  }
+                ]
+              }
+            ],
+            "events": [
+              {
+                "event": "value_changed",
+                "write": {
+                  "source": "demo.running"
+                },
+                "value": {
+                  "event": "value"
+                }
+              }
+            ]
+          },
+          {
+            "id": "counter",
+            "type": "label",
+            "style": {
+              "x": 126,
+              "y": 43,
+              "width": 180,
+              "height": 20,
+              "text_font": "montserrat_14"
+            },
+            "props": {
+              "text": "--",
+              "long_mode": 1
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.text",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": [],
+            "bindings": [
+              {
+                "method": "text",
+                "value": {
+                  "source": "demo.clicks"
+                },
+                "format": {
+                  "prefix": "Count: "
+                }
+              }
+            ]
+          },
+          {
+            "id": "step",
+            "type": "button",
+            "style": {
+              "x": 126,
+              "y": 73,
+              "width": 80,
+              "height": 29,
+              "text_font": "montserrat_14",
+              "pad_all": 0
+            },
+            "props": {
+              "text": "Add 1"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "action": "demo.step",
+                "args": {
+                  "literal": 1
+                }
+              }
+            ]
+          },
+          {
+            "id": "disabled",
+            "type": "button",
+            "style": {
+              "x": 214,
+              "y": 73,
+              "width": 92,
+              "height": 29,
+              "text_font": "montserrat_14",
+              "pad_all": 0
+            },
+            "props": {
+              "text": "Disabled"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "common": {
+              "add_state": 512
+            }
+          },
+          {
+            "id": "level",
+            "type": "bar",
+            "style": {
+              "x": 126,
+              "y": 112,
+              "width": 180,
+              "height": 8
+            },
+            "props": {
+              "min": 0,
+              "max": 180,
+              "value": 0
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.track",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "INDICATOR",
+                "state": []
+              }
+            ],
+            "children": [],
+            "bindings": [
+              {
+                "method": "value",
+                "value": {
+                  "op": "round",
+                  "args": [
+                    {
+                      "source": "demo.speed",
+                      "path": [
+                        "kmh"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "flags": {
+          "SCROLLABLE": false
+        }
+      }
+    },
+    "controls": {
+      "format": "lvgl-screen-draft-1",
+      "id": "controls",
+      "name": "controls",
+      "size": {
+        "width": 320,
+        "height": 124
+      },
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "style": {
+          "width": 320,
+          "height": 124,
+          "pad_all": 0,
+          "border_width": 0,
+          "radius": 0,
+          "text_font": "montserrat_14"
+        },
+        "props": {},
+        "styles": [
+          {
+            "ref": "global-static:ui.canvas",
+            "part": "MAIN",
+            "state": []
+          }
+        ],
+        "children": [
+          {
+            "id": "checked",
+            "type": "checkbox",
+            "style": {
+              "x": 6,
+              "y": 4,
+              "width": 130,
+              "height": 26,
+              "text_font": "montserrat_14"
+            },
+            "props": {
+              "text": "Flag"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.text",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.track",
+                "part": "INDICATOR",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "INDICATOR",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "bindings": [
+              {
+                "scope": "common",
+                "method": "state",
+                "value": [
+                  {
+                    "literal": 4
+                  },
+                  {
+                    "source": "demo.checked"
+                  }
+                ]
+              }
+            ],
+            "events": [
+              {
+                "event": "value_changed",
+                "write": {
+                  "source": "demo.checked"
+                },
+                "value": {
+                  "event": "value"
+                }
+              }
+            ]
+          },
+          {
+            "id": "slider",
+            "type": "slider",
+            "style": {
+              "x": 158,
+              "y": 12,
+              "width": 146,
+              "height": 12
+            },
+            "props": {
+              "min": 0,
+              "max": 100,
+              "value": 65
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.track",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "INDICATOR",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.knob",
+                "part": "KNOB",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "bindings": [
+              {
+                "method": "value",
+                "value": {
+                  "source": "demo.level"
+                }
+              }
+            ],
+            "events": [
+              {
+                "event": "value_changed",
+                "write": {
+                  "source": "demo.level"
+                },
+                "value": {
+                  "event": "value"
+                }
+              }
+            ]
+          },
+          {
+            "id": "choice",
+            "type": "dropdown",
+            "style": {
+              "x": 6,
+              "y": 40,
+              "width": 136,
+              "height": 30,
+              "pad_all": 5,
+              "text_font": "montserrat_14"
+            },
+            "props": {
+              "options": [
+                "One",
+                "Two",
+                "Three"
+              ],
+              "selected": 0
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.panel",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "bindings": [
+              {
+                "method": "selected",
+                "value": {
+                  "source": "demo.choice"
+                }
+              }
+            ],
+            "events": [
+              {
+                "event": "value_changed",
+                "write": {
+                  "source": "demo.choice"
+                },
+                "value": {
+                  "event": "value"
+                }
+              }
+            ]
+          },
+          {
+            "id": "text",
+            "type": "textarea",
+            "style": {
+              "x": 158,
+              "y": 40,
+              "width": 148,
+              "height": 30,
+              "pad_all": 5,
+              "text_font": "montserrat_14"
+            },
+            "props": {
+              "text": "Text",
+              "max_length": 32,
+              "one_line": true
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.panel",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "CURSOR",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "CURSOR",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button",
+                "part": "SELECTED",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "bindings": [
+              {
+                "method": "text",
+                "value": {
+                  "source": "demo.text"
+                }
+              }
+            ],
+            "events": [
+              {
+                "event": "value_changed",
+                "write": {
+                  "source": "demo.text"
+                },
+                "value": {
+                  "event": "value"
+                }
+              }
+            ]
+          },
+          {
+            "id": "line",
+            "type": "line",
+            "style": {
+              "x": 6,
+              "y": 84,
+              "line_width": 2
+            },
+            "props": {
+              "points": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  300,
+                  0
+                ]
+              ]
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": []
+          },
+          {
+            "id": "image",
+            "type": "image",
+            "style": {
+              "x": 6,
+              "y": 97,
+              "width": 18,
+              "height": 18
+            },
+            "props": {
+              "src": "ui_sample_image_small"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.indicator",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": []
+          },
+          {
+            "id": "image_label",
+            "type": "label",
+            "style": {
+              "x": 32,
+              "y": 97,
+              "text_font": "montserrat_14"
+            },
+            "props": {
+              "text": "Image"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.text",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": []
+          },
+          {
+            "id": "buttons_hint",
+            "type": "label",
+            "style": {
+              "x": 126,
+              "y": 99,
+              "width": 184,
+              "height": 20,
+              "text_font": "montserrat_12"
+            },
+            "props": {
+              "text": "0: page   14: scheme"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.text",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": []
+          }
+        ],
+        "flags": {
+          "SCROLLABLE": false
+        }
+      }
+    },
+    "schemes": {
+      "format": "lvgl-screen-draft-1",
+      "id": "schemes",
+      "name": "schemes",
+      "size": {
+        "width": 320,
+        "height": 124
+      },
+      "styles": {},
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "style": {
+          "width": 320,
+          "height": 124,
+          "pad_all": 0,
+          "border_width": 0,
+          "radius": 0,
+          "text_font": "montserrat_14"
+        },
+        "props": {},
+        "styles": [
+          {
+            "ref": "global-static:ui.canvas",
+            "part": "MAIN",
+            "state": []
+          }
+        ],
+        "children": [
+          {
+            "id": "scheme_light",
+            "type": "button",
+            "style": {
+              "x": 8,
+              "y": 8,
+              "width": 148,
+              "height": 32,
+              "text_font": "montserrat_14",
+              "pad_all": 0
+            },
+            "props": {
+              "text": "Light"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "action": "ui.select_scheme",
+                "args": {
+                  "literal": "light"
+                }
+              }
+            ],
+            "bindings": [
+              {
+                "scope": "common",
+                "method": "state",
+                "value": [
+                  {
+                    "literal": 4
+                  },
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "source": "ui.scheme",
+                        "path": [
+                          "id"
+                        ]
+                      },
+                      {
+                        "literal": "light"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "scheme_cream",
+            "type": "button",
+            "style": {
+              "x": 164,
+              "y": 8,
+              "width": 148,
+              "height": 32,
+              "text_font": "montserrat_14",
+              "pad_all": 0
+            },
+            "props": {
+              "text": "Cream"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "action": "ui.select_scheme",
+                "args": {
+                  "literal": "cream"
+                }
+              }
+            ],
+            "bindings": [
+              {
+                "scope": "common",
+                "method": "state",
+                "value": [
+                  {
+                    "literal": 4
+                  },
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "source": "ui.scheme",
+                        "path": [
+                          "id"
+                        ]
+                      },
+                      {
+                        "literal": "cream"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "scheme_emerald",
+            "type": "button",
+            "style": {
+              "x": 8,
+              "y": 48,
+              "width": 148,
+              "height": 32,
+              "text_font": "montserrat_14",
+              "pad_all": 0
+            },
+            "props": {
+              "text": "Emerald"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "action": "ui.select_scheme",
+                "args": {
+                  "literal": "emerald"
+                }
+              }
+            ],
+            "bindings": [
+              {
+                "scope": "common",
+                "method": "state",
+                "value": [
+                  {
+                    "literal": 4
+                  },
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "source": "ui.scheme",
+                        "path": [
+                          "id"
+                        ]
+                      },
+                      {
+                        "literal": "emerald"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "scheme_dark",
+            "type": "button",
+            "style": {
+              "x": 164,
+              "y": 48,
+              "width": 148,
+              "height": 32,
+              "text_font": "montserrat_14",
+              "pad_all": 0
+            },
+            "props": {
+              "text": "Dark"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.button",
+                "part": "MAIN",
+                "state": []
+              },
+              {
+                "ref": "global-static:ui.button_pressed",
+                "part": "MAIN",
+                "state": [
+                  "PRESSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "FOCUSED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_focus",
+                "part": "MAIN",
+                "state": [
+                  "CHECKED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.button_disabled",
+                "part": "MAIN",
+                "state": [
+                  "DISABLED"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "FOCUS_KEY"
+                ]
+              },
+              {
+                "ref": "global-static:ui.focus_outline",
+                "part": "MAIN",
+                "state": [
+                  "EDITED"
+                ]
+              }
+            ],
+            "children": [],
+            "events": [
+              {
+                "event": "clicked",
+                "action": "ui.select_scheme",
+                "args": {
+                  "literal": "dark"
+                }
+              }
+            ],
+            "bindings": [
+              {
+                "scope": "common",
+                "method": "state",
+                "value": [
+                  {
+                    "literal": 4
+                  },
+                  {
+                    "op": "eq",
+                    "args": [
+                      {
+                        "source": "ui.scheme",
+                        "path": [
+                          "id"
+                        ]
+                      },
+                      {
+                        "literal": "dark"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "selected",
+            "type": "label",
+            "style": {
+              "x": 8,
+              "y": 94,
+              "width": 304,
+              "height": 20,
+              "text_font": "montserrat_14"
+            },
+            "props": {
+              "text": "--"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.text",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "children": [],
+            "bindings": [
+              {
+                "method": "text",
+                "value": {
+                  "source": "ui.scheme",
+                  "path": [
+                    "id"
+                  ]
+                },
+                "format": {
+                  "prefix": "Scheme: "
+                }
+              }
+            ]
+          }
+        ],
+        "flags": {
+          "SCROLLABLE": false
+        }
+      }
+    }
+  },
+  "styles": {}
+}

@@ -1,12 +1,14 @@
 #pragma once
 #include "demo_data.hpp"
 #include "appearance.hpp"
+#include "host_fonts.hpp"
 #include "lvgl_cbor/capabilities.hpp"
 #include "lvgl_cbor/project_service.hpp"
 #include <filesystem>
 #include <memory>
 
 class Application {
+  HostFonts fonts_;
 public:
   static constexpr size_t project_limit=2*1024*1024;
   Appearance appearance;
@@ -21,4 +23,5 @@ private:
   std::vector<uint8_t> bytes_;
   std::unique_ptr<lvgl_cbor::ConstProjectSource> source_;
   std::unique_ptr<lvgl_cbor::ProjectService> project_;
+  bool select_scheme(const std::string &,std::string &);
 };

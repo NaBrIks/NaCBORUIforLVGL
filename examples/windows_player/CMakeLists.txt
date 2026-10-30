@@ -37,7 +37,8 @@ add_library(player_runtime STATIC
 target_include_directories(player_runtime PUBLIC "${ROOT}/include")
 target_compile_features(player_runtime PUBLIC cxx_std_17)
 target_link_libraries(player_runtime PUBLIC lvgl::lvgl player_cbor)
-add_executable(nacborui_player src/main.cpp src/application.cpp src/demo_data.cpp src/appearance.cpp)
+add_executable(nacborui_player src/main.cpp src/application.cpp src/appearance.cpp src/host_fonts.cpp
+  ../common/appearance/appearance.cpp ../common/demo_data/demo_data.cpp)
 target_compile_definitions(nacborui_player PRIVATE UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN)
 target_link_libraries(nacborui_player PRIVATE player_runtime user32 gdi32 imm32 shcore comdlg32)
 if(MSVC)

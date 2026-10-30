@@ -19,8 +19,11 @@ export function roleStyles(p) {
     button:{bg_color:p.primary,bg_opa:255,text_color:ink,border_width:0,shadow_width:0},
     button_pressed:{bg_color:p.hover,text_color:ink},
     button_focus:{bg_color:p.hover,text_color:ink,outline_color:p.primary,outline_width:1,outline_pad:1},
+    focus_outline:{outline_color:p.primary,outline_width:1,outline_pad:1,border_color:p.primary},
     button_disabled:{bg_color:p.surfaceAlt,bg_opa:255,text_color:p.muted},
-    indicator:{bg_color:p.primary},track:{bg_color:p.surfaceAlt,bg_opa:255},
+    indicator:{bg_color:p.primary,border_color:p.primary,text_color:ink,bg_image_recolor:ink,
+      line_color:p.primary,image_recolor:p.primary,image_recolor_opa:255},
+    track:{bg_color:p.surfaceAlt,bg_opa:255,border_color:p.border},
     knob:{bg_color:p.text,border_color:p.primary,shadow_width:0},
     arc_track:{arc_color:p.border},arc_value:{arc_color:p.primary}
   };

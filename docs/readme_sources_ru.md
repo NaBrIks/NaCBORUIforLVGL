@@ -45,3 +45,18 @@ Touch использует `espressif/esp_lcd_touch` 1.2.1 и `espressif/esp_lcd
 ## Обновление UI-зависимостей, 2026-10-23
 
 Текущие версии: Vue 3.5.44 и Vite 7.3.7; @vitejs/plugin-vue 6.0.1 сохранён. Связанные @vue/* обновлены согласованно. Исправлены отмеченные npm audit записи; [advisory, область применимости и результаты проверок](reviews/REVIEW_20261023_vue-vite-security.md). Лицензии и происхождение кода не меняются.
+
+## Независимый T-Display-S3 target, 2026-10-30
+
+`examples/lilygo_t_display_s3` и `examples/common` — MIT. Распиновка и параметры
+инициализации ST7789 адаптированы из официальных MIT-материалов
+[LilyGo-Display-IDF](https://github.com/Xinyuan-LilyGO/LilyGo-Display-IDF/blob/master/main/display_s3.c)
+и [T-Display-S3](https://github.com/Xinyuan-LilyGO/T-Display-S3/blob/main/examples/tft/pin_config.h).
+Авторское уведомление и текст MIT сохранены в `examples/lilygo_t_display_s3/NOTICE`.
+Драйвер использует публичный esp_lcd ESP-IDF 5.5.6 (Apache-2.0); GPL-адаптация
+большой RGB-платы и оболочка редактора в этот target не входят.
+
+LVGL 9.6.0 / espressif-cbor 0.6.1~4 переиспользуются как исходные компоненты;
+новых копий библиотек в Git нет. Общие Appearance и DemoData написаны в этом
+проекте. Для USB-тестов используется внешний pyserial (BSD-3-Clause), устанавливаемый
+в окружение Python; его исходники не копируются в репозиторий.

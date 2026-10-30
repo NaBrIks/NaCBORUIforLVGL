@@ -8,6 +8,12 @@ import {encodeProject} from '../packages/project-codec/index.js';
 import {offlineCapabilities,screenContract} from '../packages/screen-codec/index.js';
 
 const example=new URL('../examples/windows_player/demo.json',import.meta.url);
+test('Windows settings demonstrates every standard runtime widget',async()=>{
+  const p=JSON.parse(await readFile(example,'utf8')),types=new Set();
+  function walk(node){types.add(node.type);for(const child of node.children)walk(child);}
+  walk(p.screens.settings.root);
+  assert.deepEqual([...types].sort(),screenContract.widgets.filter(w=>!w.retired).map(w=>w.name).sort());
+});
 test('Windows loader shares JSON/CBOR project compilation and screen dimensions',async t=>{
   const dir=await mkdtemp(join(tmpdir(),'nacborui-loader-'));t.after(()=>rm(dir,{recursive:true,force:true}));
   const json=join(dir,'interface.json'),cbor=join(dir,'interface.cbor');

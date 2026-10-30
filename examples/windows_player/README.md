@@ -6,6 +6,10 @@ and MCP. The native executable only receives CBOR and links the existing C++
 `ProjectService`, `ScreenRuntime`, `StyleService` and `DataRegistry` sources.
 There is no second renderer, binding engine or event dispatcher.
 
+`Appearance` and `DemoData` now live in `../common` and are linked unchanged
+by this player and the T-Display-S3 target. This directory retains the Windows
+file/font/window adapters. See [the MCU example](../lilygo_t_display_s3/README.md).
+
 ## Build and run
 
 Requirements: Windows, Visual Studio C++ Build Tools with the Windows SDK,
@@ -33,6 +37,25 @@ is left untouched, so a running older player need not be stopped to build this v
 
 ## Color schemes
 
+The included project opens **Настройки (Settings)** inside the existing shell.
+The bottom navigation offers Overview, Data and Settings. The settings page has
+four scheme buttons, a bound current-choice label, and all 12 standard types
+currently supported by the shared runtime: `obj`, `label`, `button`, `bar`,
+`slider`, `arc`, `line`, `image`, `checkbox`, `switch`, `textarea`, and `dropdown`.
+The compact example includes normal/disabled buttons and writable controls.
+It is an ordinary JSON/CBOR page, not a separate native settings renderer.
+
+The buttons call the registered `ui.select_scheme` action; `ui.scheme` publishes
+`{id, title}`. Bindings update checked states and the label. The native menu and
+control API share this same selection method and preference storage. Pages and
+their bindings stay alive while changing appearance.
+
+Russian labels use resources `ui_20` / `ui_28`, rendered by LVGL TinyTTF from the
+installed Windows Segoe UI font. The font file is not copied into the repository
+or bundled with the player. Legacy Montserrat resources remain available.
+The default theme's color transitions are disabled in this desktop profile so
+the selected palette is displayed immediately and consistently.
+
 The application menu **Оформление: Кремовая → Цветовая схема** offers **Светлая,
 Кремовая, Изумрудная, Тёмная**, in the UI-standard order, with the current choice
 checked. The default is Cream. Only color appearance is implemented in this
@@ -43,10 +66,21 @@ tokens. These are data values, not a copy of its CSS or frontend implementation.
 `schemes.mjs` compiles every variant through the shared project/style codecs.
 The application exposes stable `const lv_style_t *` resources named `ui.canvas`,
 `ui.panel`, `ui.status`, `ui.text`, `ui.muted`, `ui.button`, `ui.button_pressed`,
-`ui.button_focus`, `ui.button_disabled`, `ui.indicator`, `ui.track`, `ui.knob`,
+`ui.button_focus`, `ui.focus_outline`, `ui.button_disabled`, `ui.indicator`, `ui.track`, `ui.knob`,
 `ui.arc_track`, and `ui.arc_value`. Pages attach them with ordinary
 `global-static:ui.*` style references and LVGL parts/states. The included project
 uses this mechanism; there are no widget-ID branches in the runtime.
+
+State-specific roles are explicit: the switch uses `ui.indicator` on
+`INDICATOR/CHECKED`, so LVGL's default blue checked style cannot override the
+chosen palette. Its OFF indicator keeps the default transparent opacity.
+Buttons also attach an explicit `FOCUS_KEY` outline; arcs attach it for
+`FOCUS_KEY` and `EDITED`. A combined-state test checks the effective LVGL colors.
+Checkbox selection, slider knob, textarea cursor/selection, lines and image
+recolor use the same role resources. The generated 24×24 sample image is owned
+by the demo. A small application theme extension styles the standard dropdown's
+separate popup with those same shared resources and the installed Cyrillic font;
+it does not add a second widget implementation to the engine.
 
 Switching replaces the shared style values at their existing addresses in the
 serialized UI context. It preserves pages, cached instances, data, bindings and
@@ -87,7 +121,7 @@ The source document is never rewritten or automatically saved.
 ## Included application capabilities
 
 `demo.json` is an independent, standard-widget example: status clock, speed arc,
-numeric speed, action counter, writable switch, and two nested pages. It does not
+numeric speed, action counter, writable controls, and three nested pages. It does not
 contain any board driver, Bluetooth implementation, or copied S3 demo module.
 
 | Name | Contract |
@@ -95,15 +129,22 @@ contain any board driver, Bluetooth implementation, or copied S3 demo module.
 | `demo.speed` | `{kmh: number 0..180, unit: text, sequence: integer}`; autonomous 25 Hz CBOR publication |
 | `demo.running` | Writable boolean; pauses/resumes the generator |
 | `demo.clicks` | Nonnegative integer; retained across page changes |
+| `demo.level` | Writable integer 0..100; slider |
+| `demo.checked` | Writable boolean; checkbox |
+| `demo.choice` | Writable integer 0..2; dropdown selection |
+| `demo.text` | Writable UTF-8 text, max 128 bytes; textarea (32 characters) |
 | `system.clock` | `{localTime: text}` from the Windows clock, no NTP configuration |
 | `demo.step` | Action with integer argument 1..100 |
 | `demo.reset` | Action with null argument |
+| `ui.scheme` | Readonly `{id, title}` describing the current appearance |
+| `ui.select_scheme` | Action with scheme ID text; used by the Settings page |
 
 These belong to `src/demo_data.*`, not the UI engine. Applications register their
 own schemas, handlers, resources and native widgets in the same way as firmware.
 This player does not advertise the S3's optional native widget catalog. Projects
 requiring unregistered widgets/sources/resources are rejected, not silently
-emulated. Default resources are `montserrat_20` and `montserrat_28`.
+emulated. Font resources are `ui_20`, `ui_28`, `montserrat_20`, and `montserrat_28`;
+`ui_sample_image` is a registered LVGL image descriptor.
 
 ## Optional local control
 
@@ -128,6 +169,10 @@ serialized with LVGL. `inspect` returns view instance IDs, requested node bounds
 and supported standard-widget values; `dataJson` contains the existing registry
 snapshot verbatim. `click` with `node` and optional numeric `instance` injects a
 LVGL clicked event for integration tests. It does not emulate pointer input.
+`event` with `node`, optional `instance`, and `event` (`pressed`, `released`,
+`focus`, or `key`) exercises the actual LVGL control handlers. For `key`, provide
+ASCII 1..127 or `left`, `right`, `up`, `down`, `enter`, `escape`, `backspace`.
+These events stay inside the player; no OS mouse/keyboard input is sent.
 
 The private launcher-to-executable bridge frames CBOR values with a 4-byte LE
 length, max 64 KiB per command; the native input buffer is bounded. The launcher
@@ -155,6 +200,20 @@ snapshots to ignored `local/windows-schemes`. `--hidden` is also available for
 other automation. Physical mouse/keyboard acceptance is separate from injected
 LVGL events. A control `snapshot` command with `path` writes the current screen
 using LVGL's own snapshot renderer; it does not capture the user's desktop.
+
+Settings snapshots are exported as `settings-<scheme>.bmp`, plus `-on.bmp` and
+`-popup.bmp` variants. Tests cover all four palettes, switch/checkbox ON/OFF,
+slider, text and dropdown writeback, cursor and popup colors, scheme buttons,
+bindings, preview values, menu synchronization, retained instances and actual
+component containment. This covers the 12 supported contract types, not every
+widget offered upstream by LVGL.
+Tests also cover combined keypad focus/edit states, bounded large counters,
+180.0 km/h and 32 Cyrillic input characters. The page stays within its container;
+long input can scroll inside the textarea. Labels keep fixed cells and use the
+standard ellipsis where needed; full source values remain in the registry.
+To build without replacing a running executable, use `build.ps1 -BuildDirectory
+local/windows-player-staging` and pass that executable as the optional first
+argument to `test-window.mjs`.
 
 This is the first desktop target. It does not yet host the editor's HTTP/WS API,
 package a standalone Node runtime, or claim MCU memory/timing equivalence.

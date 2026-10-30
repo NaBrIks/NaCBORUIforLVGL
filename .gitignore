@@ -57,3 +57,4 @@ examples/*/sdkconfig.old
 
 # Generated board configuration profiles
 examples/*/sdkconfig.s3*
+examples/lilygo_t_display_s3/sdkconfig.lilygo*

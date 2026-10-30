@@ -16,6 +16,15 @@ DemoData::DemoData() {
     }},error));
   require(registry.add_source({"demo.clicks",S::integer(0)},error));
   require(registry.add_source({"system.clock",S::object({{"localTime",S::text(8)}})},error));
+  for(auto source:std::vector<DataSource>{
+      {"demo.level",S::integer(0,100)}, {"demo.checked",S::boolean()},
+      {"demo.choice",S::integer(0,2)}, {"demo.text",S::text(128)}}) {
+    const auto name=source.name;
+    source.write=[this,name](const DataPath &,const DataValue &value,std::string &e){return registry.publish(name,value,e);};
+    require(registry.add_source(std::move(source),error));
+  }
+  require(registry.publish("demo.level",65,error));require(registry.publish("demo.checked",true,error));
+  require(registry.publish("demo.choice",0,error));require(registry.publish("demo.text","Текст",error));
   require(registry.add_action({"demo.step",S::integer(1,100),
     [this](const DataValue &value,std::string &e) {
       clicks_ += std::get<int64_t>(value.value);
@@ -40,7 +49,12 @@ void DemoData::tick() {
     const auto bytes=encode_data_value(DataValue::Object{{"kmh",speed_},{"unit","km/h"},{"sequence",++sequence_}});
     if(!registry.publish_cbor("demo.speed",bytes.data(),bytes.size(),error)) throw std::runtime_error(error);
   }
-  std::time_t seconds=std::time(nullptr);std::tm local{};localtime_s(&local,&seconds);
+  std::time_t seconds=std::time(nullptr);std::tm local{};
+#ifdef _WIN32
+  localtime_s(&local,&seconds);
+#else
+  localtime_r(&seconds,&local);
+#endif
   char text[9]{};std::strftime(text,sizeof(text),"%H:%M:%S",&local);
   if(clock_!=text) {
     clock_=text;

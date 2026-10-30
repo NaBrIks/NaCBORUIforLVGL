@@ -4,6 +4,13 @@ The root [MIT License](LICENSE) applies to independently authored NaCBORUIforLVG
 
 The independently authored Windows player (`examples/windows_player`) is also MIT. It links the portable core, LVGL and TinyCBOR; it does not include the GPL board/editor adaptations from the S3 example.
 
+The Windows player can read the installed Segoe UI font through LVGL TinyTTF.
+No Windows font file is copied into this repository or redistributed with it.
+
+The shared example modules (`examples/common`) and T-Display-S3 example
+(`examples/lilygo_t_display_s3`) are MIT. The latter retains the upstream MIT
+board-parameter notice in its `NOTICE`; it does not adapt the GPL RGB-board code.
+
 | Material | License / notice |
 | --- | --- |
 | Frontend, including shell adaptations from ESP32-yaidfws | GPL-3.0-only; [frontend/LICENSE](frontend/LICENSE) |
