@@ -10,5 +10,9 @@
 #include "radar.hpp"
 #include "catalog.generated.hpp"
 #else
-bool lab_widgets::register_examples(lvgl_cbor::WidgetRegistry &) { return true; }
+bool lab_widgets::register_examples(lvgl_cbor::WidgetRegistry &)
+{
+	return true;
+}
+
 #endif

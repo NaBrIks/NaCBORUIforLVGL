@@ -125,6 +125,11 @@ Detailed guides are mainly Russian: [index](docs/README.md),
 [nested pages](docs/readme_page_composition_ru.md), [MCP](integrations/mcp/README.md),
 [SeMaps](docs/readme_semaps_ru.md), [sources/notices](docs/readme_sources_ru.md).
 
+C/C++ contributions use [Uncrustify 0.83.0_f](agents/code_style.md) and the
+unchanged NaWServer profile in `uncrustify.cfg`. Run
+`powershell -NoProfile -File tools/format_cpp.ps1 -Mode Check` before review.
+Generated/vendor code and other languages are excluded.
+
 Project-owned code is [MIT](LICENSE), including the owner-authored frontend/RGB
 code previously offered under GPL. This follows the owner's explicit decision
 on 2026-10-30, rather than the repository transfer or a history rewrite. Third-party

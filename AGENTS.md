@@ -1,5 +1,12 @@
 # NaCBORUIforLVGL: agent entry point
 
+- Owner formatting decision 2026-10-30: maintained C/C++ uses the unchanged
+  NaWServer Uncrustify profile, version 0.83.0_f. Read agents/code_style.md before
+  edits and use tools/format_cpp.ps1. Exclude generated/vendor/SDK source and the
+  retained LilyGO board adaptation. Do not apply this profile to Vue/JS/JSON.
+  The previous .clang-format is inactive. Keep repository-wide formatting in a
+  separate commit from functional/licensing changes; check repeat-pass stability.
+
 - Owner decision 2026-10-30 supersedes earlier GPL-scope instructions for the
   owner's own code: all project-owned code is MIT, including his ESP32-yaidfws
   frontend/RGB adaptations previously offered under GPL. Retain third-party

@@ -126,6 +126,11 @@ UTF-8. Число объектов, размеры значений, вложе�
 [MCP](integrations/mcp/README.md), [SeMaps](docs/readme_semaps_ru.md),
 [источники и notices](docs/readme_sources_ru.md).
 
+Для C/C++ принят [Uncrustify 0.83.0_f](agents/code_style.ru.md) с неизменённым
+профилем NaWServer в `uncrustify.cfg`. Перед проверкой изменений выполнить
+`powershell -NoProfile -File tools/format_cpp.ps1 -Mode Check`.
+Генерируемые/сторонние файлы и другие языки исключены.
+
 Собственный код — [MIT](LICENSE), включая собственные frontend/RGB-файлы,
 ранее предложенные под GPL. Основание — прямое решение правообладателя
 2026-10-30, а не перенос репозитория или изменение истории. Сторонние код,

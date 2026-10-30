@@ -1,5 +1,7 @@
 # Документация NaCBORUIforLVGL
 
+- [Единый стиль C/C++: Uncrustify 0.83.0_f, область и проверки](reviews/REVIEW_20261030_cpp-style.md)
+
 - [Windows: размер окна, адаптивные страницы и сохранение состояния](reviews/REVIEW_20261030_windows-resize.md)
 
 - [Windows: реальные CPU/RAM/GPU и история по логическим процессорам](reviews/REVIEW_20261030_windows-system.md)
