@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #pragma once
 #include "esp_err.h"
 #include <cstdint>

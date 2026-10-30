@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import test from 'node:test';import assert from 'node:assert/strict';
 import {styleFields,styleGroups} from '../frontend/src/generated/style-fields.js';
 import {byName,expandProps,updateProperty,defaultValue,kind} from '../frontend/src/style-model.js';

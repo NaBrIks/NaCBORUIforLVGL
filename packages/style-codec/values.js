@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {contract} from './contract.js';
 
 export const integerRange=(value,min,max)=>Number.isSafeInteger(value)&&value>=min&&value<=max;

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 const normalized=value=>Array.isArray(value)?value.map(normalized):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,normalized(value[key])])):value;
 const same=(a,b)=>JSON.stringify(normalized(a))===JSON.stringify(normalized(b));
 export function assertScreenAbiCompatible(previous,current){

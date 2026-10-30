@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {screenContract} from './contract.js';
 import {validateParameterSchema} from './parameter-schema.js';
 import {encodeWidgetMethod} from './widget-methods.js';

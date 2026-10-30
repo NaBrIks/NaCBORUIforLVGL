@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #pragma once
 #include "lvgl_cbor/screen_runtime.hpp"
 #include "lvgl_cbor/widget_registry.hpp"

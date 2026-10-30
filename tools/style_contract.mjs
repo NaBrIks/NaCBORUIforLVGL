@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {assertAbiCompatible} from './style-abi.mjs';

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #pragma once
 #include "component_preview.hpp"
 #include "freertos/FreeRTOS.h"

@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import {computed,ref} from 'vue';
 import {parseDocument,serializeDocument,documentFilename,maxDocumentBytes} from '@lvgl-cbor/document-io';

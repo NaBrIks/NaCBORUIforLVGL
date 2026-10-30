@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {ref,computed,watch,onBeforeUnmount} from 'vue';
 import {ProjectClient} from '../../../packages/project-codec/client.js';
 import {encodeProject} from '../../../packages/project-codec/index.js';

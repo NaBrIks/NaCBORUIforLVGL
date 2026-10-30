@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {renderSectionHelp} from './section-help.js';
 // Shared TechnicalShell tooltip behavior. Text only; no HTML from application data.
 const selector = '[data-tooltip]';

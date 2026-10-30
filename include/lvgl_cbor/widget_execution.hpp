@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #pragma once
 #include "widget_registry.hpp"
 #include "screen_contract.hpp"

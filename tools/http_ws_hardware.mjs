@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Explicit device acceptance. Changes live screens, then restores the saved entry.
 // Never saves project data. Pass the intended device origin explicitly.
 import assert from 'node:assert/strict';

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Locally authored, explanatory SVG diagrams; no external assets or HTML input.
 const sections={
  'Геометрия':{intro:'Где находится объект, сколько места занимает и как расположено содержимое.',items:['size / min / max — размеры и их ограничения.','pos / align — положение относительно родителя.','transform — масштаб, поворот и смещение рисунка.','padding — внутри объекта; margin — снаружи; gap — между дочерними объектами.'],note:'Поворот и масштаб не равны изменению размеров в компоновке.'},

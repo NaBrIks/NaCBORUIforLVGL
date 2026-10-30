@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {ref,computed,watch} from 'vue';
 import {createNode,SCREEN_FORMAT,widgetTypes} from '../screen-model.js';
 import {readSaved,save} from './persistence.js';

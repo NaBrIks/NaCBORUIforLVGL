@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {loadProject} from '../windows_player/loader.mjs';

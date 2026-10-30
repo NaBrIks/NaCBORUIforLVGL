@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "application.hpp"
 #include <windows.h>
 #include <commdlg.h>

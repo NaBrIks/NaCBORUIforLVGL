@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Optional application demo; no generator or ESP event dependency enters core.
 #include "demo_speed.hpp"
 #include "demo_speed/model.hpp"

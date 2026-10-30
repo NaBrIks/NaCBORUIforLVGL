@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Authoring format. This draft is deliberately separate from style ABI v1.
 import {contract} from '@lvgl-cbor/style-codec';
 export const SCREEN_FORMAT='lvgl-screen-draft-1';

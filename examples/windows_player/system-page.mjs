@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Example composition only: these are ordinary JSON nodes compiled by project-codec.
 // No renderer, binding evaluator or component-specific editor code lives here.
 import {readFileSync} from 'node:fs';

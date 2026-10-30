@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Browser-only transport fixture. It validates CBOR, but does not execute LVGL.
 import {encode} from 'cborg';
 import {offlineCapabilities,screenContract} from '@lvgl-cbor/screen-codec';

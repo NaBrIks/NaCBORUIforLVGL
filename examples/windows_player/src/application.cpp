@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "application.hpp"
 #include "history_plot.hpp"
 #include "../../common/sample_image.hpp"

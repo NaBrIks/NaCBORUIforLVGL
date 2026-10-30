@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {object as only,integerRange} from '@lvgl-cbor/style-codec/values';
 import {bindingText,bindingCatalogIsAuthoritative} from './binding-schema.js';
 import {compositionContract as C} from './composition-contract.js';

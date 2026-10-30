@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {contract} from './contract.js';
 import {object,encodeValue,decodeValue} from './values.js';
 const active=contract.methods.filter(m=>!m.retired);

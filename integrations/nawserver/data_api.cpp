@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "data_api.hpp"
 #include "esp_timer.h"
 #include <algorithm>

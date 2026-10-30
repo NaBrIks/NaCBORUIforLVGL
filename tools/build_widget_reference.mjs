@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Public LVGL 9.6 API inventory outside style setters. Offline, reproducible from the pinned component.
 import {readFile,writeFile,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';

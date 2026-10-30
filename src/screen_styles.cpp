@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "screen_internal.hpp"
 #include <cstdio>
 namespace lvgl_cbor::detail {

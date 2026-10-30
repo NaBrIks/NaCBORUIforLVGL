@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {bindingContract} from '../../../packages/screen-codec/index.js';
 export const shellId='shell';
 export const shellGeometry={width:800,height:480,statusHeight:28,footerHeight:44};

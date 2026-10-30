@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {encodeScreen,offlineCapabilities} from '@lvgl-cbor/screen-codec';
 import {nativeDemo,extensions} from '../examples/native_widget/demo-screen.mjs';

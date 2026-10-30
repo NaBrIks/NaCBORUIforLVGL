@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {ref,computed,watch,onBeforeUnmount} from 'vue';
 import {contract,encodeStyle,decodeStyle,diagnostic} from '@lvgl-cbor/style-codec';
 import {CommandChannel} from '../transport/command-channel.js';

@@ -1,2 +1,4 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 export function readSaved(key,fallback){try{const raw=localStorage.getItem(key);return raw===null?fallback:JSON.parse(raw);}catch{return fallback;}}
 export function save(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch{return false;}}

@@ -1,5 +1,12 @@
 # NaCBORUIforLVGL: agent entry point
 
+- Owner decision 2026-10-30 supersedes earlier GPL-scope instructions for the
+  owner's own code: all project-owned code is MIT, including his ESP32-yaidfws
+  frontend/RGB adaptations previously offered under GPL. Retain third-party
+  notices and exceptions in LICENSES.md. Maintained owned source headers use
+  SPDX-License-Identifier: MIT and the confirmed copyright 2026 Oleg Kozhevnikov;
+  do not relabel vendor/generated files, assets or strict JSON.
+
 - Public repository: documentation, examples, fixtures and screenshots must not disclose a developer's actual network topology, host/device identifiers, credentials or personal filesystem paths. Use neutral placeholders and reserved documentation addresses. Keep original deployment evidence and environment-specific diagnostics only in ignored local storage.
 
 - Owner authorized data bindings/events on 2026-10-22. Owner refinement 2026-10-23: Bluetooth libraries and their examples belong to their own projects, not this UI repository. Read docs/readme_bindings_ru.md and docs/adr/ADR_20261022_data-bindings-events.md; earlier binding deferrals are superseded. Application-owned DataRegistry exposes typed symbolic sources/actions. The generic editor uses those schemas; do not add Bluetooth implementations, library dependencies or scanner examples to this repository. Keep callback observations owned/bounded, serialize registry/LVGL work on the UI task, and preserve the previous full project when recompiling ABI fingerprints. Hardware flashing was authorized for this task; future unrelated flashing still needs an owner request.

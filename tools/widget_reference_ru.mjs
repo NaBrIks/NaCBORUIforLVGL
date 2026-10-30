@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Russian help for the reference view. Source comments remain in the JSON inventory.
 const events={
  ALL:'Подписка сразу на все события объекта.',MARKED_DELETING:'Внутренняя отметка удаления обработчика события.',LAST_CUSTOM:'Верхняя граница пользовательских кодов событий.',PREPROCESS:'Модификатор: вызвать обработчик до стандартной обработки события классом.',

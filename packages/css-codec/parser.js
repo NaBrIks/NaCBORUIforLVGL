@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Strict, bounded CSS subset. Never executes CSS or fetches URLs.
 export const cssMaxBytes=256*1024;
 export function parseCss(source,{declarations=false}={}){

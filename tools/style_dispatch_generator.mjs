@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Native tables contain only correctly typed function pointers, indexed within
 // each signature. The compiler owns method metadata and semantic validation.
 export function generateStyleDispatch(contract) {

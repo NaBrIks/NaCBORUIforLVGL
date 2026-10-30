@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {defineConfig} from 'vite';
 import vue from '@vitejs/plugin-vue';
 import {readFile} from 'node:fs/promises';

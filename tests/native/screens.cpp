@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "../../examples/native_widget/meter.hpp"
 #include "../../examples/s3_style_lab/main/component_preview.hpp"
 #include "lvgl_cbor/capabilities.hpp"

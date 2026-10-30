@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "lvgl_cbor/widget_registry.hpp"
 #include <algorithm>
 namespace lvgl_cbor {

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {readFile,stat} from 'node:fs/promises';
 import {parseDocument,maxDocumentBytes} from '../../packages/document-io/index.js';
 import {encodeProject} from '../../packages/project-codec/index.js';

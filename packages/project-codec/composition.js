@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {screenViews,compositionLimits,validateView} from '@lvgl-cbor/screen-codec';
 
 export function projectCompositionGraph(project){

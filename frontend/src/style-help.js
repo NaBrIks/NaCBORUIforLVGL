@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Concise Russian explanations, paraphrased from LVGL 9.6.0 style-properties.mdx
 // and main-modules/draw/draw_descriptors.mdx. Sources: docs/readme_property_help_ru.md.
 const descriptions={

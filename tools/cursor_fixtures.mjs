@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {readFile,writeFile} from 'node:fs/promises';
 import {encode} from 'cborg';
 import {encodeScreen,decodeScreenPacket,screenContract as C} from '../packages/screen-codec/index.js';

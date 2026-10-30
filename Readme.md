@@ -22,7 +22,7 @@ It is private; cloning requires authorized access.
 | `examples/common` | Shared Appearance, demo sources/actions and sample image | MIT |
 | `examples/windows_player` | Real Win32 LVGL player, schemes and CPU/RAM/GPU overview | MIT |
 | `examples/lilygo_t_display_s3` | Independent ST7789 T-Display-S3 example | MIT, including its upstream NOTICE |
-| `frontend`, `examples/s3_style_lab` | Editor shell and RGB/touch example with GPL adaptations | GPL-3.0-only; see [scope](LICENSES.md) |
+| `frontend`, `examples/s3_style_lab` | Owner-authored editor shell and RGB/touch example | MIT; third-party exceptions in [scope](LICENSES.md) |
 
 Bluetooth implementations/examples belong to their own projects. They are not
 UI-runtime dependencies. OS font binaries, SDKs and build outputs are not bundled.
@@ -125,11 +125,12 @@ Detailed guides are mainly Russian: [index](docs/README.md),
 [nested pages](docs/readme_page_composition_ru.md), [MCP](integrations/mcp/README.md),
 [SeMaps](docs/readme_semaps_ru.md), [sources/notices](docs/readme_sources_ru.md).
 
-Independent core/codecs/MCP/common/Windows/LilyGO code is [MIT](LICENSE).
-Adapted frontend and RGB S3 code retain **GPL-3.0-only**. A repository transfer,
-dependency rename or history rewrite does not relicense those materials. The
-NaWServer revision you select has its own license. This repository as a whole is
-**not MIT-only**; preserve [license scopes](LICENSES.md) and dependency notices.
+Project-owned code is [MIT](LICENSE), including the owner-authored frontend/RGB
+code previously offered under GPL. This follows the owner's explicit decision
+on 2026-10-30, rather than the repository transfer or a history rewrite. Third-party
+code, Tabler icons, LilyGO parameters/notices, LVGL reference material and external
+libraries retain their own terms. See the explicit [exceptions register](LICENSES.md).
+Existing third-party copyright notices must stay intact.
 
 Contributions and voluntary donations are welcome. No payment link is configured;
 donations are optional and do not change license terms.

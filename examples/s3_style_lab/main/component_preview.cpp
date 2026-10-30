@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "component_preview.hpp"
 #include "../../../src/cbor_reader.hpp"
 #include "cbor.h"

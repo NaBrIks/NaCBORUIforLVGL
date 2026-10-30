@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {screenContractFingerprint} from './contract_fingerprint.mjs';
 import {assertScreenAbiCompatible} from './screen-abi.mjs';

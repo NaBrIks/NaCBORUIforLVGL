@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Explicit hardware acceptance: previews/saves a test project, then restores the original.
 import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';

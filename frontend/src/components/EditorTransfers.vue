@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import {defineAsyncComponent} from 'vue';
 import {useRuntimeCapabilities} from '../state/runtime-capabilities.js';

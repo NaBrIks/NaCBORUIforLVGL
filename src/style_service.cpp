@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "lvgl_cbor/style_service.hpp"
 #include "lvgl_cbor/style_runtime.hpp"
 #include <cstring>

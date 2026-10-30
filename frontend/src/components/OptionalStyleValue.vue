@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import StyleValue from './StyleValue.vue';
 defineProps({method:Object,modelValue:{default:undefined},resources:{type:Array,default:()=>[]}});

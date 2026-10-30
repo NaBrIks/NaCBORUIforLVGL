@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 const root=new URL('../',import.meta.url),raw=await readFile(new URL('contracts/composition-api-v1.json',root),'utf8'),contract=JSON.parse(raw);

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {computed,inject} from 'vue';
 import {contract} from '@lvgl-cbor/style-codec';
 import {screenContract,widgetCatalog} from '@lvgl-cbor/screen-codec';

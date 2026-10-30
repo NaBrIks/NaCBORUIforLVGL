@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
 import {assertAbiCompatible} from '../tools/style-abi.mjs';
 const lock=JSON.parse(await readFile(new URL('../contracts/style-abi-v2.lock.json',import.meta.url)));

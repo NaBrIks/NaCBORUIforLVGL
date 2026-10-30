@@ -1,5 +1,7 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // RGB wiring and frame ownership adapted from ESP32-yaidfws touch_lcd7.
-// This example is GPL-3.0; see ../LICENSE and README.md.
+// Owner-authored adaptation; licensed under MIT by the owner on 2026-10-30.
 #include "board.hpp"
 #include "lvgl.h"
 #include "driver/i2c.h"

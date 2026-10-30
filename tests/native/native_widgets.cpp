@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "../../examples/s3_style_lab/main/native_widgets/registry.hpp"
 #include "../../examples/s3_style_lab/main/native_widgets/signal.hpp"
 #include "../../examples/s3_style_lab/main/native_widgets/speedometer.hpp"

@@ -1,33 +1,34 @@
-# License scope and third-party notices
+# License scope and third-party exceptions
 
-The root [MIT License](LICENSE) applies to independently authored NaCBORUIforLVGL code and documentation, including the C++ core (`include/lvgl_cbor`, `src`), JavaScript codecs (`packages`), and host MCP adapter (`integrations/mcp`). It does not replace third-party licenses or relicense adapted code.
+The root [MIT License](LICENSE) applies to project-owned NaCBORUIforLVGL code:
+the C++ core, codecs, MCP/device adapters, frontend, shared modules, Windows player
+and both hardware examples. Copyright: **2026 Oleg Kozhevnikov**, as confirmed by
+the owner. The owner explicitly selected MIT for his code on 2026-10-30, including
+his earlier ESP32-yaidfws frontend/RGB adaptations previously offered under GPL.
+Their provenance comments remain; the nested [frontend license](frontend/LICENSE)
+and [RGB example license](examples/s3_style_lab/LICENSE) now contain MIT.
+Earlier Git revisions retain their historical licensing records. A repository
+transfer or history rewrite by itself is not a relicensing operation.
 
-The independently authored Windows player (`examples/windows_player`) is also MIT. It links the portable core, LVGL and TinyCBOR; it does not include the GPL board/editor adaptations from the S3 example.
+## Exceptions and retained notices
 
-The Windows player can read the installed Segoe UI font through LVGL TinyTTF.
-No Windows font file is copied into this repository or redistributed with it.
-
-The shared example modules (`examples/common`) and T-Display-S3 example
-(`examples/lilygo_t_display_s3`) are MIT. The latter retains the upstream MIT
-board-parameter notice in its `NOTICE`; it does not adapt the GPL RGB-board code.
-
-| Material | License / notice |
+| Material | Terms and location |
 | --- | --- |
-| Frontend, including shell adaptations from ESP32-yaidfws | GPL-3.0-only; [frontend/LICENSE](frontend/LICENSE) |
-| ESP32-S3 example, including board/display adaptations | GPL-3.0-only; [examples/s3_style_lab/LICENSE](examples/s3_style_lab/LICENSE) |
-| Tabler icons bundled with the frontend | Preserve [the icon license notice](frontend/src/design/icons/LICENSE.txt) |
-| LVGL-derived API reference material | MIT under the upstream LVGL notice; see the source register and generated reference provenance |
-| External dependencies | Their own licenses and copyright notices; versions are recorded in lock files and the source register |
+| Tabler SVG/CSS/webfont assets in `frontend/src/design/icons` | Upstream MIT; copyright 2020-2024 Paweł Kuna, original [LICENSE.txt](frontend/src/design/icons/LICENSE.txt). Do not replace with the project author's header. |
+| Adapted T-Display-S3 panel parameters in `examples/lilygo_t_display_s3/main/board.cpp` | Upstream MIT, copyright 2024 Shenzhen Xinyuan Electronic Technology Co., Ltd.; full [NOTICE](examples/lilygo_t_display_s3/NOTICE) and file header retained. |
+| LVGL-derived API names/signatures/reference text in generated contracts/catalogs | Upstream LVGL MIT notice; provenance/SHA records and [source register](docs/readme_sources_ru.md). Generated files are not relabelled as solely project-authored. |
+| LVGL and TinyCBOR sources | External dependencies under their own MIT notices, not vendored here. |
+| Montserrat font data supplied by LVGL | Preserve the applicable font license from the selected LVGL dependency when distributing it; project headers do not replace font licenses. |
+| ESP-IDF and managed touch drivers | External dependencies with their own licenses/notices, including Apache-2.0; see [source register](docs/readme_sources_ru.md). |
+| Vue, cborg, Vite, MCP SDK and transitive npm dependencies | Their own package licenses; versions/integrities are recorded in lock files. |
+| Installed Windows Segoe UI | OS font is read at runtime, never copied into this repository or bundled. Windows licensing is not replaced by MIT. |
+| NaWServer | Separate owner project/dependency; use the license of the selected revision. |
 
-The GPL example uses the external NaWServer server (formerly ESP32-yaidfws).
-This dependency remains outside the portable core; check the license of the
-specific revision selected by your application. A later server license change
-does not relicense the GPL-derived frontend or RGB board/display adaptations
-already in this repository. Combining or distributing those materials must
-retain their applicable GPL terms; the root MIT license does not remove them.
+Generated files, assets, third-party material and strict JSON do not receive
+invented project-author copyright comments. Maintained project source headers
+use `SPDX-License-Identifier: MIT` and the confirmed author/year; the full terms
+remain in LICENSE. Historical confirmed notices are retained.
 
-MIT permits commercial use and sale subject to its notice requirements.
-Voluntary donations do not change that license or the obligations applying to
-third-party/GPL material. No payment account or donation URL is configured here.
-
-The [source and dependency register](docs/readme_sources_ru.md) records origins, versions, and notice locations. Existing upstream copyright notices must be preserved.
+MIT allows commercial use and sale subject to its notice requirements.
+Voluntary donations do not change licensing or third-party obligations.
+No payment account or donation URL is configured in this repository.

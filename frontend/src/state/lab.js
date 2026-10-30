@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {ref,computed,provide} from 'vue';
 import {createSimulator} from '../simulator.js';
 import {useScreenWorkspace} from './screen-workspace.js';

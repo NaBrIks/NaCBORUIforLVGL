@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {projectCompositionGraph} from '../../../../packages/project-codec/index.js';
 import {compositionLimits} from '@lvgl-cbor/screen-codec';
 import {clone,findNode,createBlankScreen} from '../../screen-model.js';

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {encodeScreen,screenContract} from '@lvgl-cbor/screen-codec';
 import {CommandChannel} from './transport/command-channel.js';
 

@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import {ref} from 'vue';
 const props=defineProps({modelValue:{default:undefined},name:{type:String,required:true}});

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {build} from 'vite';
 import {readdir,readFile,writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';

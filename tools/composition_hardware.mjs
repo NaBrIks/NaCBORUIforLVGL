@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Explicit, non-persistent acceptance of the S3 composition example. Real data;
 // diagnostic clicked events exercise LVGL callbacks, not physical touch input.
 import assert from 'node:assert/strict';

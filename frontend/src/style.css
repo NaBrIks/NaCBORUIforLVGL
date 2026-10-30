@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov */
 /* Application entry point; editor.css is also usable on its own. */
 @import './design/themes.css';
 @import './design/icons/tabler-icons.css';

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {writeFile,mkdir} from 'node:fs/promises';
 import {contract} from '../packages/style-codec/contract.js';
 import {screenContract} from '../packages/screen-codec/contract.js';

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {decodePacket} from '@lvgl-cbor/style-codec';
 import {ReconnectingSocket} from '../ws-link.js';
 

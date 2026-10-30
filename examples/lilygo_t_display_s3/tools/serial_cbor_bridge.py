@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Oleg Kozhevnikov
 """Private-transport adapter: stdin JSON records carry already encoded CBOR frames.
 
 Requires pyserial. It never toggles reset/boot signals or writes flash.

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "screen_bindings.hpp"
 #include "binding_expression.hpp"
 #include "screen_views.hpp"

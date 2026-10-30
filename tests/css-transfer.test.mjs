@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {importCss,exportCss,parseCss} from '../packages/css-codec/index.js';

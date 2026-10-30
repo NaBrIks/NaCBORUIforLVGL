@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {readFile,writeFile,readdir} from 'node:fs/promises';import {gzipSync} from 'node:zlib';
 import {encodeStyle} from '../packages/style-codec/index.js';
 const root=new URL('../',import.meta.url),startupOnly=process.argv.includes('--startup-only'),files=startupOnly?[]:['index.html',...(await readdir(new URL('frontend/dist/assets/',root))).map(n=>'assets/'+n)];

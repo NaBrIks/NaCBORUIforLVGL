@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Keep wheel edits on the normal input path (validation, persistence, CBOR).
 import {stepDimensionText} from './field-input';
 function onWheel(event){

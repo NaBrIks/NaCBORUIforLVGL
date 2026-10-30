@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import {computed} from 'vue';
 const props=defineProps({tasks:{type:Array,default:()=>[]},online:Boolean,language:{type:String,default:'ru'}});

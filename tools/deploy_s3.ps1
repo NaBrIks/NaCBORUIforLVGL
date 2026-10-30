@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Oleg Kozhevnikov
 param([Parameter(Mandatory)][string]$Port,[Parameter(Mandatory)][string]$ExpectedMac,[switch]$ProvisionFilesystem,[switch]$UpdateFilesystem,[switch]$FullImage)
 $ErrorActionPreference='Stop'
 if($FullImage){if($UpdateFilesystem){throw 'FullImage includes filesystem provisioning'};$ProvisionFilesystem=$true}

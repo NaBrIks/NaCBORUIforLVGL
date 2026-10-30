@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {ref,computed,onBeforeUnmount} from 'vue';
 export function usePaneResize(page){
  const styleWidth=ref(700),screenWidth=ref(700),columns=ref(null);

@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import {ref,computed,onMounted,onBeforeUnmount,inject,provide,watch} from 'vue';
 import PreviewNode from './PreviewNode.vue';

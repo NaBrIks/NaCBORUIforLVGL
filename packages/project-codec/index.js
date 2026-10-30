@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {encode} from 'cborg';
 import {encodeScreen,decodeScreen,screenContract} from '@lvgl-cbor/screen-codec';
 import {encodeStyle,decodeStyle,decodePacket,contract} from '@lvgl-cbor/style-codec';

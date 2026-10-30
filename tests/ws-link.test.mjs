@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import test from 'node:test';import assert from 'node:assert/strict';
 import {ReconnectingSocket} from '../frontend/src/ws-link.js';
 function rig(make){

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import test from 'node:test';import assert from 'node:assert/strict';import {readFile,writeFile} from 'node:fs/promises';
 import {encode,decode} from 'cborg';
 import {contract,encodeStyle,decodeStyle,decodePacket} from '../packages/style-codec/index.js';

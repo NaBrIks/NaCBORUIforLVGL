@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #pragma once
 // Copy to wifi_secret.hpp (ignored). Do not commit real credentials.
 #define STYLE_LAB_WIFI_SSID "YOUR_WIFI_SSID"

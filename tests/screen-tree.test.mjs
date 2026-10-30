@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {canMoveNodeTo,moveNodeTo} from '../frontend/src/screen-model.js';

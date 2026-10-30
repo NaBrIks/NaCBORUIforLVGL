@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {screenContract} from './contract.js';
 import {integerRange as range,text} from '@lvgl-cbor/style-codec/values';
 const numeric=new Set(['int32_t','uint32_t',...screenContract.widgets.flatMap(w=>w.methods.flatMap(m=>m.parameters)),...screenContract.common.methods.flatMap(m=>m.parameters)]);

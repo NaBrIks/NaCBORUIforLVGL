@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import CornerFrame from './CornerFrame.vue';
 import {computed} from 'vue';

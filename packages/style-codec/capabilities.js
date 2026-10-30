@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {contract} from './contract.js';
 import {byName} from './methods.js';
 export function checkStyleCapabilities(props,capabilities){

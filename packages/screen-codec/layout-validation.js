@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {decodeMethods} from '@lvgl-cbor/style-codec';
 import {screenContract} from './contract.js';
 export function validateLayout(node,parent,named){

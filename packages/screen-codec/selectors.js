@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {screenContract} from './contract.js';
 import {integerRange} from '@lvgl-cbor/style-codec/values';
 export function encodeSelector(rule){

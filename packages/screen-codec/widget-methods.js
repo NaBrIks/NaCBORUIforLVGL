@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {screenContract} from './contract.js';
 import {convertParameter} from './parameter-schema.js';
 export function encodeWidgetMethod(family,name,value){const m=family.methods.find(m=>!m.retired&&m.alias===name);if(!m)throw Error('Unsupported widget property '+name);const values=m.parameters.length===1?[value]:value;if(!Array.isArray(values)||values.length!==m.parameters.length)throw Error('Widget argument count');

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "binding_expression.hpp"
 #include <cmath>
 namespace lvgl_cbor::detail {

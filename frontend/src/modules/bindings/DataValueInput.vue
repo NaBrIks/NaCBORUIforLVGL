@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import {computed} from 'vue';
 import {dataDescriptor,defaultDataValue,literalSchema,bindingLimits} from '@lvgl-cbor/screen-codec';

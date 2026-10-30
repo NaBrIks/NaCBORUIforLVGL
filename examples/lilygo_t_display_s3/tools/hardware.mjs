@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {dirname,resolve} from 'node:path';

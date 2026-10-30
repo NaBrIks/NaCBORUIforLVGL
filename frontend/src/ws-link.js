@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Browser-independent retry lifecycle; no style or application protocol assumptions.
 export class ReconnectingSocket {
  constructor({makeSocket=url=>new WebSocket(url),onState=()=>{},onMessage=()=>{},onError=()=>{},later=(fn,ms)=>setTimeout(fn,ms),cancel=id=>clearTimeout(id)}){

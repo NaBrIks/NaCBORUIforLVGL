@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov */
 /* Screen editor and CSS approximation. Authoring controls never inherit into the virtual display. */
 .lab-columns.editor-columns {
  grid-template-columns: minmax(var(--inspector-min-width,260px),min(var(--inspector-width,460px),calc(100% - 280px))) 5px minmax(260px,1fr);

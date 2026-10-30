@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov */
 /* Screen collection management; navigation retains the shell's existing width. */
 .lab-columns.screen-manager-columns {grid-template-columns:minmax(0,1fr);}
 .lab-main.screen-manager-main {overflow:hidden;}

@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import {computed,ref} from 'vue';
 const props=defineProps({level:{type:Number,default:2},title:{type:String,default:''},showSide:{type:Boolean,default:true},showHeader:{type:Boolean,default:true},collapsible:{type:Boolean,default:true}});

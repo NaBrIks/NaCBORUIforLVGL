@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {readFileSync,writeFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 const dir=new URL('../examples/s3_style_lab/main/native_widgets/',import.meta.url);

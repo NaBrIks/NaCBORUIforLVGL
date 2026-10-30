@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {styleFields,styleGroups} from './generated/style-fields.js';
 export const editorSections=[
  {id:'geometry',name:'Геометрия',ids:['size','position','transform','padding','margin']},

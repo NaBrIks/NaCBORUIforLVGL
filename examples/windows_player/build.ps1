@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Oleg Kozhevnikov
 param([string]$Configuration='Release',[string]$LvglSource='', [string]$TinyCborSource='', [string]$BuildDirectory='local/windows-player')
 $ErrorActionPreference='Stop'
 $root=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent

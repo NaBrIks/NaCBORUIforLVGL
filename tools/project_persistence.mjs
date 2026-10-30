@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Explicit hardware acceptance. Run prepare, reset the board, then verify.
 import assert from 'node:assert/strict';
 import {readFile,writeFile} from 'node:fs/promises';

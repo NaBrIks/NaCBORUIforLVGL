@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {readFile,writeFile} from 'node:fs/promises';
 import {encodeScreen,offlineCapabilities} from '../packages/screen-codec/index.js';
 const compiler=JSON.parse(await readFile(new URL('../examples/native_widget/meter.json',import.meta.url)));

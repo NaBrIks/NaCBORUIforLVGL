@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {contract,normalizeProperties} from '@lvgl-cbor/style-codec';
 const dimensions={'width':'width','height':'height','min-width':'min_width','min-height':'min_height','max-width':'max_width','max-height':'max_height','left':'x','top':'y'};
 const lengths={'border-width':'border_width','border-radius':'radius','outline-width':'outline_width','outline-offset':'outline_pad','letter-spacing':'text_letter_space','row-gap':'pad_row','column-gap':'pad_column'};

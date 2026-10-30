@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {validateScreen,inspectExpression,validateNavigation} from '@lvgl-cbor/screen-codec';
 // An unavailable native implementation must not discard all saved screens on reload.
 // Only recovery uses a skeleton; sending always validates the untouched document.

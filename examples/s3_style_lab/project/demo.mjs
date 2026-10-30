@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {createProject} from '../../../packages/project-codec/index.js';
 import {extensions} from '../../native_widget/demo-screen.mjs';
 import {offlineCapabilities} from '../../../packages/screen-codec/index.js';

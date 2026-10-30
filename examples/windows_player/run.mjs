@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {spawn,execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {mkdtemp,writeFile,rm,stat,readFile,mkdir,rename} from 'node:fs/promises';

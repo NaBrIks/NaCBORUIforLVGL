@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // v2 IDs are local to a signature; the pair (signature, index) is the identity.
 export function assertSignatureSlots(methods, signatures) {
  if(new Set(signatures.map(s=>s.id)).size!==signatures.length)throw Error('Duplicate signature ID');

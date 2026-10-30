@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Oleg Kozhevnikov
 param([string]$Configuration='Release',[string]$LvglSource='', [string]$TinyCborSource='')
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent

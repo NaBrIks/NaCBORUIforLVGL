@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {readFileSync} from 'node:fs';
 export const extensions=JSON.parse(readFileSync(new URL('../s3_style_lab/main/native_widgets/catalog.json',import.meta.url),'utf8')).map(({symbol,...entry})=>entry);
 const component=(index,id,x,y,width,height,props)=>({id,type:extensions[index].name,props:{...extensions[index].contract.defaults,...props},style:{x,y,width,height},children:[]});

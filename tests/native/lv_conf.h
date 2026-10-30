@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #ifndef LV_CONF_H
 #define LV_CONF_H
 #define LV_COLOR_FORMAT_DEFAULT LV_COLOR_FORMAT_RGB565

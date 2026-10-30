@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {encode,decode} from 'cborg';
 import {compileProject,encodeProject} from './index.js';
 export const catalogFormat='lvgl-project-catalog-1';

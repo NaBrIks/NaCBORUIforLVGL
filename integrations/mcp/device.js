@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {decodePacket} from '../../packages/style-codec/index.js';
 import {serializeDocument} from '../../packages/document-io/index.js';
 import {contract} from '../../packages/style-codec/contract.js';

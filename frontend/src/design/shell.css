@@ -1,6 +1,6 @@
-/* Adapted from ESP32-yaidfws S3 demo. GPL-3.0-only; see LICENSE. */
-/*Adapted from ESP32-yaidfws S3 demo. GPL-3.0-only; see LICENSE.*/
-
+/* SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov */
+/* Adapted from the owner's ESP32-yaidfws UI shell; see LICENSES.md. */
 :root {
   font-family: Segoe UI,Arial,sans-serif;
   font-size: 14px;

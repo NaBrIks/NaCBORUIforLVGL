@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {ref,computed} from 'vue';
 
 // Compare authoring data independently of JSON key order or Vue proxy identity.

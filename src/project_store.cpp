@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "project_internal.hpp"
 #include <cerrno>
 #include <cstdio>

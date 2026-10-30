@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {bindingContract,dataDescriptor,dataSchemaAtPath,defaultDataValue,methodDataSchema} from '@lvgl-cbor/screen-codec';
 
 export const expressionMode=value=>Array.isArray(value)?'array':value&&Object.hasOwn(value,'object')?'object':value&&Object.hasOwn(value,'op')?'op':value&&Object.hasOwn(value,'event')?'event':value&&Object.hasOwn(value,'source')?'source':'literal';

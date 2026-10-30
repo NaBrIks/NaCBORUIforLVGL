@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {contract} from '@lvgl-cbor/style-codec';
 export const byName=new Map(contract.methods.filter(m=>!m.retired).flatMap(m=>[[m.alias,m],[m.name,m]]));
 export const flagTypes=new Set(['lv_border_side_t','lv_text_decor_t']);

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Explicit real-device acceptance; no project saves or firmware changes.
 import assert from 'node:assert/strict';
 import {decodePacket} from '../packages/style-codec/index.js';

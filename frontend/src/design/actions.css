@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov */
 /* Commands stay visible at every editor density; property cells keep their own compact size. */
 .action-button {
  display:inline-flex;align-items:center;justify-content:center;gap:5px;

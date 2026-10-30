@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "registry.hpp"
 #ifndef LVGL_CBOR_DEMO_NATIVE_WIDGETS
 #define LVGL_CBOR_DEMO_NATIVE_WIDGETS 1

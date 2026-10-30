@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "../../examples/s3_style_lab/main/demo_speed/model.hpp"
 #include <cmath>
 #include <cstdio>

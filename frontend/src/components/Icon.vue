@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup lang="ts">
 import helpCircle from '../design/icons/help-circle.svg?raw';
 import deviceDesktop from '../design/icons/device-desktop.svg?raw';

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {computed,ref,watch} from 'vue';
 import {pagePreviewTargets,buildPagePreview} from '../modules/composition/page-preview.js';
 

@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup lang="ts">
 import {computed,ref,onBeforeUnmount} from 'vue';
 import {appearance,t} from '../state/appearance';

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {readFile,writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';

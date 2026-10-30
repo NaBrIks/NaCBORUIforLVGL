@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
 import {DeviceClient} from '../integrations/mcp/device.js';

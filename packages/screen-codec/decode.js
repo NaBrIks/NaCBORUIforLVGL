@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {decodeNodeCommands} from './command-stream.js';
 import {contract,decodeMethods} from '@lvgl-cbor/style-codec';
 import {text,object as only} from '@lvgl-cbor/style-codec/values';

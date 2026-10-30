@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov */
 .editor-transfers {flex-shrink:0;min-width:0;font-size:12px;display:flex;flex-direction:column;gap:var(--gap);}
 .screen-editor-workspace {display:flex;flex-direction:column;min-height:0;flex:1;gap:var(--gap);}
 .screen-editor-workspace>.screen-editor {flex:1;min-height:0;}

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {computed,inject,provide,ref,watch} from 'vue';
 import {readSaved,save} from './persistence.js';
 

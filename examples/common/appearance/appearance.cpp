@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "appearance.hpp"
 #include "lvgl_cbor/data_registry.hpp"
 #include <stdexcept>

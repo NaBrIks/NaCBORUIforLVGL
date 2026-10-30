@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {compositionLimits,screenViews} from '@lvgl-cbor/screen-codec';
 import {reactive} from 'vue';
 

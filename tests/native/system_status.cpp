@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "../../examples/s3_style_lab/main/system_status/model.hpp"
 #include <cstdlib>
 #include <cstring>

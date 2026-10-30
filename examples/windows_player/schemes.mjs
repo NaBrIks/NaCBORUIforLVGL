@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {readFile} from 'node:fs/promises';
 import {createProject,encodeProject} from '../../packages/project-codec/index.js';
 

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Application services for the optional S3 example. No NTP/network dependency
 // is introduced into the portable UI runtime or its binding expressions.
 #include "system_status.hpp"

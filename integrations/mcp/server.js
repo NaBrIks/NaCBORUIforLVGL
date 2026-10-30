@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {McpServer} from '@modelcontextprotocol/server';
 import * as z from 'zod/v4';
 import {serializeDocument,parseDocument} from '../../packages/document-io/index.js';

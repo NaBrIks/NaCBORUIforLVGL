@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Positions are derived from the declared graph; no second graph is persisted.
 export function layoutCompositionGraph(graph){
  const levels=new Map(),ids=new Set(graph.nodes.map(node=>node.id)),children=new Map();

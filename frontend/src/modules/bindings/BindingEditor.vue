@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import {computed} from 'vue';
 import {bindingMethodCatalog,eventValueSchema,bindingContract,bindingLimits,dataDescriptor,dataSchemaAtPath,inspectExpression,bindingCatalogIsAuthoritative,compositionAvailable,screenViews} from '@lvgl-cbor/screen-codec';

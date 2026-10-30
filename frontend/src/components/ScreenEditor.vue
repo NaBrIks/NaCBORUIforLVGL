@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import EditorTransfers from './EditorTransfers.vue';
 import Icon from './Icon.vue';

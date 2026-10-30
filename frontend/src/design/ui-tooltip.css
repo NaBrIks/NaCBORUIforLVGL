@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov */
 .lu-tooltip {
     position:fixed; inset:auto; margin:0; box-sizing:border-box;
     width:max-content; max-width:min(440px,calc(100vw - 24px));

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {ref,onBeforeUnmount} from 'vue';
 import {DataClient} from '@lvgl-cbor/project-codec';
 import {bindingLimits,validateDataValue} from '@lvgl-cbor/screen-codec';

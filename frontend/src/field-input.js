@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // One input contract for every editor: empty unsets, zero is a value,
 // incomplete/invalid typing must not replace the last accepted value.
 export function readNumberInput(input){

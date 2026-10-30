@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Explicit hardware test: changes the screen on the device passed on the command line.
 import assert from 'node:assert/strict';
 import {readFile,writeFile} from 'node:fs/promises';

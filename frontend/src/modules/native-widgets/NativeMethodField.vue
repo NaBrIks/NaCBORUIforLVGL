@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT
+Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import {computed,ref,watch} from 'vue';
 import {methodSchema,parameterType,defaultParameter,encodeWidgetMethod} from '@lvgl-cbor/screen-codec';

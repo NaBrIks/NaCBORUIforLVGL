@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 import {createHash} from 'node:crypto';
 
 // Screen v3 was published with CRLF bytes. Keep that fingerprint while allowing

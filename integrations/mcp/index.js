@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 // Entirely optional host integration: no import from the editor or firmware.
 if(process.env.LVGL_CBOR_MCP_ENABLED!=='0'){
  const {serveStdio}=await import('@modelcontextprotocol/server/stdio');

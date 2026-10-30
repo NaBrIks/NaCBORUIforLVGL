@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Oleg Kozhevnikov
 param([string]$CoreDir=$env:PLATFORMIO_CORE_DIR,[string]$LvglComponentSource='', [string]$CborComponentSource='')
 $ErrorActionPreference='Stop'
 if(!$CoreDir){$CoreDir=Join-Path $env:USERPROFILE '.platformio'}

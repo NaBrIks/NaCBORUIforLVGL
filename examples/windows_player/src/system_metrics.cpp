@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 #include "system_metrics.hpp"
 #include <windows.h>
 #include <pdh.h>

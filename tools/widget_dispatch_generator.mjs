@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 Oleg Kozhevnikov
 const cppType = type => ({text:'const char *',resource:'const void *',points:'PointSpan'})[type] ?? type;
 export function generateWidgetDispatch(contract) {
   let out = '// Generated from contracts/screen-api-v3.json. Local switch dispatch; no method tables.\n';
