@@ -40,3 +40,13 @@ test('an older firmware without capabilities remains visible in INFO and cannot 
  device.value='http://old-firmware.test:5298';assert.equal(await connection.connect(),false);
  assert.equal(connection.httpOnline.value,true);assert.equal(connection.info.value.boot_id,'boot-1');assert.equal(connection.ready.value,false);assert.match(connection.capabilitiesError.value,/404/);
 });
+
+test('catalog WS invalidation refreshes authoritative metadata without reset',async t=>{
+ let revision=1,requests=0;
+ const {device,connection}=mount(t,async url=>{if(url.endsWith('/api/info'))return response(info('catalog'));requests++;const caps=offlineCapabilities();caps.binding.catalogRevision=revision;return response(caps);});
+ device.value='http://device.test:5298';await connection.connect();const epoch=connection.epoch.value;revision=2;
+ assert.equal(connection.catalogChanged(new Map([['v',1],['event','data_catalog_changed'],['catalogRevision',2]])),true);
+ for(let i=0;i<10&&connection.capabilities.value?.binding.catalogRevision!==2;i++)await new Promise(r=>setTimeout(r,0));
+ assert.equal(connection.capabilities.value.binding.catalogRevision,2);assert.equal(connection.epoch.value,epoch);assert.equal(requests,2);
+ assert.equal(connection.catalogChanged(new Map([['v',1],['event','other']])),false);
+});

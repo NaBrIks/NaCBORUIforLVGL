@@ -171,24 +171,30 @@ struct SystemMetrics::Impl {
 		cpu_history.fill(-1); memory_history.fill(-1); for(auto &h:core_history)
 			h.fill(-1);
 		using S = DataSchema; std::string error;
+		auto percent = S::number(0, 100); percent.unit = "%"; percent.description = "Utilization percentage";
+		auto mib = S::number(0); mib.unit = "MiB"; mib.description = "Memory in mebibytes";
 		const auto curve = S::object({{"label", S::text(255)}, {"history", S::array(S::integer(-1, 100), 32, 32)}});
 		const auto require = [&](bool ok){
 				if(!ok)
 					throw std::runtime_error(error);
 			};
-		require(r.add_source({"system.cpu", S::object({{"percent", S::number(0, 100)}, {"count", S::integer(0)},
+		require(r.add_source({"system.cpu", S::object({{"percent", percent}, {"count", S::integer(0)},
 								  {"displayed", S::integer(0, core_limit)}, {"sequence", S::integer(0)},
-								  {"series", curve}}), {}, "CPU total / processor time"}, error));
+								  {"series", curve}}), {}, "CPU total / processor time",
+		                      "Processor use and bounded sample history", "system"}, error));
 		require(r.add_source({"system.cores", S::array(curve, core_count, core_count), {},
-		                      "Logical processors / history"}, error));
-		require(r.add_source({"system.memory", S::object({{"totalMiB", S::number(0)}, {"usedMiB", S::number(0)},
-								  {"availableMiB", S::number(0)}, {"percent", S::number(0, 100)},
-								  {"summary", S::text(255)}, {"series", curve}}), {}, "Physical RAM"}, error));
-		const auto device = S::object({{"name", S::text(255)}, {"percent", S::number(0, 100)},
-					{"dedicatedMiB", S::number(0)}, {"capacityMiB", S::number(0)}, {"sharedMiB", S::number(0)},
+		                      "Logical processors / history", "Per-core processor use and bounded history", "system"},
+		    error));
+		require(r.add_source({"system.memory", S::object({{"totalMiB", mib}, {"usedMiB", mib},
+								  {"availableMiB", mib}, {"percent", percent},
+								  {"summary", S::text(255)}, {"series", curve}}), {}, "Physical RAM",
+		                      "Physical memory use and availability", "system"}, error));
+		const auto device = S::object({{"name", S::text(255)}, {"percent", percent},
+					{"dedicatedMiB", mib}, {"capacityMiB", mib}, {"sharedMiB", mib},
 					{"memoryLabel", S::text(255)}, {"series", curve}});
 		require(r.add_source({"system.gpus", S::array(device, gpu.size(), gpu.size()), {},
-		                      "GPU / busiest engine; dedicated and shared memory"}, error));
+		                      "GPU / busiest engine; dedicated and shared memory",
+		                      "Available GPU counters; missing counters remain unknown", "system"}, error));
 	}
 
 	void sample(Query &q)

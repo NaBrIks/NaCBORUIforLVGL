@@ -6,7 +6,7 @@ import {contract} from '@lvgl-cbor/style-codec';
 import {screenContract} from '@lvgl-cbor/screen-codec';
 import {t} from '../state/appearance';
 const props=defineProps(['simulated','info','httpOnline']);
-const board=computed(()=>props.simulated?t('CSS-предпросмотр · LVGL не исполняется','CSS preview · LVGL is not executed'):props.httpOnline?props.info?.board??t('Название платы не получено','Board name unavailable'):t('Данные платы не получены','No device data received'));
+const board=computed(()=>props.simulated?t('CSS-предпросмотр · LVGL не исполняется','CSS preview · LVGL is not executed'):props.httpOnline?props.info?.board??props.info?.name??t('Название устройства не получено','Device name unavailable'):t('Данные платы не получены','No device data received'));
 </script>
 <template><div class="device-runtime-info">
  <span class="device-board-name" :data-tooltip="board">{{board}}</span>

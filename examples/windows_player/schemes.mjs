@@ -13,7 +13,7 @@ export const contrast=(a,b)=>{const x=luminance(a),y=luminance(b);return (Math.m
 export function roleStyles(p) {
   // The standard has no on-primary token. Choose readable ink for both button states.
   const ink=Math.min(contrast(p.primary,'#ffffff'),contrast(p.hover,'#ffffff'))>=4.5?'#ffffff':'#111111';
-  return {
+  const styles={
     canvas:{bg_color:p.canvas,bg_opa:255,text_color:p.text,border_color:p.border},
     panel:{bg_color:p.surface,bg_opa:255,text_color:p.text,border_color:p.border},
     status:{bg_color:p.bar,bg_opa:255,text_color:p.barText},
@@ -29,6 +29,15 @@ export function roleStyles(p) {
     knob:{bg_color:p.text,border_color:p.primary,shadow_width:0},
     arc_track:{arc_color:p.border},arc_value:{arc_color:p.primary}
   };
+  const overrides=p.roleOverrides??{};
+  if(!overrides||typeof overrides!=='object'||Array.isArray(overrides))throw Error('Scheme roleOverrides object');
+  for(const [role,props] of Object.entries(overrides)){
+    if(!Object.hasOwn(styles,role)||!props||typeof props!=='object'||Array.isArray(props))throw Error('Scheme role override '+role);
+    // Property names/types/ranges are validated by the existing style codec when
+    // compileSchemes encodes the project. These are ordinary LVGL style props.
+    styles[role]={...styles[role],...props};
+  }
+  return styles;
 }
 export async function compileSchemes(path=new URL('./schemes.json',import.meta.url)) {
   const catalog=JSON.parse(await readFile(path,'utf8'));

@@ -75,7 +75,8 @@ namespace lvgl_cbor
 		ProjectBundle base, effective; std::string base_revision, revision; bool ready{}, changed{};
 		std::string displayed_screen, displayed_revision; bool displaying_preview{};
 		uint32_t displayed_instance{};
-		bool presenting{};
+		bool presenting{}, layout_debug{};
+		LayoutDebugOptions layout_options;
 		std::vector<ScreenViewStatus> displayed_views;
 		struct Presentation : ScreenResolver {
 			ProjectBundle bundle;
@@ -195,7 +196,8 @@ namespace lvgl_cbor
 			return true;
 		}
 
-		bool show(ProjectBundle bundle, const std::string &name, ScreenReply &reply, bool preview = false)
+		bool show(ProjectBundle bundle, const std::string &name, ScreenReply &reply, bool preview = false,
+		    bool preserve_views = false)
 		{
 			if(presenting || (presentation && presentation->runtime.busy()))
 			{
@@ -212,6 +214,11 @@ namespace lvgl_cbor
 			reply = {}; const auto *document = project_detail::find(bundle.screens, name.empty() ? bundle.entry : name);
 			if(!document) { std::snprintf(reply.error, sizeof(reply.error), "project_screen_not_found"); return false; }
 
+			std::vector<ScreenViewSelection> selections;
+			if(preserve_views && presentation && presentation->bundle.id == bundle.id &&
+			    displayed_screen == document->name)
+				selections = presentation->runtime.view_selections();
+
 			const auto bytes = document->bytes;
 			const auto screen_name = document->name, shown_revision = fingerprint(encode_project(bundle));
 			auto next = std::make_unique<Presentation>(std::move(bundle), resources, count, registry, data, viewport);
@@ -224,7 +231,9 @@ namespace lvgl_cbor
 					    result.error); return false;
 				}
 			}
-			if(!next->runtime.load(bytes.data, bytes.size, reply))  return false;
+			next->runtime.set_layout_debug_options(layout_options);
+			next->runtime.set_layout_debug(layout_debug);
+			if(!next->runtime.load(bytes.data, bytes.size, reply, selections))  return false;
 
 			presentation = std::move(next);
 			presentation->changed = [this]() {
@@ -423,6 +432,14 @@ namespace lvgl_cbor
 		return impl_->show(snapshot(), name, reply);
 	}
 
+	bool ProjectService::refresh(ScreenReply &reply)
+	{
+		auto bundle = snapshot();
+		const auto name = impl_->presentation && impl_->presentation->bundle.id == bundle.id &&
+		    project_detail::find(bundle.screens, impl_->displayed_screen) ? impl_->displayed_screen : bundle.entry;
+		return impl_->show(std::move(bundle), name, reply, false, true);
+	}
+
 	bool ProjectService::preview(ProjectBytes bytes, const std::string &screen, ScreenReply &reply)
 	{
 		ProjectBundle bundle; std::string error;
@@ -432,6 +449,28 @@ namespace lvgl_cbor
 		}
 
 		return impl_->show(std::move(bundle), screen, reply, true);
+	}
+
+	void ProjectService::set_layout_debug(bool enabled)
+	{
+		impl_->layout_debug = enabled;
+		if(impl_->presentation) impl_->presentation->runtime.set_layout_debug(enabled);
+	}
+
+	void ProjectService::set_layout_debug_options(const LayoutDebugOptions &options)
+	{
+		impl_->layout_options = options;
+		if(impl_->presentation) impl_->presentation->runtime.set_layout_debug_options(options);
+	}
+
+	size_t ProjectService::layout_debug_max_depth() const
+	{
+		return impl_->presentation ? impl_->presentation->runtime.layout_debug_max_depth() : 0;
+	}
+
+	bool ProjectService::layout_debug() const
+	{
+		return impl_->layout_debug;
 	}
 
 	lv_obj_t *ProjectService::root() const

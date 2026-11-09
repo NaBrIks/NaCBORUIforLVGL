@@ -95,9 +95,14 @@ namespace lab_demo_speed
 	bool register_data(lvgl_cbor::DataRegistry &registry, std::string &error)
 	{
 		using lvgl_cbor::DataSchema;
+		if(!registry.add_group({"demo", "Demonstration", "Code-generated sources", ""}, error))return false;
+
+		auto speed = DataSchema::number(0, 180); speed.title = "Speed"; speed.unit = "km/h";
+		speed.description = "Smooth generated trajectory";
 		if(!registry.add_source({"demo.speed", DataSchema::object({
-				{"kmh", DataSchema::number(0, 180)}, {"unit", DataSchema::text(8)},
-				{"sequence", DataSchema::integer(0)}}), {}, "Demo speed"}, error)) return false;
+				{"kmh", speed}, {"unit", DataSchema::text(8)},
+				{"sequence", DataSchema::integer(0)}}), {}, "Demo speed", "Autonomous 25 Hz CBOR demonstration",
+		                         "demo"}, error)) return false;
 
 		data = &registry;
 		uint8_t bytes[frame_bytes]; const auto size = encode_event(bytes, 0, 0);

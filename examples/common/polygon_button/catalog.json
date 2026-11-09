@@ -1,0 +1,8 @@
+{
+  "title":"Кнопка произвольной формы",
+  "description":"Общая замкнутая фигура: 3..128 точек 0..1000 по каждой оси, нормализованных к размеру объекта. Даже-нечётная заливка и такой же hit-test; граница/обводка включены с допуском max(0.5 px, border_width/2). Дочерние объекты не обрезаются полигоном. Обычные LVGL button states/events.",
+  "preview":{"width":160,"height":160},
+  "defaults":{"points":[[0,0],[1000,0],[1000,1000],[0,1000]]},
+  "methods":[{"alias":"points","opcode":256,"parameters":[{"type":"points","title":"Замкнутый путь; 3..128 точек, координаты 0..1000","minItems":3,"maxItems":128,"min":0,"max":1000}]}],
+  "events":[{"name":"clicked"},{"name":"long_pressed"},{"name":"ready"}]
+}

@@ -136,6 +136,12 @@ namespace lvgl_cbor::detail
 			}
 		}
 
+		bool resolves(const std::string &name) const
+		{
+			const uint8_t *packet{}; size_t length{};
+			return owner->resolver_ && owner->resolver_->resolve_screen(name, packet, length);
+		}
+
 		void changed()
 		{
 			if(alive && owner->resolver_)  owner->resolver_->composition_changed();
@@ -186,13 +192,15 @@ namespace lvgl_cbor::detail
 				lv_label_set_text(slot.placeholder, LV_SYMBOL_CLOSE);
 				lv_obj_set_style_text_color(slot.placeholder, lv_color_hex(0xff3030), LV_PART_MAIN);
 				lv_obj_center(slot.placeholder);
+				if(state->layout_debug && state->layout_debug->enabled) state->layout_debug->apply(slot.placeholder);
 			}
 
 			changed();
 			return false;
 		}
 
-		bool show(size_t slot_index, size_t page_index, ScreenReply &reply)
+		bool show(size_t slot_index, size_t page_index, ScreenReply &reply,
+		    const std::vector<ScreenViewSelection> &selections = {})
 		{
 			reply = {};
 			if(!alive || !owner->active() || slot_index >= slots.size())
@@ -266,7 +274,7 @@ namespace lvgl_cbor::detail
 				if(!alive || !slot.node->object)  return false;
 
 				page.runtime = owner->make_child(screen);
-				if(!page.runtime->replace(packet, length, slot.node->object, false, reply))
+				if(!page.runtime->replace(packet, length, slot.node->object, false, reply, selections))
 				{
 					const std::string error = reply.error;
 					page.runtime.reset();
@@ -318,7 +326,8 @@ namespace lvgl_cbor::detail
 		return state;
 	}
 
-	bool prepare_views(ScreenPlan &plan, const CborValue &map, ScreenRuntime &runtime, ScreenReply &reply)
+	bool prepare_views(ScreenPlan &plan, const CborValue &map, ScreenRuntime &runtime, ScreenReply &reply,
+	    const std::vector<ScreenViewSelection> &selections)
 	{
 		CborValue version, entries;
 		const bool has_version = field(map, "views_version", version);
@@ -346,6 +355,7 @@ namespace lvgl_cbor::detail
 		auto views = std::make_shared<ScreenViews>(runtime, plan.id);
 		std::set<ScreenNode *> unique;
 		std::vector<size_t> initials;
+		std::vector<const ScreenViewSelection *> restored;
 		for(const auto &entry : *array)
 		{
 			auto name = str(get(entry, "node")), initial = str(get(entry, "initial")),
@@ -380,13 +390,27 @@ namespace lvgl_cbor::detail
 			}
 			if(selected == none)  return fail(reply, "view_initial");
 
-			initials.push_back(selected); views->slots.push_back(std::move(slot));
+			const ScreenViewSelection *selection = nullptr;
+			for(const auto &candidate : selections)
+				if(candidate.node == slot->node->id)
+					for(size_t i = 0; i < slot->pages.size(); ++i)
+						if(slot->pages[i].screen == candidate.screen)
+						{
+							if(views->resolves(candidate.screen))
+							{
+								selected = i; selection = &candidate;
+							}
+						}
+
+			initials.push_back(selected); restored.push_back(selection); views->slots.push_back(std::move(slot));
 		}
 		plan.views = views;
 		for(size_t i = 0; i < initials.size(); ++i)
 		{
 			ScreenReply initial;
-			views->show(i, initials[i], initial); // A failed page is represented by the selected error view.
+			views->show(i, initials[i], initial,
+			    restored[i] ? restored[i]->children : std::vector<ScreenViewSelection>{});
+			// A failed page is represented by the selected error view.
 			if(!views->alive)  return fail(reply, "view_owner_deleted");
 		}
 		return true;
@@ -453,6 +477,24 @@ namespace lvgl_cbor::detail
 						if(auto *found = page.runtime->find(instance, id))  return found;
 
 		return nullptr;
+	}
+
+	std::vector<ScreenViewSelection> collect_view_selections(const ScreenPlan &plan)
+	{
+		std::vector<ScreenViewSelection> out;
+		if(!plan.views || !plan.views->alive)  return out;
+
+		for(const auto &slot : plan.views->slots)
+			if(slot->selected != none)
+			{
+				const auto &page = slot->pages[slot->selected];
+				ScreenViewSelection selection{slot->node->id, page.screen, {}};
+				if(page.runtime)  selection.children = page.runtime->view_selections();
+
+				out.push_back(std::move(selection));
+			}
+
+		return out;
 	}
 
 	void collect_view_status(const ScreenPlan &plan, std::vector<ScreenViewStatus> &out)

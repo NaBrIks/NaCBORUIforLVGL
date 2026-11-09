@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ref,nextTick} from 'vue';
-import {encodeScreen,decodeScreen,offlineCapabilities,widgetCatalog,encodeWidgetMethod,methodSchema,defaultParameter,parameterType} from '@lvgl-cbor/screen-codec';
+import {encodeScreen,decodeScreen,offlineCapabilities,widgetCatalog,encodeWidgetMethod,methodSchema,defaultParameter,parameterType,convertParameter,methodDataSchema} from '@lvgl-cbor/screen-codec';
 import {nativeDemo,extensions} from '../examples/native_widget/demo-screen.mjs';
 import {createNode} from '../frontend/src/screen-model.js';
 import {readCatalogCache,useAuthoringCapabilities} from '../frontend/src/modules/native-widgets/authoring-capabilities.js';
@@ -59,4 +59,14 @@ test('cached native catalog restores authoring after reload and never replaces l
  live.value=null;await nextTick();assert.equal(authoring.value.source,'offline-cache');
  live.value={...caps,extensions:[],availableWidgets:offlineCapabilities().availableWidgets};await nextTick();assert.equal(widgetCatalog(authoring.value).length,12);
  stored.set('lvgl-cbor-native-catalog-1','broken');assert.equal(readCatalogCache(),null);
+});
+
+test('registered point paths honor their own bounds through common codecs and defaults',()=>{
+ const schema={type:'points',minItems:3,maxItems:5,min:0,max:1000};
+ assert.equal(defaultParameter(schema).length,3);
+ assert.deepEqual(convertParameter([[0,0],[1000,0],[500,1000]],schema),[[0,0],[1000,0],[500,1000]]);
+ assert.throws(()=>convertParameter([[0,0],[1000,0]],schema),/Point path/);
+ assert.throws(()=>convertParameter([[0,0],[1001,0],[500,1000]],schema),/Point path/);
+ assert.throws(()=>convertParameter(Array.from({length:6},()=>[0,0]),schema),/Point path/);
+ const binding=methodDataSchema(schema);assert.equal(binding.minItems,3);assert.equal(binding.maxItems,5);assert.equal(binding.items.items[0].max,1000);
 });

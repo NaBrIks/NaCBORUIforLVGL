@@ -1,0 +1,37 @@
+{
+  "format": "nacborui-windows-schemes-1",
+  "default": "classic",
+  "schemes": {
+    "classic": {
+      "name": "Строгая классика",
+      "canvas": "#f4f2ed", "surface": "#ffffff", "surfaceAlt": "#e5e2db",
+      "border": "#8c918e", "text": "#202c36", "muted": "#55616b",
+      "bar": "#dfe3e5", "barText": "#202c36", "primary": "#315779", "hover": "#24435f",
+      "roleOverrides": {
+        "canvas": {"radius": 0}, "panel": {"radius": 0, "border_width": 1},
+        "button": {"radius": 0}, "indicator": {"radius": 0}, "track": {"radius": 0}, "knob": {"radius": 0}
+      }
+    },
+    "space": {
+      "name": "Космическое будущее",
+      "canvas": "#06141e", "surface": "#0c2230", "surfaceAlt": "#153547",
+      "border": "#38788d", "text": "#d2f6ff", "muted": "#98c5d0",
+      "bar": "#041017", "barText": "#d2f6ff", "primary": "#36d0ef", "hover": "#10abc4",
+      "roleOverrides": {
+        "canvas": {"radius": 0}, "panel": {"radius": 0, "border_width": 2},
+        "button": {"radius": 0, "border_width": 1, "border_color": "#8be9ff"},
+        "indicator": {"radius": 0}, "track": {"radius": 0, "border_width": 1}, "knob": {"radius": 0, "border_width": 1}
+      }
+    },
+    "pony": {
+      "name": "Розовый пони",
+      "canvas": "#fff2f7", "surface": "#ffe2ee", "surfaceAlt": "#f7d0e1",
+      "border": "#ca8aa5", "text": "#542c41", "muted": "#87536a",
+      "bar": "#f8d7e6", "barText": "#542c41", "primary": "#f0a0c4", "hover": "#de78a5",
+      "roleOverrides": {
+        "canvas": {"radius": 0}, "panel": {"radius": 18, "border_width": 1},
+        "button": {"radius": 18}, "indicator": {"radius": 18, "line_color": "#b83d77"}, "track": {"radius": 18}, "knob": {"radius": 18}
+      }
+    }
+  }
+}

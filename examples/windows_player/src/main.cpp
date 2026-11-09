@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Oleg Kozhevnikov
 #include "application.hpp"
+#include "web_server.hpp"
 #include <windows.h>
 #include <commdlg.h>
 #include <atomic>
@@ -19,11 +20,12 @@ namespace
 {
 	std::atomic<bool> stopping{};
 	std::atomic<int> requested_scheme{-1};
+	std::atomic<bool> requested_layout_debug{};
 	WNDPROC original_proc{};
 	lv_indev_t *pointer{}; // Accessed only under the LVGL lock.
 	std::mutex output_mutex;
 	std::string last_error;
-	constexpr UINT open_id = 100, reload_id = 101, exit_id = 102, details_id = 103;
+	constexpr UINT open_id = 100, reload_id = 101, exit_id = 102, details_id = 103, layout_debug_id = 104;
 	constexpr UINT scheme_first = 200;
 	int minimum_width = 800, minimum_height = 480;
 	RECT window_extent(HWND window, int width, int height)
@@ -98,6 +100,7 @@ namespace
 
 				return 0;
 			}
+			case layout_debug_id: requested_layout_debug = true; return 0;
 			case reload_id: emit(DataValue::Object{{"event", "reload"}}); return 0;
 			case exit_id: stopping = true; return 0;
 			case details_id: {
@@ -192,30 +195,49 @@ namespace
 int wmain(int argc, wchar_t **argv)
 {
 	try {
-		bool catalog = false, bridge = false, hidden = false; int width = 800, height = 480;
-		std::filesystem::path path, schemes; std::string entry, scheme, title = "NaCBORUIforLVGL";
+		bool catalog = false, bridge = false, hidden = false, graphics = false;
+		int width = 800, height = 480, api_port = -1;
+		std::filesystem::path path, schemes, store, web_root, base_recovery;
+		std::string entry, scheme, title = "NaCBORUIforLVGL";
 		for(int i = 1; i < argc; ++i)
 		{
 			std::wstring option = argv[i];
-			if(option == L"--capabilities") catalog = true;
+			if(option == L"--profile" && i + 1 < argc)
+			{
+				const auto profile = std::wstring(argv[++i]); if(profile != L"system" && profile != L"graphics")
+					throw std::runtime_error("Invalid profile");
+
+				graphics = profile == L"graphics";
+			}
+			else if(option == L"--capabilities") catalog = true;
 			else if(option == L"--stdio") bridge = true;
 			else if(option == L"--hidden") hidden = true;
+			else if(option == L"--api") api_port = 5300;
+			else if(i + 1 < argc && option == L"--api-port")
+			{
+				const std::wstring value = argv[++i]; size_t consumed = 0; api_port = std::stoi(value, &consumed);
+				if(consumed != value.size() || api_port < 0 || api_port > 65535 || api_port == 443)
+					throw std::runtime_error("Invalid API port");
+			}
+			else if(i + 1 < argc && option == L"--web-root") web_root = argv[++i];
 			else if(i + 1 < argc && option == L"--schemes") schemes = argv[++i];
 			else if(i + 1 < argc && option == L"--scheme") scheme = utf8(argv[++i]);
 			else if(i + 1 < argc && option == L"--project") path = argv[++i];
+			else if(i + 1 < argc && option == L"--base-recovery") base_recovery = argv[++i];
+			else if(i + 1 < argc && option == L"--store") store = argv[++i];
 			else if(i + 1 < argc && option == L"--entry") entry = utf8(argv[++i]);
 			else if(i + 1 < argc && option == L"--title") title = utf8(argv[++i]);
 			else if(i + 1 < argc && option == L"--width") width = std::stoi(argv[++i]);
 			else if(i + 1 < argc && option == L"--height") height = std::stoi(argv[++i]);
 			else
 				throw std::runtime_error(
-						  "Usage: nacborui_player --project FILE.cbor [--width N --height N --entry SCREEN] or --capabilities. Use run.mjs to open JSON.");
+						  "Usage: nacborui_player --project FILE.cbor [--width N --height N --entry SCREEN --store PREFIX] or --capabilities. Use run.mjs to open JSON.");
 		}
 		if(width < 64 || height < 64 || width > 4096 || height > 4096 || int64_t(width) * height > 8 * 1024 * 1024)
 			throw std::runtime_error("Display dimensions out of range");
 
 		lv_init();
-		if(catalog) {Application app; std::cout << app.capabilities() << std::endl; return 0;}
+		if(catalog) {Application app(graphics); std::cout << app.capabilities() << std::endl; return 0;}
 
 		if(path.empty())
 			throw std::runtime_error(
@@ -239,8 +261,12 @@ int wmain(int argc, wchar_t **argv)
 		resize_client(window, width, height);
 		std::unique_ptr<Application> app;
 		{
-			UiLock lock; app = std::make_unique<Application>(); std::string error;
+			UiLock lock; app = std::make_unique<Application>(graphics); std::string error;
 			if(!schemes.empty()) app->load_schemes(schemes, scheme);
+
+			if(!store.empty()) app->configure_store(store);
+
+			if(!base_recovery.empty()) app->configure_base_recovery(base_recovery);
 
 			if(!app->load(path, entry, error)) throw std::runtime_error(error);
 
@@ -248,14 +274,28 @@ int wmain(int argc, wchar_t **argv)
 			lv_windows_acquire_keypad_indev(display);
 			lv_windows_acquire_encoder_indev(display);
 		}
+		std::unique_ptr<WindowsWebServer> web;
+		if(api_port >= 0)
+		{
+			if(web_root.empty())
+				throw std::runtime_error("API requires --web-root with built editor assets");
+
+			web = std::make_unique<WindowsWebServer>(*app, uint16_t(api_port), web_root); web->start();
+			{UiLock lock; app->connection(web->url());}
+			emit(DataValue::Object{{"event", "api_ready"}, {"url", web->url()}});
+		}
+
 		auto appearance_menu = CreatePopupMenu();
 		AppendMenuW(appearance_menu, MF_STRING | MF_GRAYED, 0, L"Цветовая схема");
 		AppendMenuW(appearance_menu, MF_SEPARATOR, 0, nullptr);
 		const auto &choices = app->appearance.choices();
 		for(size_t i = 0; i < choices.size(); ++i)
 			AppendMenuW(appearance_menu, MF_STRING, scheme_first + i, wide(choices[i].title).c_str());
+		AppendMenuW(appearance_menu, MF_SEPARATOR, 0, nullptr);
+		AppendMenuW(appearance_menu, MF_STRING, layout_debug_id, L"Границы и глубина компонентов");
 		InsertMenuW(menu, 1, MF_BYPOSITION | MF_POPUP, reinterpret_cast<UINT_PTR>(appearance_menu), L"Оформление");
 		std::string displayed_scheme;
+		bool displayed_layout_debug = false;
 		const auto refresh_scheme_menu = [&]() {
 				const auto &selected = app->appearance.selected();
 				if(selected == displayed_scheme) return;
@@ -274,13 +314,31 @@ int wmain(int argc, wchar_t **argv)
 				emit(DataValue::Object{{"event", "scheme_changed"}, {"scheme", selected}});
 			};
 		refresh_scheme_menu();
-		app->metrics.start();
+		app->start_metrics();
 		// Test/snapshot sessions remain invisible. Normal launches never activate the window.
 		ShowWindow(window, hidden ? SW_HIDE : SW_SHOWNOACTIVATE);
 		emit(DataValue::Object{{"event", "ready"}, {"width", width}, {"height", height}});
 		Input input;
 		while(!stopping)
 		{
+			if(requested_layout_debug.exchange(false))
+			{
+				UiLock lock;
+				const bool enabled = app->project_service() && app->project_service()->layout_debug();
+				std::string error;
+				app->data.registry.invoke("ui.layout_debug", !enabled, error);
+			}
+
+			{
+				UiLock lock;
+				const bool enabled = app->project_service() && app->project_service()->layout_debug();
+				if(enabled != displayed_layout_debug)
+				{
+					CheckMenuItem(appearance_menu, layout_debug_id,
+					    MF_BYCOMMAND | (enabled ? MF_CHECKED : MF_UNCHECKED));
+					displayed_layout_debug = enabled;
+				}
+			}
 			const auto requested = requested_scheme.exchange(-1);
 			if(requested >= 0 && size_t(requested) < choices.size())
 			{
@@ -358,10 +416,15 @@ int wmain(int argc, wchar_t **argv)
 					}
 				});
 
-			{UiLock lock; app->tick();}
+			{UiLock lock; app->tick(); if(web) web->poll();}
+			DataValue host; bool host_pending = false; {UiLock lock; host_pending = app->host_request(host);}
+			if(host_pending)emit(host);
+
 			refresh_scheme_menu(); // Scheme actions from CBOR pages share the native menu/persistence path.
 			lv_timer_handler(); Sleep(5);
 		}
+		if(web) {web->stop(); web.reset();}
+
 		{UiLock lock; pointer = nullptr; app.reset();}
 		emit(DataValue::Object{{"event", "closed"}});
 		// The process owns the backend thread; no board/network resource is involved.

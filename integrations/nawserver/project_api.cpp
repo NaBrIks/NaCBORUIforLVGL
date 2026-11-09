@@ -191,9 +191,10 @@ bool ProjectApi::begin()
 	jobs_ = xQueueCreate(2, sizeof(std::shared_ptr<Job> *)); return jobs_ != nullptr;
 }
 
-bool ProjectApi::canHandle(NaWServer::Request *request)
+NaWServer::RouteDescriptors ProjectApi::routes() const
 {
-	return request->path() == "/api/project";
+	static const NaWServer::RouteDescriptor descriptor{"/api/project"};
+	return {&descriptor, 1};
 }
 
 void ProjectApi::process()
@@ -385,6 +386,19 @@ void ProjectApi::handle_command(const CborValue &root, NaWServer::Response &resp
 
 		ScreenReply result; if(!run([this, screen](ScreenReply &r){
 			return project_.load_screen(screen, r);
+		}, result, message))
+		{
+			error(response, message); return;
+		}
+
+		json(response, 200, reply(result)); return;
+	}
+
+	if(action == "refresh")
+	{
+		std::string message; ScreenReply result;
+		if(!run([this](ScreenReply &r){
+			return project_.refresh(r);
 		}, result, message))
 		{
 			error(response, message); return;

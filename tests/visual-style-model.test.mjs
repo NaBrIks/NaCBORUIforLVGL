@@ -21,3 +21,8 @@ test('removing a field and expanding size do not leave conflicting setters',()=>
 test('every non-resource editor default is representable by the actual codec',()=>{
  for(const field of styleFields){const method=byName.get(field.name);if(kind(method)==='resource')continue;const doc={scope:'screen',name:'test',props:{[field.name]:defaultValue(method)}};assert.doesNotThrow(()=>encodeStyle(doc,'default'),field.name);}
 });
+
+test('Conflicting style shorthand diagnostics identify both setters for model correction',()=>{
+ assert.throws(()=>encodeStyle({scope:'screen',name:'test',props:{pad_all:8,pad_top:2}},'invalid'),/Overlapping property: pad_top \(pad_all and pad_top\)/);
+ assert.throws(()=>encodeStyle({scope:'screen',name:'test',props:{size:[120,60],width:80}},'invalid'),/Overlapping property: width \(size and width\)/);
+});

@@ -4,6 +4,8 @@
 #include "../../examples/s3_style_lab/main/component_preview.hpp"
 #include "lvgl_cbor/capabilities.hpp"
 #include "lvgl_cbor/screen_runtime.hpp"
+#include "lvgl_cbor/contract.hpp"
+#include "lvgl_cbor/data_registry.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -27,6 +29,22 @@ static std::vector<uint8_t> fixture(const std::string &dir, const char *name)
 	std::ifstream file(dir + "/" + name + ".cbor", std::ios::binary);
 	require(file.good(), name);
 	return {std::istreambuf_iterator<char>(file), {}};
+}
+
+// Construct raw wire packets without the PC authoring validator.
+static std::vector<uint8_t> raw_line_packet(size_t count)
+{
+	using Array = lvgl_cbor::DataValue::Array;
+	using Object = lvgl_cbor::DataValue::Object;
+	Array points;
+	for(size_t i = 0; i < count; ++i)
+		points.emplace_back(Array{int64_t(i), int64_t(i % 100)});
+	const Array line{0, 6, Array{Array{1, "trace"}, Array{256, std::move(points)}}};
+	const Array root{0, 0, Array{lvgl_cbor::DataValue(line)}};
+	return lvgl_cbor::encode_data_value(Object{
+		{"v", lvgl_cbor::screen_contract_version}, {"kind", "screen"}, {"id", "raw-line"},
+		{"name", "raw-line"}, {"abi", lvgl_cbor::screen_contract_sha256},
+		{"style_abi", lvgl_cbor::contract_sha256}, {"size", Array{800, 480}}, {"root", root}});
 }
 
 struct Reentry {
@@ -58,6 +76,36 @@ int main(int argc, char **argv)
 	const lvgl_cbor::Resource resources[]{
 		{"montserrat_28", "const lv_font_t *", &lv_font_montserrat_28},
 		{"montserrat_20", "const lv_font_t *", &lv_font_montserrat_20}};
+	{
+		lvgl_cbor::ScreenRuntime runtime(resources, 2);
+		lvgl_cbor::ScreenReply reply;
+		for(size_t count : {size_t(2), size_t(256)})
+		{
+			const auto packet = raw_line_packet(count);
+			const bool ok = runtime.load(packet.data(), packet.size(), reply);
+			if(!ok)
+				std::fprintf(stderr, "raw line %zu: node=%s opcode=%u %s\n", count, reply.node, reply.opcode,
+				    reply.error);
+
+			require(ok, "raw line boundary accepted");
+			require(runtime.find("trace") && lv_line_get_point_count(runtime.find("trace")) == count,
+			    "raw line retains every boundary point");
+			require(lv_line_get_points(runtime.find("trace"))[count - 1].x == int32_t(count - 1),
+			    "raw line boundary point values survive decode");
+		}
+		auto *live = runtime.root();
+		auto *trace = runtime.find("trace");
+		for(size_t count : {size_t(1), size_t(257)})
+		{
+			const auto packet = raw_line_packet(count);
+			require(!runtime.load(packet.data(), packet.size(), reply) && reply.opcode == 256,
+			    "raw line outside cardinality contract rejected by method");
+			require(runtime.root() == live && lv_screen_active() == live && runtime.find("trace") == trace &&
+			    lv_line_get_point_count(trace) == 256, "raw line boundary failure preserves live screen");
+		}
+		std::puts("Raw CBOR line points: 2/256 accepted, 1/257 rejected with rollback.");
+	}
+
 	{
 		lvgl_cbor::ScreenRuntime runtime(resources, 2);
 		lvgl_cbor::ScreenReply reply;

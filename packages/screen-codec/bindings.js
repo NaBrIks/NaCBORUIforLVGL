@@ -19,7 +19,7 @@ export function methodDataSchema(schema){
  if(s.type==='tuple')return {type:'tuple',items:s.items.map(methodDataSchema)};
  if(s.type==='array')return {...s,items:methodDataSchema(s.items)};
  if(s.type==='object')return {...s,fields:Object.fromEntries(Object.entries(s.fields).map(([key,field])=>[key,methodDataSchema(field)]))};
- if(s.type==='points')return {type:'array',minItems:screenContract.valueRules.points.minItems,maxItems:screenContract.valueRules.points.maxItems,items:{type:'tuple',items:[{type:'integer'},{type:'integer'}]}};
+ if(s.type==='points')return {type:'array',minItems:s.minItems??screenContract.valueRules.points.minItems,maxItems:s.maxItems??screenContract.valueRules.points.maxItems,items:{type:'tuple',items:[{type:'integer',min:s.min??screenContract.valueRules.points.min,max:s.max??screenContract.valueRules.points.max},{type:'integer',min:s.min??screenContract.valueRules.points.min,max:s.max??screenContract.valueRules.points.max}]}};
  return {...s,type:s.type==='resource'?'text':['bool','text','number'].includes(s.type)?s.type:'integer'};
 }
 export function eventValueSchema(family,event){

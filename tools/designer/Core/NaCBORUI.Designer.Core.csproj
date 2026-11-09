@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>NaCBORUI.Designer.Core</RootNamespace>
+    <SplaRoot Condition="'$(SplaRoot)' == ''">$(MSBuildThisFileDirectory)..\..\..\..\..\SPLA</SplaRoot>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(SplaRoot)\src\agent\SPLA.Agent\SPLA.Agent.csproj" />
+    <ProjectReference Include="$(SplaRoot)\src\llm\SPLA.LLM.OpenAiCompat\SPLA.LLM.OpenAiCompat.csproj" />
+    <ProjectReference Include="$(SplaRoot)\src\llm\SPLA.LLM.OpenRouter\SPLA.LLM.OpenRouter.csproj" />
+    <ProjectReference Include="$(SplaRoot)\src\service\SPLA.Mcp.Client\SPLA.Mcp.Client.csproj" />
+    <EmbeddedResource Include="..\..\..\examples\windows_player\assistant-system-prompt.md" LogicalName="NaCBORUI.Designer.Prompts.System.md" />
+    <EmbeddedResource Include="..\..\..\examples\windows_player\assistant-layout-reference.md" LogicalName="NaCBORUI.Designer.Prompts.Layout.md" />
+    <EmbeddedResource Include="..\..\..\examples\windows_player\assistant-styles-reference.md" LogicalName="NaCBORUI.Designer.Prompts.Styles.md" />
+    <Compile Remove="Tests\**\*.cs" />
+  </ItemGroup>
+  <Target Name="CheckSplaSource" BeforeTargets="PrepareForBuild" Condition="!Exists('$(SplaRoot)\src\agent\SPLA.Agent\SPLA.Agent.csproj')">
+    <Error Text="SPLA source is required. Set the SplaRoot MSBuild property to the SPLA checkout; the future SPLA NuGet packages will replace these project references." />
+  </Target>
+</Project>

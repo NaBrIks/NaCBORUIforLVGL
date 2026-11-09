@@ -90,6 +90,8 @@ namespace lvgl_cbor
 		size_t max_bytes = binding_contract::textBytes, min_items{}, max_items{};
 		std::map<std::string, DataSchema> fields;
 		std::shared_ptr<const DataSchema> items;
+		std::string title, description, unit;
+		bool nullable = false;
 		static DataSchema null();
 		static DataSchema boolean();
 		static DataSchema integer(double min = -9007199254740991.0, double max = 9007199254740991.0);
@@ -105,6 +107,7 @@ namespace lvgl_cbor
 		    snapshot_bytes = binding_contract::snapshotBytes,
 		    event_queue = binding_contract::eventQueue,
 		    event_queue_bytes = binding_contract::eventQueueBytes;
+		size_t groups = 32, metadata_bytes = 32768, schema_nodes = 1024;
 	};
 	using DataWrite = std::function<bool (const DataPath &, const DataValue &, std::string &)>;
 	using DataActionHandler = std::function<bool (const DataValue &, std::string &)>;
@@ -113,12 +116,39 @@ namespace lvgl_cbor
 		DataSchema schema;
 		DataWrite write{};
 		std::string title{};
+		std::string description{}, group{};
 	};
 	struct DataAction {
 		std::string name;
 		DataSchema schema;
 		DataActionHandler invoke;
 		std::string title{};
+		std::string description{}, group{};
+	};
+	struct DataGroup {
+		std::string name, title, description, parent;
+	};
+	struct DataQuery {
+		enum class Kind { Groups, Sources, Actions, Fields, Values };
+		Kind kind = Kind::Groups;
+		std::string group, prefix, name, path;
+		bool descendants = false, detail = false;
+		size_t offset = 0, limit = 16, max_bytes = 4096;
+		uint64_t catalog_revision = 0;
+	};
+	bool parse_data_query(const DataValue &, DataQuery &, std::string &error);
+	class DataView
+	{
+	public:
+		struct Impl;
+		DataView() = default;
+		uint64_t catalog_revision() const;
+		uint64_t revision() const;
+		bool query_json(const DataQuery &, std::string &json, std::string &error) const;
+	private:
+		std::shared_ptr<const Impl> impl_;
+		explicit DataView(std::shared_ptr<const Impl>);
+		friend class DataRegistry;
 	};
 	bool decode_data_value(const uint8_t *, size_t, DataValue &, std::string &,
 	    size_t max_bytes = binding_contract::valueBytes,
@@ -149,6 +179,7 @@ namespace lvgl_cbor
 		~DataRegistry();
 		DataRegistry(const DataRegistry &) = delete;
 		DataRegistry &operator=(const DataRegistry &) = delete;
+		bool add_group(DataGroup, std::string &);
 		bool add_source(DataSource, std::string &);
 		bool add_action(DataAction, std::string &);
 		bool publish(const std::string &, DataValue, std::string &, DataState = DataState::Known);
@@ -161,10 +192,15 @@ namespace lvgl_cbor
 		const DataValue *read(const std::string &, const DataPath &path = {},
 		    DataState *state = nullptr) const;
 		const DataSource *source(const std::string &) const;
+		std::vector<std::string> source_names() const;
 		const DataAction *action(const std::string &) const;
 		bool invoke(const std::string &, const DataValue &, std::string &);
 		bool write(const std::string &, const DataPath &, const DataValue &, std::string &);
 		uint64_t revision() const;
+		uint64_t catalog_revision() const;
+		// Build in the UI context; immutable shared records can then be queried from HTTP.
+		DataView view() const;
+		bool query_json(const DataQuery &, std::string &, std::string &) const;
 		DataLimits limits() const;
 		size_t demand(const std::string &) const;
 		DemandToken retain(const std::string &);

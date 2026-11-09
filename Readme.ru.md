@@ -62,16 +62,17 @@ npm run build
 ```
 
 GitHub CLI либо Git должен иметь доступ к репозиторию. Требование закреплённого
-Vite к Node.js: `^20.19.0 || >=22.12.0`. `npm run sim` запускает редактор в браузере,
+Vite к Node.js: `^20.19.0 || >=22.12.0`. `npm run sim` собирает редактор и запускает native target с NaWServer,
 в Windows также есть `RunSimulator.cmd`. Этот CSS-предпросмотр **не исполняет LVGL**.
 
 Для нативных тестов и Windows-проигрывателя нужны Visual Studio C++ Build Tools
-с Windows SDK, CMake 3.24+, Git и Node.js. Две открытые зависимости скачиваются явно;
-подготовленная S3-демка, NaWServer и ESP-IDF для этого варианта не нужны:
+с Windows SDK, CMake 3.24+, Git и Node.js. Зависимости LVGL, TinyCBOR и NaWServer скачиваются явно;
+подготовленная S3-демка и ESP-IDF для этого варианта не нужны:
 
 ```powershell
 git clone --depth 1 --branch v9.6.0 https://github.com/lvgl/lvgl.git local/deps/lvgl
 git clone --depth 1 --branch v0.6.1 https://github.com/intel/tinycbor.git local/deps/tinycbor
+git clone --depth 1 https://github.com/NaBrIks/NaWServer.git local/deps/NaWServer
 ./tools/test_native.ps1 -LvglSource "$PWD/local/deps/lvgl" -TinyCborSource "$PWD/local/deps/tinycbor"
 ./examples/windows_player/build.ps1 -LvglSource "$PWD/local/deps/lvgl" -TinyCborSource "$PWD/local/deps/tinycbor"
 npm run player
@@ -117,8 +118,13 @@ UTF-8. Число объектов, размеры значений, вложе�
 виджеты LVGL и произвольный HTML/CSS не обещаются. Windows явно выбирает
 `ScreenViewport::Display`; `Declared` с проверкой размера остаётся режимом по
 умолчанию. Пиксельную разметку чужого проекта нужно отдельно сделать адаптивной.
-Проигрыватель не содержит HTTP/WS-сервера редактора и отдельного дистрибутива Node.js.
+Проигрыватель раздаёт построенный редактор и HTTP/WS API через NaWServer.
 [Датированные отчёты](docs/reviews/README.md) отделяют проверки ПК от аппаратных.
+
+`npm run player:graphics` открывает отдельную страницу графики Windows-демки:
+настоящие LVGL BIN/PNG/JPEG/BMP/GIF/SVG, пиксельные форматы и сравнение кривых.
+[Руководство](docs/readme_graphics_ru.md); профиль галереи отключается через
+`LVGL_CBOR_GRAPHICS_GALLERY=OFF`.
 
 ## Документация, лицензии и поддержка
 
@@ -141,3 +147,29 @@ UTF-8. Число объектов, размеры значений, вложе�
 
 Вклад в проект и добровольные донаты приветствуются. Платёжная ссылка не настроена;
 донат необязателен и не меняет лицензионные условия.
+
+Реестр содержит группы, описания и единицы измерения, выдаёт ограниченные страницы
+через существующий HTTP/MCP API. Необязательный `DataHistory` публикует обычные
+источники независимо от времени жизни страницы. См.
+[каталог и историю](docs/readme_data_catalog_ru.md).
+Проверка настоящего Windows LVGL и MCP: `npm run player:test-catalog`.
+
+Собственные схемы через существующие MCP-операции проекта и стек стилей: [руководство](docs/readme_appearance_ru.md).
+
+`npm run player` запускает также постоянный loopback API на `http://127.0.0.1:5300`.
+Проектный MCP `nacborui_windows` использует тот же адаптер, что и устройство;
+preview, сохранение с revision, стили, биндинги и события исполняются общими
+нативными сервисами. Проверка: `npm run player:test-api`.
+См. [Windows API](docs/readme_windows_api_ru.md).
+
+- [Графика LVGL: форматы изображений, кривые и цена на МК](docs/readme_graphics_ru.md)
+
+- [Две Windows-демки, живой сайт и встроенный агент](docs/readme_graphics_studio_ru.md)
+
+### MAUI-конструктор
+
+[Штатное приложение Windows/Android](docs/readme_maui_designer_ru.md) поставляется
+в `tools/designer`, отдельно от примеров: отображение
+Blazor Hybrid, история/модель/MCP из SPLA. Для первого телефонного прототипа
+используется native NaWServer MCP gateway к Windows LVGL; прямой MCP МК и голос
+остаются планом.

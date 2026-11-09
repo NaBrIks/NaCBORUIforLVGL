@@ -9,8 +9,13 @@ export function generateWidgetDispatch(contract) {
     for(const m of family.methods.filter(m=>m.fixed?.length))
       out+=`static void adapt_${name}_${m.opcode}(lv_obj_t *obj, ${m.parameters.map((p,i)=>`${cppType(p)} a${i}`).join(', ')}) { ${m.c}(obj, ${[...m.parameters.map((_,i)=>`a${i}`),...m.fixed].join(', ')}); }\n`;
     out+=`static bool execute_${name}(lv_obj_t *obj, uint16_t method, CborValue &cursor, WidgetContext &context) {\n  switch (method) {\n`;
-    for(const m of family.methods.filter(m=>!m.retired))
-      out+=`  case ${m.opcode}: return invoke_widget(${m.fixed?.length?`adapt_${name}_${m.opcode}`:m.c}, obj, cursor, context);\n`;
+    for(const m of family.methods.filter(m=>!m.retired)) {
+      const invoke=`invoke_widget(${m.fixed?.length?`adapt_${name}_${m.opcode}`:m.c}, obj, cursor, context)`;
+      // Built-in line cardinality belongs to its contract, not generic native PointSpan arguments.
+      if(name==='line'&&m.alias==='points')
+        out+=`  case ${m.opcode}: {\n    size_t count;\n    if (!cbor_value_is_array(&cursor) || cbor_value_get_array_length(&cursor, &count) != CborNoError || count < line_min_points || count > line_max_points) return false;\n    return ${invoke};\n  }\n`;
+      else out+=`  case ${m.opcode}: return ${invoke};\n`;
+    }
     out+='  default: return false;\n  }\n}\n';
     if(family.feature)out+='#endif\n';
   }

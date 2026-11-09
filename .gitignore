@@ -58,3 +58,14 @@ examples/*/sdkconfig.old
 # Generated board configuration profiles
 examples/*/sdkconfig.s3*
 examples/lilygo_t_display_s3/sdkconfig.lilygo*
+
+# Small LVGL image example, not a firmware build output.
+!/examples/windows_player/assets/graphics/sample.bin
+
+# .NET/MAUI outputs and Android signing material
+**/bin/
+**/obj/
+*.apk
+*.aab
+*.keystore
+*.jks

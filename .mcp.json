@@ -3,16 +3,46 @@
     "semaps": {
       "type": "stdio",
       "command": "semaps",
-      "args": ["mcp"]
+      "args": [
+        "mcp"
+      ]
     },
     "nacborui": {
       "type": "stdio",
       "command": "node",
-      "args": ["integrations/mcp/index.js"],
+      "args": [
+        "integrations/mcp/index.js"
+      ],
       "env": {
         "LVGL_CBOR_ALLOW_PREVIEW": "0",
         "LVGL_CBOR_ALLOW_SAVE": "0",
         "LVGL_CBOR_ALLOW_DATA": "0"
+      }
+    },
+    "nacborui_windows": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "integrations/mcp/index.js"
+      ],
+      "env": {
+        "LVGL_CBOR_DEVICE": "http://127.0.0.1:5300",
+        "LVGL_CBOR_ALLOW_PREVIEW": "1",
+        "LVGL_CBOR_ALLOW_SAVE": "1",
+        "LVGL_CBOR_ALLOW_DATA": "1"
+      }
+    },
+    "nacborui_graphics": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "integrations/mcp/index.js"
+      ],
+      "env": {
+        "LVGL_CBOR_DEVICE": "http://127.0.0.1:5301",
+        "LVGL_CBOR_ALLOW_PREVIEW": "1",
+        "LVGL_CBOR_ALLOW_SAVE": "1",
+        "LVGL_CBOR_ALLOW_DATA": "1"
       }
     }
   }

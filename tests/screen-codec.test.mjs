@@ -41,3 +41,9 @@ test('screen ABI rejects changed factory, signature or method and preserves exis
  const retired=structuredClone(current);retired.widgets[1].methods[0].retired=true;assertScreenAbiCompatible(lock,retired);assert.throws(()=>assertScreenAbiCompatible(retired,current));
  const styleLock=JSON.parse(await readFile(new URL('../contracts/style-abi-v2.lock.json',import.meta.url),'utf8'));assert.equal(contract.methods.find(m=>m.alias==='x').opcode,styleLock.methods.find(m=>m.alias==='x').opcode);assert.deepEqual(decodeScreenPacket(encodeScreen(await load('component'),'mount')).get('bindings'),[]);
 });
+
+test('Nested node validation identifies the exact authored path without changing the document',async()=>{
+ const doc=await load('absolute');doc.root.children=[{id:'group',type:'obj',children:[{type:'label',props:{text:'Missing ID'}}]}];const original=structuredClone(doc);
+ assert.throws(()=>encodeScreen(doc,'invalid'),/Node ID at root\.children\[0\]\.children\[0\]/);assert.deepEqual(doc,original);
+ doc.root.children[0].children[0].id='root';assert.throws(()=>encodeScreen(doc,'invalid'),/Duplicate node ID root at root\.children\[0\]\.children\[0\]/);
+});

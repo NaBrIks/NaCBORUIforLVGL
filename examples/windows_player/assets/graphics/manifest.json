@@ -1,0 +1,62 @@
+{
+  "rgb565": {
+    "bytes": 12288,
+    "sha256": "13b13c3eaae21a5ad81b798523f575bf5b9474768cf61a0e55ed93677da73d65"
+  },
+  "rgb888": {
+    "bytes": 18432,
+    "sha256": "8c796c46bf16394863236588f10a91d31819f82d224e45a288a15979b25ebea1"
+  },
+  "xrgb8888": {
+    "bytes": 24576,
+    "sha256": "67fc6438f1f811b59c5cc645e807bec062abc214e0cb7e6bebf4d031af259255"
+  },
+  "argb8888": {
+    "bytes": 24576,
+    "sha256": "2408bd87b4fb3feab781b49a2cd1846d6f722b67343be01c07bdf6805fe6a630"
+  },
+  "a8": {
+    "bytes": 6144,
+    "sha256": "58c146d26f5fd5cb1ca53533cbe4e8cc454c114324590759915233a9c7768251"
+  },
+  "checker": {
+    "bytes": 38016,
+    "sha256": "1e49034e25232882bc855a84de20d73d825b7ce839097f3376bffeeb6c757e56"
+  },
+  "landscape_svg": {
+    "bytes": 1527,
+    "sha256": "5d6d9c5b27ea3fdb4b06dd8670b0f3a60e4bbee3b17bbdf258c62c134321d367"
+  },
+  "bin": {
+    "bytes": 12300,
+    "sha256": "fcbf178842d06610e8f198a2f8857bb2b9977a02a97ccbf42a530dbdf10faea9"
+  },
+  "i4": {
+    "bytes": 3136,
+    "sha256": "2c2c88a15fc1a52271615a428e84d6e4a2c54c1a931bef23173d652fd7b2150a"
+  },
+  "png": {
+    "bytes": 979,
+    "sha256": "75ce2f5003ca21af6d83bd60aa92968578794459c73d85eb27b0f31b6b854424"
+  },
+  "jpeg": {
+    "bytes": 3271,
+    "sha256": "eb75b1959813193ff65ab32b01061ae1f7369fb1d52a127af4e55ca0540b641e"
+  },
+  "bmp": {
+    "bytes": 18486,
+    "sha256": "b3b3b0a34214d3cce98cc8d7edb9060c8bc969a30aa82fe976feef8bfffbc001"
+  },
+  "gif": {
+    "bytes": 2282,
+    "sha256": "07820dbd8e830beb11ffb81334dbc1f307180a4cc72d2de7775d2e5100763de3"
+  },
+  "tabler_heart": {
+    "bytes": 295,
+    "sha256": "ab6113a074e2c7a9717a409010ff408dcbdbaad1f3d44dbf0e8f1751e98cfdba"
+  },
+  "tabler_cloud": {
+    "bytes": 478,
+    "sha256": "a99db57e762f2afabdb6dbd95355ffe1e384a2ad44b5941912a330426793e5ed"
+  }
+}

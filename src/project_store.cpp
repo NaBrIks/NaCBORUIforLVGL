@@ -7,6 +7,7 @@
 #include <limits>
 #ifdef _WIN32
 #include <io.h>
+#include <filesystem>
 #else
 #include <unistd.h>
 #endif
@@ -15,10 +16,19 @@ namespace lvgl_cbor
 	using namespace project_detail;
 	namespace
 	{
+		FILE *open_file(const std::string &path, bool write)
+		{
+#ifdef _WIN32
+			return _wfopen(std::filesystem::u8path(path).c_str(), write ? L"wb" : L"rb");
+#else
+			return std::fopen(path.c_str(), write ? "wb" : "rb");
+#endif
+		}
+
 		bool read_file(const std::string &path, std::vector<uint8_t> &out, size_t max_bytes, bool &missing,
 		    std::string &error)
 		{
-			missing = false; FILE *file = std::fopen(path.c_str(), "rb");
+			missing = false; FILE *file = open_file(path, false);
 			if(!file)
 			{
 				missing = errno == ENOENT; if(missing)
@@ -138,7 +148,7 @@ namespace lvgl_cbor
 		append(bytes, payload.size()); bytes.insert(bytes.end(), payload.begin(), payload.end());
 		append(bytes, checksum(bytes.data(), bytes.size()));
 		const unsigned next_slot = generation_ ? 1 - slot_ : 0;
-		FILE *file = std::fopen((prefix_ + "." + std::to_string(next_slot)).c_str(), "wb"); if(!file)
+		FILE *file = open_file(prefix_ + "." + std::to_string(next_slot), true); if(!file)
 			return fail(error, "project_file_open_write");
 
 		bool ok = std::fwrite(bytes.data(), 1, bytes.size(), file) == bytes.size() && std::fflush(file) == 0;

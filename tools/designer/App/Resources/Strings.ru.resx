@@ -1,0 +1,378 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="API key" xml:space="preserve">
+    <value>Ключ API</value>
+  </data>
+  <data name="Core не вернул кадр." xml:space="preserve">
+    <value>Core не вернул кадр.</value>
+  </data>
+  <data name="Enter — отправить · Shift+Enter — новая строка" xml:space="preserve">
+    <value>Enter — отправить · Shift+Enter — новая строка</value>
+  </data>
+  <data name="G — Grid, F — Flex; выключено — номер слоя" xml:space="preserve">
+    <value>G — Grid, F — Flex; выключено — номер слоя</value>
+  </data>
+  <data name="MCP URL" xml:space="preserve">
+    <value>URL MCP</value>
+  </data>
+  <data name="MCP server ID" xml:space="preserve">
+    <value>ID сервера MCP</value>
+  </data>
+  <data name="MCP отключено" xml:space="preserve">
+    <value>MCP отключено</value>
+  </data>
+  <data name="MCP подключено" xml:space="preserve">
+    <value>MCP подключено</value>
+  </data>
+  <data name="MCP: {0} инструментов" xml:space="preserve">
+    <value>MCP: {0} инструментов</value>
+  </data>
+  <data name="Model ID" xml:space="preserve">
+    <value>ID модели</value>
+  </data>
+  <data name="Model endpoint" xml:space="preserve">
+    <value>API модели</value>
+  </data>
+  <data name="RGB рамки" xml:space="preserve">
+    <value>RGB рамки</value>
+  </data>
+  <data name="RGB фона" xml:space="preserve">
+    <value>RGB фона</value>
+  </data>
+  <data name="{0}: слой {1}" xml:space="preserve">
+    <value>{0}: слой {1}</value>
+  </data>
+  <data name="Адрес MCP и параметры модели" xml:space="preserve">
+    <value>Адрес MCP и параметры модели</value>
+  </data>
+  <data name="В очереди" xml:space="preserve">
+    <value>В очереди</value>
+  </data>
+  <data name="В очередь" xml:space="preserve">
+    <value>В очередь</value>
+  </data>
+  <data name="Вкл" xml:space="preserve">
+    <value>Вкл</value>
+  </data>
+  <data name="Вложения" xml:space="preserve">
+    <value>Вложения</value>
+  </data>
+  <data name="Возможности модели ещё не запрошены" xml:space="preserve">
+    <value>Возможности модели ещё не запрошены</value>
+  </data>
+  <data name="Вы" xml:space="preserve">
+    <value>Вы</value>
+  </data>
+  <data name="Выберите JSON" xml:space="preserve">
+    <value>Выберите JSON</value>
+  </data>
+  <data name="Выберите изображение" xml:space="preserve">
+    <value>Выберите изображение</value>
+  </data>
+  <data name="Выкл" xml:space="preserve">
+    <value>Выкл</value>
+  </data>
+  <data name="Готово" xml:space="preserve">
+    <value>Готово</value>
+  </data>
+  <data name="Границы и цифры глубины компонентов; проект не изменяется" xml:space="preserve">
+    <value>Границы и цифры глубины компонентов; проект не изменяется</value>
+  </data>
+  <data name="Диагностика" xml:space="preserve">
+    <value>Диагностика</value>
+  </data>
+  <data name="Диагностика разметки" xml:space="preserve">
+    <value>Диагностика разметки</value>
+  </data>
+  <data name="Для телефона по USB: adb reverse tcp:5302 tcp:5302, затем MCP URL http://127.0.0.1:5302/mcp. Для эмулятора: http://10.0.2.2:5302/mcp." xml:space="preserve">
+    <value>Для телефона по USB: adb reverse tcp:5302 tcp:5302, затем MCP URL http://127.0.0.1:5302/mcp. Для эмулятора: http://10.0.2.2:5302/mcp.</value>
+  </data>
+  <data name="Добавить изображение" xml:space="preserve">
+    <value>Добавить изображение</value>
+  </data>
+  <data name="Дождитесь завершения остановки. Запрос сохранён." xml:space="preserve">
+    <value>Дождитесь завершения остановки. Запрос сохранён.</value>
+  </data>
+  <data name="Доступные модели" xml:space="preserve">
+    <value>Доступные модели</value>
+  </data>
+  <data name="Закрыть" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="Закрыть настройки" xml:space="preserve">
+    <value>Закрыть настройки</value>
+  </data>
+  <data name="Изображение больше 8 МБ." xml:space="preserve">
+    <value>Изображение больше 8 МБ.</value>
+  </data>
+  <data name="Кадр ещё не получен" xml:space="preserve">
+    <value>Кадр ещё не получен</value>
+  </data>
+  <data name="Конструктор интерфейса" xml:space="preserve">
+    <value>Конструктор интерфейса</value>
+  </data>
+  <data name="Контекст" xml:space="preserve">
+    <value>Контекст</value>
+  </data>
+  <data name="Копировать экран в буфер" xml:space="preserve">
+    <value>Копировать экран в буфер</value>
+  </data>
+  <data name="Модели" xml:space="preserve">
+    <value>Модели</value>
+  </data>
+  <data name="Модель" xml:space="preserve">
+    <value>Модель</value>
+  </data>
+  <data name="Модель не поддерживает рассуждения" xml:space="preserve">
+    <value>Модель не поддерживает рассуждения</value>
+  </data>
+  <data name="Модель отвечает" xml:space="preserve">
+    <value>Модель отвечает</value>
+  </data>
+  <data name="Модель рассуждает всегда" xml:space="preserve">
+    <value>Модель рассуждает всегда</value>
+  </data>
+  <data name="Можно приложить изображение или JSON. Изображения и JSON остаются в истории чата." xml:space="preserve">
+    <value>Можно приложить изображение или JSON. Изображения и JSON остаются в истории чата.</value>
+  </data>
+  <data name="Настоящий дисплей · MCP" xml:space="preserve">
+    <value>Настоящий дисплей · MCP</value>
+  </data>
+  <data name="Настройка применяется к следующему отправленному сообщению" xml:space="preserve">
+    <value>Настройка применяется к следующему отправленному сообщению</value>
+  </data>
+  <data name="Настройки" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="Настройки MCP изменены — переподключитесь" xml:space="preserve">
+    <value>Настройки MCP изменены — переподключитесь</value>
+  </data>
+  <data name="Настройки диагностики разметки" xml:space="preserve">
+    <value>Настройки диагностики разметки</value>
+  </data>
+  <data name="Не более 8 вложений в одном сообщении." xml:space="preserve">
+    <value>Не более 8 вложений в одном сообщении.</value>
+  </data>
+  <data name="Не более 8 вложений." xml:space="preserve">
+    <value>Не более 8 вложений.</value>
+  </data>
+  <data name="Не более 8 изображений за одну вставку." xml:space="preserve">
+    <value>Не более 8 изображений за одну вставку.</value>
+  </data>
+  <data name="Не подключено" xml:space="preserve">
+    <value>Не подключено</value>
+  </data>
+  <data name="Не удалось прочитать буфер." xml:space="preserve">
+    <value>Не удалось прочитать буфер.</value>
+  </data>
+  <data name="Некорректное изображение буфера." xml:space="preserve">
+    <value>Некорректное изображение буфера.</value>
+  </data>
+  <data name="Непрозрачность фона" xml:space="preserve">
+    <value>Непрозрачность фона</value>
+  </data>
+  <data name="Новый чат" xml:space="preserve">
+    <value>Новый чат</value>
+  </data>
+  <data name="Обновить кадр" xml:space="preserve">
+    <value>Обновить кадр</value>
+  </data>
+  <data name="Обычный" xml:space="preserve">
+    <value>Обычный</value>
+  </data>
+  <data name="Ожидает продолжения" xml:space="preserve">
+    <value>Ожидает продолжения</value>
+  </data>
+  <data name="Ожидание остановлено" xml:space="preserve">
+    <value>Ожидание остановлено</value>
+  </data>
+  <data name="Опишите экран или правку" xml:space="preserve">
+    <value>Опишите экран или правку</value>
+  </data>
+  <data name="Опишите, что нужно создать или изменить…" xml:space="preserve">
+    <value>Опишите, что нужно создать или изменить…</value>
+  </data>
+  <data name="Остановить" xml:space="preserve">
+    <value>Остановить</value>
+  </data>
+  <data name="Ответ поступает" xml:space="preserve">
+    <value>Ответ поступает</value>
+  </data>
+  <data name="Отправить" xml:space="preserve">
+    <value>Отправить</value>
+  </data>
+  <data name="Очередь приостановлена" xml:space="preserve">
+    <value>Очередь приостановлена</value>
+  </data>
+  <data name="Ошибка" xml:space="preserve">
+    <value>Ошибка</value>
+  </data>
+  <data name="Ошибок нет" xml:space="preserve">
+    <value>Ошибок нет</value>
+  </data>
+  <data name="Ошибок нет. " xml:space="preserve">
+    <value>Ошибок нет. </value>
+  </data>
+  <data name="Переподключить" xml:space="preserve">
+    <value>Переподключить</value>
+  </data>
+  <data name="По умолчанию" xml:space="preserve">
+    <value>По умолчанию</value>
+  </data>
+  <data name="Поддерживаются только изображения и JSON." xml:space="preserve">
+    <value>Поддерживаются только изображения и JSON.</value>
+  </data>
+  <data name="Подключение" xml:space="preserve">
+    <value>Подключение</value>
+  </data>
+  <data name="Подключение MCP" xml:space="preserve">
+    <value>Подключение MCP</value>
+  </data>
+  <data name="Подключение отменено" xml:space="preserve">
+    <value>Подключение отменено</value>
+  </data>
+  <data name="Подключено" xml:space="preserve">
+    <value>Подключено</value>
+  </data>
+  <data name="Подключите MCP" xml:space="preserve">
+    <value>Подключите MCP</value>
+  </data>
+  <data name="Подключите MCP и выберите модель в настройках. Введённый запрос сохранён." xml:space="preserve">
+    <value>Подключите MCP и выберите модель в настройках. Введённый запрос сохранён.</value>
+  </data>
+  <data name="Подключить" xml:space="preserve">
+    <value>Подключить</value>
+  </data>
+  <data name="Подробности" xml:space="preserve">
+    <value>Подробности</value>
+  </data>
+  <data name="Подробности состояния" xml:space="preserve">
+    <value>Подробности состояния</value>
+  </data>
+  <data name="Подробный" xml:space="preserve">
+    <value>Подробный</value>
+  </data>
+  <data name="Последний полученный кадр дисплея" xml:space="preserve">
+    <value>Последний полученный кадр дисплея</value>
+  </data>
+  <data name="Последний фактический кадр LVGL" xml:space="preserve">
+    <value>Последний фактический кадр LVGL</value>
+  </data>
+  <data name="Предпросмотр LVGL" xml:space="preserve">
+    <value>Предпросмотр LVGL</value>
+  </data>
+  <data name="Прикрепить JSON" xml:space="preserve">
+    <value>Прикрепить JSON</value>
+  </data>
+  <data name="Провайдер" xml:space="preserve">
+    <value>Провайдер</value>
+  </data>
+  <data name="Провайдер не объявил возможности рассуждений" xml:space="preserve">
+    <value>Провайдер не объявил возможности рассуждений</value>
+  </data>
+  <data name="Проверить JSON" xml:space="preserve">
+    <value>Проверить JSON</value>
+  </data>
+  <data name="Продолжить" xml:space="preserve">
+    <value>Продолжить</value>
+  </data>
+  <data name="Развернуть предпросмотр" xml:space="preserve">
+    <value>Развернуть предпросмотр</value>
+  </data>
+  <data name="Размер предпросмотра" xml:space="preserve">
+    <value>Размер предпросмотра</value>
+  </data>
+  <data name="Рамка" xml:space="preserve">
+    <value>Рамка</value>
+  </data>
+  <data name="Рассуждения" xml:space="preserve">
+    <value>Рассуждения</value>
+  </data>
+  <data name="Режим ответа" xml:space="preserve">
+    <value>Режим ответа</value>
+  </data>
+  <data name="Сессия Core ещё не создана." xml:space="preserve">
+    <value>Сессия Core ещё не создана.</value>
+  </data>
+  <data name="Слой" xml:space="preserve">
+    <value>Слой</value>
+  </data>
+  <data name="Сменить тему" xml:space="preserve">
+    <value>Сменить тему</value>
+  </data>
+  <data name="Сначала получите кадр дисплея." xml:space="preserve">
+    <value>Сначала получите кадр дисплея.</value>
+  </data>
+  <data name="События сессии" xml:space="preserve">
+    <value>События сессии</value>
+  </data>
+  <data name="Сообщение" xml:space="preserve">
+    <value>Сообщение</value>
+  </data>
+  <data name="Сохранить" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="Токены по данным провайдера. Контекст — вход последнего запроса; лимит из каталога модели. Σ — расход с начала запуска приложения." xml:space="preserve">
+    <value>Токены по данным провайдера. Контекст — вход последнего запроса; лимит из каталога модели. Σ — расход с начала запуска приложения.</value>
+  </data>
+  <data name="Толщина рамки" xml:space="preserve">
+    <value>Толщина рамки</value>
+  </data>
+  <data name="Только :free" xml:space="preserve">
+    <value>Только :free</value>
+  </data>
+  <data name="Удалить {0}" xml:space="preserve">
+    <value>Удалить {0}</value>
+  </data>
+  <data name="Удалить вложение" xml:space="preserve">
+    <value>Удалить вложение</value>
+  </data>
+  <data name="Уровень" xml:space="preserve">
+    <value>Уровень</value>
+  </data>
+  <data name="Уровень рассуждений" xml:space="preserve">
+    <value>Уровень рассуждений</value>
+  </data>
+  <data name="Устройство не объявило команду диагностики разметки" xml:space="preserve">
+    <value>Устройство не объявило команду диагностики разметки</value>
+  </data>
+  <data name="Файл больше допустимого предела {0} КБ." xml:space="preserve">
+    <value>Файл больше допустимого предела {0} КБ.</value>
+  </data>
+  <data name="Фильтр моделей" xml:space="preserve">
+    <value>Фильтр моделей</value>
+  </data>
+  <data name="Фон" xml:space="preserve">
+    <value>Фон</value>
+  </data>
+  <data name="Хранится в SecureStorage" xml:space="preserve">
+    <value>Хранится в SecureStorage</value>
+  </data>
+  <data name="Чат и проверка через общий LVGL runtime" xml:space="preserve">
+    <value>Чат и проверка через общий LVGL runtime</value>
+  </data>
+  <data name="Чат конструктора" xml:space="preserve">
+    <value>Чат конструктора</value>
+  </data>
+  <data name="Ширина панелей" xml:space="preserve">
+    <value>Ширина панелей</value>
+  </data>
+  <data name="Экран настроек" xml:space="preserve">
+    <value>Экран настроек</value>
+  </data>
+  <data name="в очереди {0}" xml:space="preserve">
+    <value>в очереди {0}</value>
+  </data>
+  <data name="кадр" xml:space="preserve">
+    <value>кадр</value>
+  </data>
+  <data name="с" xml:space="preserve">
+    <value>с</value>
+  </data>
+</root>

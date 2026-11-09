@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Oleg Kozhevnikov
-import {spawn} from 'node:child_process';
+import {spawn,execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 import {createInterface} from 'node:readline';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {resolve,join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
+import {systemPage} from './system-page.mjs';
 const here=dirname(fileURLToPath(import.meta.url)),root=resolve(here,'../..');
 const exe=resolve(process.argv[2]??join(root,'local/windows-player/Release/nacborui_player.exe'));
+const {stdout}=await promisify(execFile)(exe,['--capabilities'],{windowsHide:true,maxBuffer:2*1024*1024});
+const capabilities=JSON.parse(stdout);
+const topologySize=name=>capabilities.binding.sources.find(source=>source.name===name).schema.maxItems;
 const child=spawn(process.execPath,[join(here,'run.mjs'),'--exe',exe,'--control','--hidden','--no-settings'],
   {cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
 let stderr='',next=0,closed=false;const pending=new Map();
@@ -40,12 +45,15 @@ try {
   let r=await command({op:'inspect'});healthy(r);assert.equal(r.views[0].selected,'system');
   const cpu=source(r,'system.cpu'),cores=source(r,'system.cores'),ram=source(r,'system.memory'),gpus=source(r,'system.gpus');
   assert.ok(cpu.percent>=0&&cpu.percent<=100);assert.equal(cores.length,cpu.displayed);
-  assert.equal(cores.length,Math.min(cpu.count,64));assert.ok(cores.every(c=>c.history.length===32&&c.history.at(-1)>=0));
+  assert.equal(cores.length,Math.min(cpu.count,64));
+  assert.equal(cores.length,topologySize('system.cores'),'CPU slots come from the actual registry topology');
+  assert.equal(gpus.length,topologySize('system.gpus'),'GPU slots come from DXGI discovery, not authored placeholders');assert.ok(cores.every(c=>c.history.length===32&&c.history.at(-1)>=0));
   assert.ok(ram.usedMiB>0&&ram.totalMiB>=ram.usedMiB);
   assert.ok(Math.abs(ram.usedMiB+ram.availableMiB-ram.totalMiB)<0.01);
   assert.ok(Math.abs(ram.percent-100*ram.usedMiB/ram.totalMiB)<0.001);
   for(const gpu of gpus) {
     assert.ok(gpu.name);assert.equal(gpu.series.history.length,32);
+    if(!Object.hasOwn(gpu,'percent'))assert.equal(gpu.series.history.at(-1),-1,'missing GPU counters remain gaps');
     if(process.argv.includes('--require-gpu')) {
       assert.ok(gpu.percent>=0&&gpu.percent<=100,gpu.name+' load counter');
       assert.ok(gpu.dedicatedMiB>=0&&gpu.sharedMiB>=0,gpu.name+' memory counters');
@@ -65,11 +73,34 @@ try {
   }
   assert.ok(source(r,'system.cpu').series.history.every(n=>n>=0));
   const instance=r.views[0].pageInstance;
-  const ids=['root','cpu_group','ram_group','gpu_group','gpumem_group','cpu_history','ram_history','ram_summary','core_count','interval','logical_heading','core_grid',
-    ...cores.map((_,i)=>'core_'+i),...gpus.flatMap((_,i)=>['gpu_name_'+i,'gpu_history_'+i,'gpu_memory_'+i])];
-  const inspect=()=>command({op:'inspect',nodes:ids.map(id=>({id,instance}))});
-  r=await inspect();healthy(r);const bounds=r.nodes.map(n=>n.bounds);
-  for(const n of r.nodes){assert.ok(n.found,n.id);if(cores.length<=32)assert.ok(n.bounds[0]>=0&&n.bounds[1]>=28&&n.bounds[2]<800&&n.bounds[3]<436,n.id+' stays inside content');}
+  const topology=new Map();
+  function collect(node,parent=null,scrollAncestor=false) {
+    const scrollable=node.flags?.SCROLLABLE===true;
+    topology.set(node.id,{parent,scrollable,scrollAncestor});
+    for(const child of node.children)collect(child,node.id,scrollAncestor||scrollable);
+  }
+  collect(systemPage(cores.length,gpus.length).root);
+  const inspect=()=>command({op:'inspect',nodes:[...topology.keys()].map(id=>({id,instance}))});
+  r=await inspect();healthy(r);
+  for(let i=0;i<gpus.length;i++)assert.equal(r.nodes.find(node=>node.id==='gpu_name_'+i).text,gpus[i].name);
+  const bounds=r.nodes.map(n=>n.bounds),byId=new Map(r.nodes.map(n=>[n.id,n]));
+  // Extra CPU/GPU rows belong to explicit nested scroll views, never to page overflow.
+  for(const n of r.nodes) {
+    assert.ok(n.found,n.id);
+    const expected=topology.get(n.id),[x,y,x2,y2]=n.bounds;
+    assert.ok(x2>=x&&y2>=y,n.id+' has nonempty geometry');
+    assert.ok(x>=0&&x2<r.displayWidth,n.id+' stays inside content horizontally');
+    if(!expected.scrollAncestor)assert.ok(y>=28&&y2<r.displayHeight-44,n.id+' stays inside content');
+    if(expected.scrollable||!expected.parent)assert.ok(n.scrollRight<=0,n.id+' has no horizontal overflow');
+    if(!expected.parent){assert.ok(n.scrollBottom<=0,'page root has no hidden overflow');continue;}
+    const parent=byId.get(expected.parent),[a,b,c,d]=parent.bounds;
+    assert.deepEqual(n.parentBounds,parent.bounds,n.id+' has the expected parent geometry');
+    assert.ok(x>=a&&x2<=c,n.id+' fits parent horizontally');
+    assert.ok(y>=b,n.id+' starts inside its parent');
+    if(topology.get(expected.parent).scrollable) {
+      if(y2>d)assert.ok(parent.scrollBottom>0,expected.parent+' owns vertical overflow of '+n.id);
+    } else assert.ok(y2<=d,n.id+' fits its non-scrolling parent');
+  }
   const palettes=JSON.parse(await readFile(join(here,'schemes.json'),'utf8')).schemes;
   const output=join(root,'local/windows-system');await mkdir(output,{recursive:true});
   for(const [id,palette] of Object.entries(palettes)) {

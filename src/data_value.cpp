@@ -445,6 +445,8 @@ namespace lvgl_cbor
 
 	bool validate_data_value(const DataValue &v, const DataSchema &s, std::string &e)
 	{
+		if(s.nullable && std::holds_alternative<std::monostate>(v.value)) { e.clear(); return true; }
+
 		bool ok = false;
 		double n;
 		switch(s.type)

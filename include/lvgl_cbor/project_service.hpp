@@ -236,8 +236,15 @@ namespace lvgl_cbor
 		bool reset(const std::string &kind, const std::string &name, std::string &error,
 		    const std::string &expected_revision = {}, std::string *committed_revision = nullptr);
 		bool load_screen(const std::string &name, ScreenReply &);
+		// Rebuild the saved project while preserving valid active view selections.
+		bool refresh(ScreenReply &);
 		bool preview(ProjectBytes complete_project, const std::string &screen, ScreenReply &);
 		lv_obj_t *root() const;
+		// Transient UI-context diagnostic, retained across load/preview/refresh.
+		void set_layout_debug(bool enabled);
+		bool layout_debug() const;
+		void set_layout_debug_options(const LayoutDebugOptions &);
+		size_t layout_debug_max_depth() const;
 		lv_obj_t *find(const char *id) const;
 		lv_obj_t *find(uint32_t instance, const char *id) const;
 	private:

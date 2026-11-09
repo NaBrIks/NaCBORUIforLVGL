@@ -90,6 +90,49 @@ namespace lvgl_cbor
 		return out;
 	}
 
+	std::vector<ScreenViewSelection> ScreenRuntime::view_selections() const
+	{
+		return impl_ ? detail::collect_view_selections(impl_->plan) : std::vector<ScreenViewSelection>{};
+	}
+
+	void ScreenRuntime::set_layout_debug(bool enabled)
+	{
+		if(!composition_->layout_debug && enabled)
+		{
+			composition_->layout_debug = std::make_unique<detail::LayoutDebugStyles>();
+			composition_->layout_debug->configure(composition_->layout_options);
+		}
+
+		if(!composition_->layout_debug || composition_->layout_debug->enabled == enabled) return;
+
+		composition_->layout_debug->enabled = enabled;
+		composition_->layout_debug->apply(root());
+	}
+
+	void ScreenRuntime::set_layout_debug_options(const LayoutDebugOptions &options)
+	{
+		composition_->layout_options = options;
+		if(composition_->layout_debug)
+		{
+			const bool enabled = composition_->layout_debug->enabled;
+			composition_->layout_debug->enabled = false;
+			composition_->layout_debug->apply(root());
+			composition_->layout_debug->configure(options);
+			composition_->layout_debug->enabled = enabled;
+			composition_->layout_debug->apply(root());
+		}
+	}
+
+	size_t ScreenRuntime::layout_debug_max_depth() const
+	{
+		return root() ? detail::maximum_layout_depth(root(), detail::layout_depth(root())) : 0;
+	}
+
+	bool ScreenRuntime::layout_debug() const
+	{
+		return composition_->layout_debug && composition_->layout_debug->enabled;
+	}
+
 	std::unique_ptr<ScreenRuntime> ScreenRuntime::make_child(const std::string &name)
 	{
 		auto child = std::make_unique<ScreenRuntime>(resources_, resource_count_, limits_, service_,
@@ -162,7 +205,8 @@ namespace lvgl_cbor
 		}
 	}
 
-	bool ScreenRuntime::load(const uint8_t *p, size_t n, ScreenReply &r)
+	bool ScreenRuntime::load(const uint8_t *p, size_t n, ScreenReply &r,
+	    const std::vector<ScreenViewSelection> &selections)
 	{
 		if(!active_)
 		{
@@ -174,7 +218,7 @@ namespace lvgl_cbor
 			r = {}; std::snprintf(r.error, sizeof(r.error), "runtime_busy"); return false;
 		}
 
-		return replace(p, n, nullptr, true, r);
+		return replace(p, n, nullptr, true, r, selections);
 	}
 
 	bool ScreenRuntime::busy() const
@@ -205,7 +249,7 @@ namespace lvgl_cbor
 	}
 
 	bool ScreenRuntime::replace(const uint8_t *packet, size_t length, lv_obj_t *parent, bool activate,
-	    ScreenReply &reply)
+	    ScreenReply &reply, const std::vector<ScreenViewSelection> &selections)
 	{
 		reply = {};
 		auto fail = [&](const char *s) {
@@ -269,7 +313,7 @@ namespace lvgl_cbor
 		if(!plan.root || !plan.root->object)
 			return fail("object_deleted_during_execution");
 
-		if(!detail::prepare_views(plan, plan.binding_envelope, *this, reply))
+		if(!detail::prepare_views(plan, plan.binding_envelope, *this, reply, selections))
 			return false;
 
 		if(!plan.root->object)
@@ -284,6 +328,9 @@ namespace lvgl_cbor
 		native_activation(plan.root.get(), active_);
 		if(!plan.root->object)
 			return fail("object_deleted_during_activation");
+
+		if(composition_->layout_debug && composition_->layout_debug->enabled)
+			composition_->layout_debug->apply(plan.root->object);
 
 		plan.binding_envelope = {};
 		plan.program = {};

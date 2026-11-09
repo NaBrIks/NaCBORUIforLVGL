@@ -14,6 +14,8 @@ export function literalSchema(value){
 export function schemasCompatible(actual,expected){
  if(actual===undefined||expected===undefined)return true;
  const a=dataDescriptor(actual),e=dataDescriptor(expected);
+ if(a.type==='null')return e.type==='null'||e.nullable===true;
+ if(a.nullable===true&&e.nullable!==true)return false;
  if(numeric(a)&&numeric(e))return e.type==='number'||a.type==='integer';
  if(a.type==='tuple'){
   if(e.type==='tuple')return a.items.length===e.items.length&&a.items.every((s,i)=>schemasCompatible(s,e.items[i]));
@@ -26,8 +28,12 @@ export function schemasCompatible(actual,expected){
 }
 function mergeSchema(a,b){
  if(a===undefined||b===undefined)return undefined;
- if(numeric(a)&&numeric(b))return {type:dataDescriptor(a).type==='integer'&&dataDescriptor(b).type==='integer'?'integer':'number'};
- if(schemasCompatible(a,b)&&schemasCompatible(b,a))return a;
+ const left=dataDescriptor(a),right=dataDescriptor(b),nullable=left.nullable===true||right.nullable===true;
+ if(left.type==='null')return right.type==='null'?a:{...right,nullable:true};
+ if(right.type==='null')return {...left,nullable:true};
+ if(numeric(a)&&numeric(b))return {type:left.type==='integer'&&right.type==='integer'?'integer':'number',...(nullable?{nullable:true}:{})};
+ const plainLeft={...left,nullable:false},plainRight={...right,nullable:false};
+ if(schemasCompatible(plainLeft,plainRight)&&schemasCompatible(plainRight,plainLeft))return nullable?{...left,nullable:true}:a;
  throw Error('Select branches have incompatible types');
 }
 export function inspectExpression(expression,{capabilities,eventSchema,eventContext=false}={}){

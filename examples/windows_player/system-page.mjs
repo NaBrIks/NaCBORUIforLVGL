@@ -37,7 +37,7 @@ function block(id) {
   const n=flex(node(id,'obj',0,0,full,0,{},[role('panel')]));
   Object.assign(n.style,{pad_all:6,border_width:1,radius:2});return n;
 }
-export function systemPage(coreCount=32,gpuCount=2) {
+export function systemPage(coreCount=0,gpuCount=0) {
   if(!Number.isInteger(coreCount)||coreCount<0||coreCount>64||!Number.isInteger(gpuCount)||gpuCount<0||gpuCount>4)
     throw Error('System demo topology limits: 0..64 logical processors, 0..4 GPUs');
   const root=flex(node('root','obj',0,0,800,408,{},[role('canvas')]),'LV_FLEX_FLOW_COLUMN',6);
@@ -53,9 +53,10 @@ export function systemPage(coreCount=32,gpuCount=2) {
     flex(label('interval',0,0,full,'1 s · 32 samples · 0–100%')));
   total.children.push(info);cpu.children.push(total);
   const area=grow(flex(node('core_area','obj',0,0,1,1,{},[role('panel')])));area.flags.SCROLLABLE=true;
-  const rows=Math.max(1,Math.ceil(coreCount/8));
+  const rows=Math.ceil(coreCount/8);
   const cores=flex(node('core_grid','obj',0,0,full,full,{},[role('panel')]));
   cores.style.min_height=coreCount?rows*32+(rows-1)*4:0;
+  if(!coreCount)cores.children.push(flex(label('no_cores',0,0,full,'CPU topology unavailable')));
   for(let r=0;r<rows;r++) {
     const row=grow(flex(node('core_row_'+r,'obj',0,0,1,1,{},[role('panel')]),'LV_FLEX_FLOW_ROW'));
     for(let col=0;col<8;col++) {
@@ -78,8 +79,8 @@ export function systemPage(coreCount=32,gpuCount=2) {
   const devices=grow(flex(node('gpu_list','obj',0,0,1,1,{},[role('panel')])));devices.flags.SCROLLABLE=true;
   const deviceMemory=grow(flex(node('gpumem_list','obj',0,0,1,1,{},[role('panel')])));deviceMemory.flags.SCROLLABLE=true;
   if(!gpuCount) {
-    devices.children.push(flex(label('no_gpu',0,0,full,'GPU counters unavailable')));
-    deviceMemory.children.push(flex(label('no_gpumem',0,0,full,'GPU counters unavailable')));
+    devices.children.push(flex(label('no_gpu',0,0,full,'GPU adapters unavailable')));
+    deviceMemory.children.push(flex(label('no_gpumem',0,0,full,'GPU adapters unavailable')));
   }
   for(let i=0;i<gpuCount;i++) {
     const item=grow(flex(node('gpu_group_'+i,'obj',0,0,1,1,{},[role('panel')]),'LV_FLEX_FLOW_COLUMN',0));
@@ -98,9 +99,16 @@ export function systemPage(coreCount=32,gpuCount=2) {
   return {format:'lvgl-screen-draft-1',id:'system',name:'Windows system monitor',size:{width:800,height:408},styles:{},root};
 }
 export function adaptSystemPage(project,capabilities) {
-  // Invoked only for the bundled demo, never for a user's opened project.
-  const sources=capabilities.binding.sources;
-  project.screens.system=systemPage(sources.find(s=>s.name==='system.cores').schema.maxItems,
-    sources.find(s=>s.name==='system.gpus').schema.maxItems);
+  // Invoked only for the bundled system demo, never for a user's opened project.
+  // Other example projects must remain independent of Windows system telemetry.
+  if(!project.screens||!Object.hasOwn(project.screens,'system'))return project;
+  const sources=capabilities?.binding?.sources??[];
+  const count=name=>{
+    const source=sources.find(source=>source.name===name);
+    if(!source)return 0;
+    if(source.schema?.type!=='array')throw Error('System demo topology requires array source: '+name);
+    return source.schema.maxItems; // SystemMetrics registers exact min/max topology at startup.
+  };
+  project.screens.system=systemPage(count('system.cores'),count('system.gpus'));
   return project;
 }

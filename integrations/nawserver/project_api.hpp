@@ -24,7 +24,7 @@ public:
 	}
 
 	void process();
-	bool canHandle(NaWServer::Request *) override;
+	NaWServer::RouteDescriptors routes() const override;
 	void handleRequest(NaWServer::Request *, NaWServer::Response &) override;
 private:
 	struct Transfer { std::string token, intent, revision,

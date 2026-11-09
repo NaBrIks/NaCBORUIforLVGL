@@ -38,9 +38,15 @@ export function useDeviceConnection({device,simulator=null,local=false,enabled=t
   })();
   inflight=task;try{return await task;}finally{if(inflight===task)inflight=null;}
  }
- async function connect(){desired=true;reset();if(!simulator&&local)try{localStorage.setItem('lvgl-cbor-device',device.value);}catch{}return refresh();}
+ function catalogChanged(frame){
+  if(disposed||!(frame instanceof Map)||frame.get('v')!==1||frame.get('event')!=='data_catalog_changed')return false;
+  const revision=frame.get('catalogRevision');if(!Number.isSafeInteger(revision)||revision<0)return false;
+  if(revision!==capabilities.value?.binding?.catalogRevision)void refresh();
+  return true;
+ }
+ async function connect(){desired=true;reset();if(!simulator&&local)try{localStorage.setItem('lvgl-cbor-device:'+(globalThis.location?.origin??''),device.value);}catch{}return refresh();}
  function dispose(){disposed=true;clearInterval(timer);reset();resets.clear();}
  onMounted(()=>{if(enabled){timer=setInterval(refresh,pollInterval);void refresh();}});
  onBeforeUnmount(dispose);
- return {device,info,capabilities,httpOnline,httpError,capabilitiesError,epoch,sameContract,screenCompatible,ready,origin,refresh,connect,onReset,dispose};
+ return {device,info,capabilities,httpOnline,httpError,capabilitiesError,epoch,sameContract,screenCompatible,ready,origin,refresh,catalogChanged,connect,onReset,dispose};
 }

@@ -44,14 +44,15 @@ semaps check nacboruiforlvgl.semaps
 Если порт занят на другом компьютере, фактический адрес смотрите в выводе SeMaps;
 не останавливайте постороннюю службу. Порт 443 не использовать.
 
-## Два разных сервера MCP
+## Разные серверы MCP
 
 | Имя | Команда | Назначение |
 |---|---|---|
 | `semaps` | `semaps mcp` | Авторская архитектурная модель и виды, не управление МК |
 | `nacborui` | `node integrations/mcp/index.js` | Кодеки и необязательная работа с существующим API МК |
+| `nacborui_windows` | Та же команда с отдельным окружением | Постоянный Windows API на loopback:5300; preview/save/data разрешены |
 
-Оба используют stdio. Отдельного MCP TCP-порта у UI-адаптера нет.
+Перечисленные конфигурации используют stdio. Для MAUI-прототипа добавлен отдельный native NaWServer HTTP MCP gateway (порт примера 5302), который вызывает те же SDK-обработчики и существующий Windows API через закрытый канал процесса. См. [MAUI-конструктор](readme_maui_designer_ru.md).
 В прошивке находятся HTTP/WS адаптеры; MCP SDK и отдельный `/mcp` listener
 в неё не добавляются. SeMaps host HTTP нужен своему редактору, не LCD.
 
@@ -64,8 +65,8 @@ semaps check nacboruiforlvgl.semaps
 не изменяет. Запускайте клиента из настоящего корня checkout.
 
 У `nacborui` по умолчанию не задан `LVGL_CBOR_DEVICE`; preview/save/data разрешения
-равны 0. Это пять офлайн-инструментов: `get_contract`, `get_example`,
-`compile_document`, `decode_document`, `convert_css`. Адрес устройства задаётся
+равны 0. Текущие четыре офлайн-инструмента: `get_ui_reference`, `get_example`,
+`validate_document`, `convert_css`. Адрес устройства задаётся
 приватно в окружении клиента; реальный LAN-адрес в Git не записывайте.
 Группы разрешений описаны в [руководстве MCP](readme_mcp_ru.md).
 
@@ -93,7 +94,7 @@ semaps check nacboruiforlvgl.semaps
   `get_view` после Save — `unsaved=[]`.
 - `render_view` обоих видов: **no problems found**; изображения просмотрены.
   `semaps check`: замечаний нет. Ссылка зарегистрирована в локальном портале.
-- Настоящий процесс UI MCP: офлайн `listTools` (5) и `get_contract(kind=binding)`
+- Настоящий процесс UI MCP: офлайн `listTools` (4) и `get_ui_reference(kind=screen,topic=bindings-events)`
   — PASS. С адресом МК зарегистрированы 11 read-only инструментов; изменяющих
   операций нет. `get_device` не завершился из-за недоступного устройства;
   независимый прямой HTTP-запрос также получил timeout. Новая аппаратная приёмка
@@ -118,3 +119,47 @@ DataRegistry. `demo:history_plot` относится только к приме�
 через MCP для явного ScreenViewport и изменяемого окна. Модель сохранена,
 `semaps check` без замечаний. Геометрия и связи не менялись. См.
 [проверку resize](reviews/REVIEW_20261030_windows-resize.md).
+
+## Реестр и выборочный MCP, 2026-11-07
+
+Через SeMaps MCP обновлены ответственности `e_registry`, `e_mcp`, `e_windows_player`
+и `e_http`: группы/метаданные, immutable DataView, bounded queries и необязательный
+DataHistory. Модель сохранена, оба get_view подтвердили `unsaved=[]`, `semaps check`
+не нашёл замечаний. Связи и геометрия не менялись. Новый render_view не выполнен:
+сервер вернул `no editor is open`; прежние PNG не выдаются за свежий render.
+Подробности — [принятое решение](adr/ADR_20261107_data-catalog-history.md).
+
+В той же итерации через MCP дополнено описание Windows Appearance: авторские
+roleOverrides, стек стилей и редизайн project.styles через MCP. Модель повторно
+сохранена и проверена без изменения геометрии.
+
+## Постоянный Windows API, 2026-11-07
+
+Проектный nacborui_windows использует тот же MCP с LVGL_CBOR_DEVICE, направленным
+на постоянный HTTP API проигрывателя. .codex/config.toml и .mcp.json содержат
+отдельную запись. Настройка подтверждена `codex mcp get nacborui_windows`, настоящий
+SDK-клиент подключился и выполнил preview/восстановление/действия через production
+API. Изменения tool catalog открытого Codex-клиента требуют переподключения MCP;
+сама запись файла не доказывает hot reload. [Официальная документация OpenAI](https://learn.chatgpt.com/docs/extend/mcp?surface=cli).
+Подробности — [руководство Windows API](readme_windows_api_ru.md).
+
+Описания e_windows_player/e_mcp/e_http обновлены через SeMaps MCP для постоянного
+Windows HTTP transport и общего ProjectService/FileProjectStore. Модель сохранена,
+оба вида без unsaved; semaps check без замечаний. Геометрия и PNG не менялись.
+
+
+## Отладочные стили, 2026-11-09
+
+Через MCP дополнено описание `e_runtime`: параметры композиции, независимые outline и 16×16 A1
+тайлы с цифрами глубины, opacity и индивидуальными глубинами, отсутствие overlay и изменения JSON/CBOR. Модель сохранена,
+`semaps check` без замечаний; связи, геометрия и PNG карты не менялись.
+См. [реализацию и ограничения](readme_layout_debug_ru.md).
+
+Уточнение интерфейса: два постоянных ряда, независимые цвета/флаги каждой глубины и толщина 3px; описание e_runtime обновляется через MCP, геометрия схем не меняется.
+
+Уточнение 09.11: через MCP обновлены e_runtime/e_pc — штатный Designer перенесён
+в tools/designer, добавлен per-depth выбор большой цифры или G/F. Оба get_view
+подтвердили unsaved=[], semaps check без замечаний. Геометрия карты не менялась.
+
+UI 09.11: схема e_pc/e_runtime дополнена таблицей глубин, общим G/F,
+сохраняемым коротким splitter и EN/RU ресурсами. Исполнитель SPLA и API неизменны.

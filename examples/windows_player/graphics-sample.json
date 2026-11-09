@@ -1,0 +1,9 @@
+{
+  "title":"LVGL graphics sample",
+  "description":"Windows-only real LVGL vector, polyline, cached Canvas and GIF paths; no browser renderer.",
+  "preview":{"width":176,"height":108},
+  "methods":[
+    {"alias":"mode","opcode":256,"parameters":[{"type":"uint32_t","values":[0,1,2,3,4,5],"labels":["Квадратичная Безье","Кубическая Безье","Ломаная по кубической","Растровый кэш кубической","Canvas с альфа","Анимированный GIF"]}]},
+    {"alias":"progress","opcode":257,"parameters":[{"type":"number","min":0,"max":240}]}
+  ]
+}

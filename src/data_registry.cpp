@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Oleg Kozhevnikov
 #include "lvgl_cbor/data_registry.hpp"
+#include "data_catalog_internal.hpp"
 #include <algorithm>
 #include <cmath>
 #include <deque>
@@ -39,6 +40,9 @@ namespace lvgl_cbor
 			    s.min > s.max)
 				return false;
 
+			if(!data_detail::metadata_ok(s.title, 128) || !data_detail::metadata_ok(s.description,
+			    512) || !data_detail::metadata_ok(s.unit, 32)) return false;
+
 			if(s.type == DataSchema::Type::Integer &&
 			    (std::trunc(s.min) != s.min || std::trunc(s.max) != s.max || s.min < -9007199254740991.0 ||
 			    s.max > 9007199254740991.0))
@@ -65,37 +69,6 @@ namespace lvgl_cbor
 				return false;
 
 			return true;
-		}
-
-		DataValue schema_value(const DataSchema &s)
-		{
-			const char *names[]{"null", "bool", "integer", "number", "text", "object", "array"};
-			DataValue::Object o{{"type", names[unsigned(s.type)]}};
-			if(s.type == DataSchema::Type::Integer || s.type == DataSchema::Type::Number)
-			{
-				o["min"] = s.min;
-				o["max"] = s.max;
-			}
-
-			if(s.type == DataSchema::Type::Text)
-				o["maxBytes"] = s.max_bytes;
-
-			if(s.type == DataSchema::Type::Array)
-			{
-				o["items"] = schema_value(*s.items);
-				o["minItems"] = s.min_items;
-				o["maxItems"] = s.max_items;
-			}
-
-			if(s.type == DataSchema::Type::Object)
-			{
-				DataValue::Object f;
-				for(const auto &x : s.fields)
-					f[x.first] = schema_value(x.second);
-				o["fields"] = std::move(f);
-			}
-
-			return o;
 		}
 
 		struct Demand {
@@ -143,15 +116,10 @@ namespace lvgl_cbor
 	}
 
 	struct DataRegistry::Impl {
-		struct Snapshot {
-			DataValue value;
-			DataState state = DataState::Unknown;
-			uint64_t revision{};
-			size_t bytes{};
-		};
+		using Snapshot = data_detail::Snapshot;
 		struct Source {
-			DataSource descriptor;
-			Snapshot committed;
+			std::shared_ptr<const DataSource> descriptor;
+			std::shared_ptr<const Snapshot> committed = std::make_shared<Snapshot>();
 			std::unique_ptr<Snapshot> pending;
 			std::shared_ptr<Demand> demand = std::make_shared<Demand>();
 		};
@@ -162,7 +130,10 @@ namespace lvgl_cbor
 		};
 		DataLimits limits;
 		std::map<std::string, Source> sources;
-		std::map<std::string, DataAction> actions;
+		std::map<std::string, std::shared_ptr<const DataAction> > actions;
+		std::map<std::string, std::shared_ptr<const DataGroup> > groups;
+		uint64_t catalog_revision = 0;
+		size_t metadata_bytes = 0, schema_nodes = 0;
 		std::vector<std::weak_ptr<Watch> > watchers;
 		std::deque<Deferred> events;
 		size_t event_bytes{};
@@ -177,6 +148,9 @@ namespace lvgl_cbor
 				};
 			limits.sources = bounded(limits.sources, binding_contract::sources);
 			limits.actions = bounded(limits.actions, binding_contract::actions);
+			limits.groups = bounded(limits.groups, 32);
+			limits.metadata_bytes = bounded(limits.metadata_bytes, 32768);
+			limits.schema_nodes = bounded(limits.schema_nodes, 1024);
 			limits.value_bytes = bounded(limits.value_bytes, binding_contract::valueBytes);
 			limits.snapshot_bytes = bounded(limits.snapshot_bytes, binding_contract::snapshotBytes);
 			limits.event_queue = bounded(limits.event_queue, binding_contract::eventQueue);
@@ -194,7 +168,7 @@ namespace lvgl_cbor
 			size_t n = 0;
 			for(const auto &x : sources)
 			{
-				n += x.second.committed.bytes;
+				n += x.second.committed->bytes;
 				if(x.second.pending)
 					n += x.second.pending->bytes;
 			}
@@ -208,18 +182,65 @@ namespace lvgl_cbor
 	}
 
 	DataRegistry::~DataRegistry() = default;
+	bool DataRegistry::add_group(DataGroup group, std::string &error)
+	{
+		auto &p = *impl_;
+		if(!named(group.name) || !title_ok(group.title) || !data_detail::metadata_ok(group.description, 512) ||
+		    p.groups.count(group.name) || p.groups.size() >= p.limits.groups ||
+		    (!group.parent.empty() && !p.groups.count(group.parent))) return p.fail(error, "data_group_registration");
+
+		const size_t bytes = group.name.size() + group.title.size() + group.description.size() + group.parent.size();
+		if(bytes > p.limits.metadata_bytes - p.metadata_bytes) return p.fail(error, "data_metadata_limit");
+
+		auto name = group.name;
+		p.groups.emplace(name, std::make_shared<const DataGroup>(std::move(group)));
+		p.metadata_bytes += bytes; ++p.catalog_revision; error.clear(); return true;
+	}
+
+	uint64_t DataRegistry::catalog_revision() const
+	{
+		return impl_->catalog_revision;
+	}
+
+	DataView DataRegistry::view() const
+	{
+		auto out = std::make_shared<DataView::Impl>();
+		out->catalog_revision = impl_->catalog_revision; out->revision = impl_->revision;
+		for(const auto &g : impl_->groups)
+			out->groups.push_back(g.second);
+		for(const auto &a : impl_->actions)
+			out->actions.push_back(a.second);
+		for(const auto &s : impl_->sources)
+			out->sources.push_back({s.second.descriptor, s.second.committed});
+		return DataView(std::move(out));
+	}
+
+	bool DataRegistry::query_json(const DataQuery &q, std::string &json, std::string &error) const
+	{
+		return view().query_json(q, json, error);
+	}
+
 	bool DataRegistry::add_source(DataSource s, std::string &e)
 	{
 		auto &p = *impl_;
-		if(!named(s.name) || !title_ok(s.title) || !schema_ok(s.schema) || p.sources.count(s.name) ||
+		if(!named(s.name) || !title_ok(s.title) || !data_detail::metadata_ok(s.description,
+		    512) || !schema_ok(s.schema) ||
+		    (!s.group.empty() && !p.groups.count(s.group)) || p.sources.count(s.name) ||
 		    p.sources.size() >= p.limits.sources)
 			return p.fail(e, "data_source_registration");
+
+		size_t nodes = 0, bytes = s.name.size() + s.title.size() + s.description.size() + s.group.size();
+		if(!data_detail::schema_budget(s.schema, nodes,
+		    bytes) || nodes > p.limits.schema_nodes - p.schema_nodes ||
+		    bytes > p.limits.metadata_bytes - p.metadata_bytes)
+			return p.fail(e, "data_metadata_limit");
 
 		s.schema = owned_schema(s.schema);
 		auto name = s.name;
 		Impl::Source item;
-		item.descriptor = std::move(s);
+		item.descriptor = std::make_shared<const DataSource>(std::move(s));
 		p.sources.emplace(name, std::move(item));
+		p.metadata_bytes += bytes; p.schema_nodes += nodes; ++p.catalog_revision;
 		e.clear();
 		return true;
 	}
@@ -227,13 +248,22 @@ namespace lvgl_cbor
 	bool DataRegistry::add_action(DataAction a, std::string &e)
 	{
 		auto &p = *impl_;
-		if(!named(a.name) || !title_ok(a.title) || !schema_ok(a.schema) || !a.invoke ||
+		if(!named(a.name) || !title_ok(a.title) || !data_detail::metadata_ok(a.description,
+		    512) || !schema_ok(a.schema) ||
+		    (!a.group.empty() && !p.groups.count(a.group)) || !a.invoke ||
 		    p.actions.count(a.name) || p.actions.size() >= p.limits.actions)
 			return p.fail(e, "data_action_registration");
 
+		size_t nodes = 0, bytes = a.name.size() + a.title.size() + a.description.size() + a.group.size();
+		if(!data_detail::schema_budget(a.schema, nodes,
+		    bytes) || nodes > p.limits.schema_nodes - p.schema_nodes ||
+		    bytes > p.limits.metadata_bytes - p.metadata_bytes)
+			return p.fail(e, "data_metadata_limit");
+
 		a.schema = owned_schema(a.schema);
 		auto name = a.name;
-		p.actions.emplace(name, std::move(a));
+		p.actions.emplace(name, std::make_shared<const DataAction>(std::move(a)));
+		p.metadata_bytes += bytes; p.schema_nodes += nodes; ++p.catalog_revision;
 		e.clear();
 		return true;
 	}
@@ -241,13 +271,21 @@ namespace lvgl_cbor
 	const DataSource *DataRegistry::source(const std::string &n) const
 	{
 		auto i = impl_->sources.find(n);
-		return i == impl_->sources.end() ? nullptr : &i->second.descriptor;
+		return i == impl_->sources.end() ? nullptr : i->second.descriptor.get();
+	}
+
+	std::vector<std::string> DataRegistry::source_names() const
+	{
+		std::vector<std::string> names; names.reserve(impl_->sources.size());
+		for(const auto &source:impl_->sources)
+			names.push_back(source.first);
+		return names;
 	}
 
 	const DataAction *DataRegistry::action(const std::string &n) const
 	{
 		auto i = impl_->actions.find(n);
-		return i == impl_->actions.end() ? nullptr : &i->second;
+		return i == impl_->actions.end() ? nullptr : i->second.get();
 	}
 
 	bool DataRegistry::publish(const std::string &n, DataValue v, std::string &e, DataState state)
@@ -259,10 +297,10 @@ namespace lvgl_cbor
 
 		if(state == DataState::Unknown)
 			v = {};
-		else if(!validate_data_value(v, i->second.descriptor.schema, e))
+		else if(!validate_data_value(v, i->second.descriptor->schema, e))
 			return p.fail(e, e);
 
-		size_t bytes = encode_data_value(v).size();
+		size_t bytes = state == DataState::Unknown ? 0 : encode_data_value(v).size();
 		if(bytes > p.limits.value_bytes ||
 		    p.bytes() - (i->second.pending ? i->second.pending->bytes : 0) + bytes >
 		    p.limits.snapshot_bytes)
@@ -304,7 +342,7 @@ namespace lvgl_cbor
 			return nullptr;
 		}
 
-		const auto &s = i->second.committed;
+		const auto &s = *i->second.committed;
 		if(state)
 			*state = s.state;
 
@@ -402,13 +440,13 @@ namespace lvgl_cbor
 		}
 
 		auto a = p.actions.find(n);
-		if(a == p.actions.end() || !validate_data_value(v, a->second.schema, e))
+		if(a == p.actions.end() || !validate_data_value(v, a->second->schema, e))
 		{
 			++p.rejected_events;
 			return p.fail(e, a == p.actions.end() ? "data_action_unknown" : e);
 		}
 
-		if(!a->second.invoke(v, e))
+		if(!a->second->invoke(v, e))
 		{
 			++p.rejected_events;
 			return p.fail(e, e.empty() ? "data_action_rejected" : e);
@@ -430,16 +468,16 @@ namespace lvgl_cbor
 
 		auto i = p.sources.find(n);
 		const auto *schema =
-		    i == p.sources.end() ? nullptr : data_schema_path(i->second.descriptor.schema, path);
-		if(!schema || !i->second.descriptor.write || !validate_data_value(v, *schema, e))
+		    i == p.sources.end() ? nullptr : data_schema_path(i->second.descriptor->schema, path);
+		if(!schema || !i->second.descriptor->write || !validate_data_value(v, *schema, e))
 		{
 			++p.rejected_events;
 			return p.fail(e, !schema ? "data_write_path"
-			         : !i->second.descriptor.write ? "data_read_only"
+			         : !i->second.descriptor->write ? "data_read_only"
 			                                       : e);
 		}
 
-		if(!i->second.descriptor.write(path, v, e))
+		if(!i->second.descriptor->write(path, v, e))
 		{
 			++p.rejected_events;
 			return p.fail(e, e.empty() ? "data_write_rejected" : e);
@@ -474,15 +512,15 @@ namespace lvgl_cbor
 			if(x.second.pending)
 			{
 				auto next = std::move(x.second.pending);
-				if(next->state != x.second.committed.state || next->value != x.second.committed.value)
+				if(next->state != x.second.committed->state || next->value != x.second.committed->value)
 				{
 					next->revision = ++p.revision;
 					changed.insert(x.first);
 				}
 				else
-					next->revision = x.second.committed.revision;
+					next->revision = x.second.committed->revision;
 
-				x.second.committed = std::move(*next);
+				x.second.committed = std::shared_ptr<const Impl::Snapshot>(std::move(next));
 			}
 
 		auto watchers = p.watchers;
@@ -509,23 +547,33 @@ namespace lvgl_cbor
 
 	std::string DataRegistry::catalog_json() const
 	{
-		DataValue::Array sources, actions, events;
+		DataValue::Array sources, actions, events, groups;
+		for(const auto &g : impl_->groups)
+			groups.push_back(data_detail::group_value(*g.second));
 		for(const auto &x : impl_->sources)
 		{
-			const auto &s = x.second.descriptor;
+			const auto &s = *x.second.descriptor;
 			DataValue::Object o{
-				{"name", s.name}, {"schema", schema_value(s.schema)}, {"writable", bool(s.write)}};
+				{"name", s.name}, {"schema", data_detail::schema_value(s.schema)}, {"writable", bool(s.write)}};
 			if(!s.title.empty())
 				o["title"] = s.title;
+
+			if(!s.description.empty()) o["description"] = s.description;
+
+			if(!s.group.empty()) o["group"] = s.group;
 
 			sources.emplace_back(std::move(o));
 		}
 		for(const auto &x : impl_->actions)
 		{
-			const auto &a = x.second;
-			DataValue::Object o{{"name", a.name}, {"schema", schema_value(a.schema)}};
+			const auto &a = *x.second;
+			DataValue::Object o{{"name", a.name}, {"schema", data_detail::schema_value(a.schema)}};
 			if(!a.title.empty())
 				o["title"] = a.title;
+
+			if(!a.description.empty()) o["description"] = a.description;
+
+			if(!a.group.empty()) o["group"] = a.group;
 
 			actions.emplace_back(std::move(o));
 		}
@@ -544,6 +592,11 @@ namespace lvgl_cbor
 			{"actions", impl_->limits.actions}};
 		return data_value_json(DataValue::Object{{"version", binding_contract::version},
 					   {"sha256", binding_contract::sha256},
+					   {"catalogRevision", impl_->catalog_revision}, {"groups", std::move(groups)},
+					   {"catalogLimits",
+						DataValue::Object{{"groups", impl_->limits.groups},
+							{"metadataBytes", impl_->limits.metadata_bytes},
+							{"schemaNodes", impl_->limits.schema_nodes}, {"replyBytes", 16384}}},
 					   {"sources", std::move(sources)},
 					   {"actions", std::move(actions)},
 					   {"events", std::move(events)},
@@ -555,7 +608,7 @@ namespace lvgl_cbor
 		DataValue::Array sources;
 		for(const auto &x : impl_->sources)
 		{
-			const auto &s = x.second.committed;
+			const auto &s = *x.second.committed;
 			sources.emplace_back(DataValue::Object{{"name", x.first},
 					{"state", s.state == DataState::Known ? "known"
 						                             : s.state == DataState::Stale ? "stale"

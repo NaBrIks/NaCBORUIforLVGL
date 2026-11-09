@@ -2,9 +2,11 @@
 // Copyright (c) 2026 Oleg Kozhevnikov
 import {readFile,writeFile,readdir} from 'node:fs/promises';import {gzipSync} from 'node:zlib';
 import {encodeStyle} from '../packages/style-codec/index.js';
-const root=new URL('../',import.meta.url),startupOnly=process.argv.includes('--startup-only'),files=startupOnly?[]:['index.html',...(await readdir(new URL('frontend/dist/assets/',root))).map(n=>'assets/'+n)];
+const root=new URL('../',import.meta.url),startupOnly=process.argv.includes('--startup-only');
+const files=startupOnly?[]:['index.html',...(await readdir(new URL('frontend/dist/assets/',root))).map(n=>'assets/'+n),
+ ...(await readdir(new URL('frontend/dist/licenses/',root))).map(n=>'licenses/'+n)];
 let output='#pragma once\n#include <cstddef>\n#include <cstdint>\nstruct Asset{const char *path,*mime;const uint8_t *data;size_t size;};\n';
-const records=[],manifest=[];for(const [i,file] of files.entries()){const raw=await readFile(new URL('frontend/dist/'+file,root)),bytes=gzipSync(raw);manifest.push({path:'/'+(file==='index.html'?'':file),rawBytes:raw.length,flashBytes:bytes.length});output+=`static const uint8_t asset_${i}[]={${[...bytes].join(',')}};\n`;const mime=file.endsWith('.html')?'text/html; charset=utf-8':file.endsWith('.js')?'text/javascript; charset=utf-8':'text/css; charset=utf-8';records.push(`{"/${file==='index.html'?'':file}","${mime}",asset_${i},sizeof(asset_${i})}`);}
+const records=[],manifest=[];for(const [i,file] of files.entries()){const raw=await readFile(new URL('frontend/dist/'+file,root)),bytes=gzipSync(raw);manifest.push({path:'/'+(file==='index.html'?'':file),rawBytes:raw.length,flashBytes:bytes.length});output+=`static const uint8_t asset_${i}[]={${[...bytes].join(',')}};\n`;const mime=file.endsWith('.html')?'text/html; charset=utf-8':file.endsWith('.js')?'text/javascript; charset=utf-8':file.endsWith('.txt')?'text/plain; charset=utf-8':'text/css; charset=utf-8';records.push(`{"/${file==='index.html'?'':file}","${mime}",asset_${i},sizeof(asset_${i})}`);}
 output+='static const Asset assets[]={'+records.join(',')+'};\n';
 const startup=encodeStyle({scope:'screen',name:'demo',copy:'global:base',props:{x:60,y:100,width:420,height:150,bg_color:'#173344',bg_opa:255,text_color:'#F6E9C8',text_font:'montserrat_28',border_width:3,border_color:'#36B58C',radius:12,pad_all:18}},'startup');
 await writeFile(new URL('examples/s3_style_lab/main/startup.generated.hpp',root),'#pragma once\n#include <cstdint>\nstatic const uint8_t initial_style_packet[]={'+[...startup].join(',')+'};\n');

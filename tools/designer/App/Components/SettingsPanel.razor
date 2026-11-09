@@ -1,0 +1,85 @@
+@using NaCBORUI.Designer.App.Services
+@inject UiText T
+
+<div class="settings-scrim" @onclick="OnClose">
+    <section class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title" @onclick:stopPropagation="true">
+        <header class="settings-head">
+            <div><h2 id="settings-title">@T["Подключение"]</h2><p>@T["Адрес MCP и параметры модели"]</p></div>
+            <button class="icon-button" type="button" title="@T["Закрыть"]" aria-label="@T["Закрыть настройки"]" @onclick="OnClose">×</button>
+        </header>
+        <div class="settings-fields">
+            <label>@T["Провайдер"]
+                <select @bind="Draft.Provider"><option value="openrouter">OpenRouter</option><option value="openai">OpenAI compatible</option></select>
+            </label>
+            <label>@T["Model endpoint"]
+                <input @bind="Draft.ModelEndpoint" spellcheck="false" inputmode="url" placeholder="https://openrouter.ai/api/v1" />
+            </label>
+            <label>@T["API key"]
+                <input @bind="Draft.ApiKey" type="password" autocomplete="new-password" placeholder="@T["Хранится в SecureStorage"]" />
+            </label>
+            <label>@T["Model ID"]
+                <div class="model-field">
+                    <input @bind="Draft.Model" spellcheck="false" placeholder="openrouter/model-id" list="available-models" />
+                    <datalist id="available-models">@foreach (var model in FilteredModels) { <option value="@model" /> }</datalist>
+                    <button class="button secondary compact" type="button" disabled="@LoadingModels" @onclick="LoadModels">@(LoadingModels ? "…" : T["Модели"])</button>
+                </div>
+            </label>
+            <div class="model-filters">
+                <input @bind="ModelFilter" @bind:event="oninput" placeholder="@T["Фильтр моделей"]" aria-label="@T["Фильтр моделей"]" />
+                <label><input type="checkbox" @bind="OnlyFree" /> @T["Только :free"]</label>
+                <span>@FilteredModels.Count() / @Models.Count</span>
+            </div>
+            @if (Models.Count > 0)
+            {
+                <select class="model-list" size="5" @bind="Draft.Model" aria-label="@T["Доступные модели"]">
+                    @foreach (var model in FilteredModels) { <option value="@model">@model</option> }
+                </select>
+            }
+            <label>@T["MCP URL"]
+                <input @bind="Draft.McpEndpoint" spellcheck="false" inputmode="url" placeholder="http://127.0.0.1:5302/mcp" />
+            </label>
+            <label>@T["MCP server ID"]
+                <input @bind="Draft.McpServerId" spellcheck="false" />
+            </label>
+        </div>
+        <p class="settings-note">@T["Для телефона по USB: adb reverse tcp:5302 tcp:5302, затем MCP URL http://127.0.0.1:5302/mcp. Для эмулятора: http://10.0.2.2:5302/mcp."]</p>
+        <details class="settings-error @(!string.IsNullOrWhiteSpace(Error) ? "has-error" : "")"><summary>ⓘ @(string.IsNullOrWhiteSpace(Error) ? T["Диагностика"] : T["Ошибка"])</summary><p>@(Error ?? T["Ошибок нет"])</p></details>
+        <footer class="settings-actions">
+            <button class="button secondary" type="button" @onclick="OnClose">@T["Закрыть"]</button>
+            <button class="button primary" type="button" @onclick="Save">@T["Сохранить"]</button>
+        </footer>
+    </section>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DesignerSettings Settings { get; set; } = new();
+    [Parameter] public EventCallback<DesignerSettings> OnSave { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<DesignerSettings> OnLoadModels { get; set; }
+    [Parameter] public IReadOnlyList<string> Models { get; set; } = Array.Empty<string>();
+    [Parameter] public bool LoadingModels { get; set; }
+    [Parameter] public string? Error { get; set; }
+    private string ModelFilter = string.Empty;
+    private bool OnlyFree;
+    private IEnumerable<string> FilteredModels => Models.Where(model => (!OnlyFree || model.EndsWith(":free", StringComparison.OrdinalIgnoreCase)) && model.Contains(ModelFilter, StringComparison.OrdinalIgnoreCase));
+    private DesignerSettings Draft { get; set; } = new();
+    private DesignerSettings? _source;
+
+    protected override void OnParametersSet()
+    {
+        if (ReferenceEquals(_source, Settings)) return;
+        _source = Settings;
+        Draft = new DesignerSettings
+        {
+            Provider = Settings.Provider,
+            ModelEndpoint = Settings.ModelEndpoint,
+            Model = Settings.Model,
+            McpEndpoint = Settings.McpEndpoint,
+            McpServerId = Settings.McpServerId,
+            ApiKey = Settings.ApiKey
+        };
+    }
+
+    private Task Save() => OnSave.InvokeAsync(Draft);
+    private Task LoadModels() => OnLoadModels.InvokeAsync(Draft);
+}

@@ -1,0 +1,123 @@
+{
+  "format": "lvgl-project-1",
+  "manifest": {
+    "id": "registry-demo",
+    "name": "Data registry and bounded history",
+    "entry": "registry_demo",
+    "description": "Standalone Windows example requiring the optional history module. Uses shared registry bindings and the registered history plot."
+  },
+  "styles": {},
+  "screens": {
+    "registry_demo": {
+      "format": "lvgl-screen-draft-1",
+      "id": "registry_demo",
+      "name": "Registry / history",
+      "size": {"width": 800, "height": 480},
+      "styles": {
+        "choice_geometry": {"props": {"width": 0, "flex_grow": 1, "height": 38, "pad_all": 6, "text_font": "ui_14", "shadow_width": 0}},
+        "choice_focus": {"props": {"outline_width": 3, "outline_pad": 2}},
+        "plot_geometry": {"props": {"pad_all": 6, "shadow_width": 0}}
+      },
+      "root": {
+        "id": "root",
+        "type": "obj",
+        "flags": {"SCROLLABLE": false},
+        "styles": [{"ref": "global-static:ui.canvas"}],
+        "style": {
+          "width": {"pct": 100}, "height": {"pct": 100},
+          "text_font": "ui_20",
+          "pad_all": 12, "pad_row": 6, "border_width": 0,
+          "layout": "LV_LAYOUT_FLEX", "flex_flow": "LV_FLEX_FLOW_COLUMN"
+        },
+        "children": [
+          {
+            "id": "heading", "type": "label",
+            "props": {"text": "--"}, "styles": [{"ref": "global-static:ui.text"}],
+            "style": {"width": {"pct": 100}, "height": 26},
+            "bindings": [{"method": "text", "value": {"source": "ui.scheme", "path": ["title"]}, "format": {"prefix": "Оформление: "}}]
+          },
+          {
+            "id": "choices", "type": "obj", "flags": {"SCROLLABLE": false},
+            "style": {"width": {"pct": 100}, "height": 48, "pad_all": 5, "pad_column": 8, "border_width": 0, "bg_opa": 0, "layout": "LV_LAYOUT_FLEX", "flex_flow": "LV_FLEX_FLOW_ROW"},
+            "children": [
+              {
+                "id": "choose_classic", "type": "button", "props": {"text": "Строгая классика"},
+                "styles": [{"ref": "global-static:ui.button"}, {"ref": "screen:choice_geometry"}, {"ref": "global-static:ui.button_pressed", "state": ["CHECKED"]}, {"ref": "global-static:ui.button_focus", "state": ["FOCUSED"]}, {"ref": "screen:choice_focus", "state": ["FOCUSED"]}, {"ref": "global-static:ui.button_pressed", "state": ["PRESSED"]}, {"ref": "global-static:ui.button_disabled", "state": ["DISABLED"]}],
+                "bindings": [{"scope": "common", "method": "state", "value": [{"literal": 4}, {"op": "eq", "args": [{"source": "ui.scheme", "path": ["id"]}, {"literal": "classic"}]}]}],
+                "events": [{"event": "clicked", "action": "ui.select_scheme", "args": {"literal": "classic"}}]
+              },
+              {
+                "id": "choose_space", "type": "button", "props": {"text": "Космическое будущее"},
+                "styles": [{"ref": "global-static:ui.button"}, {"ref": "screen:choice_geometry"}, {"ref": "global-static:ui.button_pressed", "state": ["CHECKED"]}, {"ref": "global-static:ui.button_focus", "state": ["FOCUSED"]}, {"ref": "screen:choice_focus", "state": ["FOCUSED"]}, {"ref": "global-static:ui.button_pressed", "state": ["PRESSED"]}, {"ref": "global-static:ui.button_disabled", "state": ["DISABLED"]}],
+                "bindings": [{"scope": "common", "method": "state", "value": [{"literal": 4}, {"op": "eq", "args": [{"source": "ui.scheme", "path": ["id"]}, {"literal": "space"}]}]}],
+                "events": [{"event": "clicked", "action": "ui.select_scheme", "args": {"literal": "space"}}]
+              },
+              {
+                "id": "choose_pony", "type": "button", "props": {"text": "Розовый пони"},
+                "styles": [{"ref": "global-static:ui.button"}, {"ref": "screen:choice_geometry"}, {"ref": "global-static:ui.button_pressed", "state": ["CHECKED"]}, {"ref": "global-static:ui.button_focus", "state": ["FOCUSED"]}, {"ref": "screen:choice_focus", "state": ["FOCUSED"]}, {"ref": "global-static:ui.button_pressed", "state": ["PRESSED"]}, {"ref": "global-static:ui.button_disabled", "state": ["DISABLED"]}],
+                "bindings": [{"scope": "common", "method": "state", "value": [{"literal": 4}, {"op": "eq", "args": [{"source": "ui.scheme", "path": ["id"]}, {"literal": "pony"}]}]}],
+                "events": [{"event": "clicked", "action": "ui.select_scheme", "args": {"literal": "pony"}}]
+              }
+            ]
+          },
+          {
+            "id": "plot", "type": "demo:history_plot",
+            "styles": [{"ref": "global-static:ui.panel"}, {"ref": "screen:plot_geometry"}, {"ref": "global-static:ui.indicator", "part": "INDICATOR"}],
+            "style": {
+              "width": {"pct": 100}, "height": 0, "flex_grow": 1
+            },
+            "bindings": [{"method": "series", "value": {"source": "demo.level_plot"}}]
+          },
+          {
+            "id": "metrics", "type": "obj",
+            "flags": {"SCROLLABLE": false},
+            "style": {
+              "width": {"pct": 100}, "height": 28, "pad_all": 0, "border_width": 0,
+              "bg_opa": 0, "layout": "LV_LAYOUT_FLEX", "flex_flow": "LV_FLEX_FLOW_ROW", "pad_column": 8
+            },
+            "children": [
+              {
+                "id": "mean", "type": "label", "props": {"text": "--"}, "styles": [{"ref": "global-static:ui.text"}],
+                "style": {"width": 0, "flex_grow": 1, "height": 28},
+                "bindings": [{"method": "text", "value": {"source": "demo.level_history", "path": ["mean"]}, "format": {"prefix": "Mean: ", "precision": 2}}]
+              },
+              {
+                "id": "level_text", "type": "label", "props": {"text": "--"}, "styles": [{"ref": "global-static:ui.text"}],
+                "style": {"width": 170, "height": 28, "text_align": "LV_TEXT_ALIGN_RIGHT"},
+                "bindings": [{"method": "text", "value": {"source": "demo.level"}, "format": {"prefix": "Level: ", "suffix": " %"}}]
+              }
+            ]
+          },
+          {
+            "id": "level", "type": "slider", "props": {"min": 0, "max": 100},
+            "styles": [{"ref": "global-static:ui.track"}, {"ref": "global-static:ui.indicator", "part": "INDICATOR"}, {"ref": "global-static:ui.knob", "part": "KNOB"}],
+            "style": {"width": {"pct": 100}, "height": 26},
+            "bindings": [{"method": "value", "value": {"source": "demo.level"}}],
+            "events": [{"event": "value_changed", "write": {"source": "demo.level"}, "value": {"event": "value"}}]
+          },
+          {
+            "id": "sampling", "type": "obj",
+            "flags": {"SCROLLABLE": false},
+            "style": {
+              "width": {"pct": 100}, "height": 30, "pad_all": 0, "border_width": 0,
+              "bg_opa": 0, "layout": "LV_LAYOUT_FLEX", "flex_flow": "LV_FLEX_FLOW_ROW", "pad_column": 12
+            },
+            "children": [
+              {
+                "id": "history_enabled", "type": "switch", "style": {"width": 48, "height": 28},
+                "styles": [{"ref": "global-static:ui.track"}, {"ref": "global-static:ui.indicator", "part": "INDICATOR", "state": ["CHECKED"]}, {"ref": "global-static:ui.knob", "part": "KNOB"}],
+                "bindings": [{"scope": "common", "method": "state", "value": [{"literal": 4}, {"source": "demo.history_enabled"}]}],
+                "events": [{"event": "value_changed", "write": {"source": "demo.history_enabled"}, "value": {"event": "value"}}]
+              },
+              {
+                "id": "sampling_label", "type": "label", "styles": [{"ref": "global-static:ui.text"}],
+                "props": {"text": "Sampling / 200 ms / disable to release history"},
+                "style": {"width": 0, "flex_grow": 1, "height": 28, "text_font": "ui_14"}
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

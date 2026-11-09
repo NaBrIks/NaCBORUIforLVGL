@@ -25,3 +25,37 @@ await writeFile(new URL('project.cbor',directory),encodeProject(project,capabili
 for(const s of [shell,...pages,nested])await writeFile(new URL(s.id+'.cbor',directory),encodeScreen(s,'composition',capabilities));
 const missing=structuredClone(shell);missing.id='missing';missing.root.children[0].view.pages.push({screen:'absent'});
 await writeFile(new URL('missing.cbor',directory),encodeScreen(missing,'missing',capabilities));
+
+// Two independent occurrences of the same nested pages exercise stable ownership paths.
+const workspace=createBlankScreen('workspace','Refresh test');
+const section=createBlankScreen('section','Section');
+const sectionView=createNode('obj','content');
+sectionView.view={pages:[{screen:'a'},{screen:'nested'}],initial:'a'};
+const sectionButton=createNode('button','open_nested');
+sectionButton.events=[{event:'clicked',navigate:{view:'content',screen:'nested'}}];
+section.root.children=[sectionView,sectionButton];
+workspace.root.children=['left','right'].flatMap(side=>{
+ const view=createNode('obj',side);view.view={pages:[{screen:'a'},{screen:'section'}],initial:'a'};
+ const button=createNode('button','open_'+side);button.events=[{event:'clicked',navigate:{view:side,screen:'section'}}];
+ return [view,button];
+});
+const refresh=createProject([workspace,section,nested,...pages],{id:'refresh-test',name:'Refresh integration'});
+await writeFile(new URL('refresh.cbor',directory),encodeProject(refresh,capabilities));
+const edited=structuredClone(refresh);
+edited.screens.b.root.children.push(createNode('label','edited'));
+await writeFile(new URL('refresh-edited.cbor',directory),encodeProject(edited,capabilities));
+const removed=structuredClone(edited);
+removed.screens.section.root.children=removed.screens.section.root.children.filter(node=>node.id!=='open_nested');
+removed.screens.section.root.children[0].view.pages=[{screen:'a'}];
+await writeFile(new URL('refresh-removed.cbor',directory),encodeProject(removed,capabilities));
+const renamed=structuredClone(edited);
+renamed.screens.nested.root.children[0].id='renamed';
+for(const node of renamed.screens.nested.root.children)for(const event of node.events??[])event.navigate.view='renamed';
+await writeFile(new URL('refresh-renamed.cbor',directory),encodeProject(renamed,capabilities));
+const bad=structuredClone(edited);bad.screens.workspace.size.width=799;
+await writeFile(new URL('refresh-invalid.cbor',directory),encodeProject(bad,capabilities));
+
+const noRoot=structuredClone(edited);delete noRoot.screens.workspace;noRoot.manifest.entry='section';
+await writeFile(new URL('refresh-no-root.cbor',directory),encodeProject(noRoot,capabilities));
+const other=structuredClone(edited);other.manifest.id='other-project';
+await writeFile(new URL('refresh-other.cbor',directory),encodeProject(other,capabilities));

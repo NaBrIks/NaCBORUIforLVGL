@@ -67,3 +67,27 @@ test('device project limits are enforced before upload and a missing revision is
  const {client,counts}=device();await assert.rejects(client.preview(fresh(),'screen_0',{capabilities:{...offlineCapabilities(),project:{maxBytes:1}}}),/Project too large/);assert.equal(counts().chunks,0);
  const missing=new ProjectClient('http://device.test:5299',{fetcher:async()=>new Response(encodeProject(fresh()))});await assert.rejects(missing.read(),/revision header missing/);
 });
+
+test('node-scoped project edits preserve siblings, other screens, bindings/events and revision guards',async()=>{
+ const {client,counts}=device(),page=createBlankScreen('screen_0','Selected page');page.root.children=[
+  {id:'group',type:'obj',children:[{id:'value',type:'label',props:{text:'Value'},bindings:[{method:'text',value:{literal:'bound'}}]}]},
+  {id:'slot',type:'obj',view:{pages:[{screen:'screen_1',retention:'cache'}],initial:'screen_1',sizing:'fill'}},
+  {id:'tab',type:'button',props:{text:'Next'},events:[{event:'clicked',navigate:{view:'slot',screen:'screen_1'}}]}
+ ];await client.write('screens','screen_0',page);
+ const before=await client.read(),tree=await client.readDocument('screens','screen_0',{outline:true});assert.equal(tree.outline.root.children.length,3);assert.equal(tree.outline.root.children[0].children[0].id,'value');assert.equal(tree.outline.root.children[0].children[0].props,undefined);
+ const selected=await client.readDocument('screens','screen_0',{node:'group'});assert.equal(selected.document.id,'group');assert.equal(selected.screen.id,'screen_0');const edited=structuredClone(selected.document);edited.children[0].props.text='Edited';
+ await client.write('screens','screen_0',edited,{node:'group',revision:selected.revision});const after=await client.read(),expected=structuredClone(before.project);expected.screens.screen_0.root.children[0].children[0].props.text='Edited';assert.deepEqual(after.project,expected);
+ const unchanged=counts();await assert.rejects(client.write('screens','screen_0',edited,{node:'group',revision:selected.revision}),/project_revision_conflict/);assert.deepEqual(counts(),unchanged);
+ await assert.rejects(client.write('screens','screen_0',{...edited,id:'changed'},{node:'group',revision:after.revision}),/preserve selected ID/);
+ await assert.rejects(client.readDocument('screens','screen_0',{node:'missing'}),/node not found/);
+ const duplicate=structuredClone(edited);duplicate.children[0].id='slot';await assert.rejects(client.write('screens','screen_0',duplicate,{node:'group',revision:after.revision}),/Duplicate node ID/);assert.deepEqual(counts(),unchanged);
+});
+
+test('refresh posts to the shared API without choosing an entry or writing storage',async()=>{
+ let called=0;
+ const client=new ProjectClient('http://device.test:5299',{fetcher:async(url,options)=>{
+  assert.equal(new URL(url).searchParams.get('action'),'refresh');assert.equal(options.method,'POST');
+  called++;return new Response(JSON.stringify({ok:true,nodes:7}));
+ }});
+ assert.equal((await client.refresh()).nodes,7);assert.equal(called,1);
+});

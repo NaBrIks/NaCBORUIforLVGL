@@ -28,6 +28,12 @@ HostFonts::HostFonts()
 		lv_tiny_ttf_destroy(small_); lv_tiny_ttf_destroy(large_); lv_tiny_ttf_destroy(compact_);
 		throw std::runtime_error("Cyrillic font initialization failed");
 	}
+
+	// Segoe UI provides text; LVGL's bundled font supplies private-use symbols.
+	small_->fallback = &lv_font_montserrat_20;
+	large_->fallback = &lv_font_montserrat_28;
+	compact_->fallback = &lv_font_montserrat_14;
+
 }
 
 HostFonts::~HostFonts()

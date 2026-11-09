@@ -1,0 +1,226 @@
+{
+  "format": "lvgl-screen-draft-1",
+  "id": "grid_controls",
+  "name": "Grid controls",
+  "size": {
+    "width": 480,
+    "height": 320
+  },
+  "theme": "device",
+  "styles": {
+    "button_base": {
+      "props": {
+        "radius": 10,
+        "text_color": "#ffffff",
+        "border_width": 0
+      }
+    },
+    "green": {
+      "props": {
+        "bg_color": "#16784a",
+        "bg_opa": 255
+      }
+    }
+  },
+  "root": {
+    "id": "root",
+    "type": "obj",
+    "flags": {
+      "SCROLLABLE": false
+    },
+    "style": {
+      "width": {
+        "pct": 100
+      },
+      "height": {
+        "pct": 100
+      },
+      "layout": "LV_LAYOUT_GRID",
+      "grid_column_dsc_array": [
+        {
+          "fr": 1
+        },
+        {
+          "fr": 1
+        }
+      ],
+      "grid_row_dsc_array": [
+        {
+          "fr": 1
+        },
+        {
+          "fr": 1
+        }
+      ],
+      "pad_all": 12,
+      "pad_row": 12,
+      "pad_column": 12,
+      "bg_color": "#182438",
+      "bg_opa": 255
+    },
+    "children": [
+      {
+        "id": "apply",
+        "type": "button",
+        "props": {
+          "text": "Apply"
+        },
+        "styles": [
+          {
+            "ref": "screen:button_base"
+          },
+          {
+            "ref": "screen:green"
+          }
+        ],
+        "style": {
+          "grid_cell_column_pos": 0,
+          "grid_cell_row_pos": 0,
+          "grid_cell_x_align": "LV_GRID_ALIGN_STRETCH",
+          "grid_cell_y_align": "LV_GRID_ALIGN_STRETCH"
+        },
+        "styleRules": [
+          {
+            "part": "MAIN",
+            "state": [
+              "PRESSED"
+            ],
+            "props": {
+              "bg_color": "#105736"
+            }
+          }
+        ],
+        "events": [
+          {
+            "event": "clicked",
+            "action": "example.apply",
+            "args": {
+              "literal": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "reset",
+        "type": "button",
+        "props": {
+          "text": "Reset"
+        },
+        "styles": [
+          {
+            "ref": "screen:button_base"
+          }
+        ],
+        "style": {
+          "grid_cell_column_pos": 1,
+          "grid_cell_row_pos": 0,
+          "grid_cell_x_align": "LV_GRID_ALIGN_STRETCH",
+          "grid_cell_y_align": "LV_GRID_ALIGN_STRETCH",
+          "bg_color": "#a33b56",
+          "bg_opa": 255
+        },
+        "events": [
+          {
+            "event": "clicked",
+            "action": "example.reset",
+            "args": {
+              "literal": null
+            }
+          }
+        ]
+      },
+      {
+        "id": "enabled",
+        "type": "checkbox",
+        "props": {
+          "text": "Enabled",
+          "checked": true
+        },
+        "style": {
+          "grid_cell_column_pos": 0,
+          "grid_cell_row_pos": 1,
+          "grid_cell_x_align": "LV_GRID_ALIGN_CENTER",
+          "grid_cell_y_align": "LV_GRID_ALIGN_CENTER",
+          "text_color": "#ffffff"
+        },
+        "styleRules": [
+          {
+            "part": "INDICATOR",
+            "state": [
+              "CHECKED"
+            ],
+            "props": {
+              "bg_color": "#16784a",
+              "border_color": "#55c28a"
+            }
+          }
+        ],
+        "bindings": [
+          {
+            "scope": "common",
+            "method": "state",
+            "value": [
+              {
+                "literal": 4
+              },
+              {
+                "source": "example.enabled"
+              }
+            ]
+          }
+        ],
+        "events": [
+          {
+            "event": "value_changed",
+            "write": {
+              "source": "example.enabled"
+            },
+            "value": {
+              "event": "value"
+            }
+          }
+        ]
+      },
+      {
+        "id": "number",
+        "type": "textarea",
+        "props": {
+          "text": "42",
+          "one_line": true,
+          "max_length": 6
+        },
+        "style": {
+          "grid_cell_column_pos": 1,
+          "grid_cell_row_pos": 1,
+          "grid_cell_x_align": "LV_GRID_ALIGN_STRETCH",
+          "grid_cell_y_align": "LV_GRID_ALIGN_CENTER",
+          "bg_color": "#ffffff",
+          "bg_opa": 255,
+          "text_color": "#142137",
+          "border_color": "#7199cc",
+          "border_width": 2,
+          "radius": 8
+        },
+        "bindings": [
+          {
+            "method": "text",
+            "value": {
+              "source": "example.number_text"
+            }
+          }
+        ],
+        "events": [
+          {
+            "event": "value_changed",
+            "write": {
+              "source": "example.number_text"
+            },
+            "value": {
+              "event": "value"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

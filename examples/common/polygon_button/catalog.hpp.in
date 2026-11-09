@@ -1,0 +1,2 @@
+#pragma once
+inline constexpr char polygon_button_catalog[]=R"catalog(@POLYGON_BUTTON_CATALOG_JSON@)catalog";

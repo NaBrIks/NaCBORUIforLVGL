@@ -18,10 +18,10 @@ import {useLiveData} from './live-data.js';
 
 export function useLab(){
  provideScreenPreviewSettings();
- const appRoute=['/','/index.html'].includes(location.pathname),simulated=new URLSearchParams(location.search).get('sim')==='1';
+ const appRoute=['/','/index.html','/editor','/editor/'].includes(location.pathname),simulated=new URLSearchParams(location.search).get('sim')==='1';
  const local=['localhost','127.0.0.1'].includes(location.hostname),page=ref('project');
- let savedDevice='';try{savedDevice=localStorage.getItem('lvgl-cbor-device')??'';}catch{}
- const device=ref(simulated?'http://127.0.0.1':local?savedDevice:location.origin),simulator=simulated?createSimulator():null;
+ let savedDevice='';try{savedDevice=localStorage.getItem('lvgl-cbor-device:'+location.origin)??'';}catch{}
+ const device=ref(simulated?'http://127.0.0.1':local?(savedDevice||location.origin):location.origin),simulator=simulated?createSimulator():null;
  const connection=useDeviceConnection({device,simulator,local,enabled:appRoute});
  const authoringCapabilities=useAuthoringCapabilities(connection.capabilities);
  provide('lvgl-authoring-capabilities',authoringCapabilities);
@@ -33,7 +33,7 @@ export function useLab(){
  provide('lvgl-project',{workspace:projectWorkspace,controller:projects,pagePreview});
  const liveData=useLiveData(connection);provide('lvgl-live-data',liveData);
  let screens;
- const styles=useStyleController(connection,{document:workspace.styleDoc,page,auto:workspace.autoStyle,preview,simulator,projectPreview:projects.previewStyle,suspended:projectWorkspace.loading,otherBusy:()=>screens?.screenBusy.value,onEvent:event=>{projects.projectChanged(event);liveData.event(event);},onOnline:projects.socketOnline,onSocketState:liveData.socketState});
+ const styles=useStyleController(connection,{document:workspace.styleDoc,page,auto:workspace.autoStyle,preview,simulator,projectPreview:projects.previewStyle,suspended:projectWorkspace.loading,otherBusy:()=>screens?.screenBusy.value,onEvent:event=>{projects.projectChanged(event);connection.catalogChanged(event);liveData.event(event);},onOnline:projects.socketOnline,onSocketState:liveData.socketState});
  screens=useScreenController(connection,{document:screenWorkspace.current,page,auto:workspace.autoScreen,simulated,projectPreview:projects.previewScreen,suspended:projectWorkspace.loading,previewKey:pagePreview.target,otherBusy:()=>styles.busy.value||styles.componentBusy.value});
  const activeAuto=computed({get:()=>page.value==='screens'?workspace.autoScreen.value:workspace.autoStyle.value,set:value=>{if(page.value==='screens')workspace.autoScreen.value=value;else workspace.autoStyle.value=value;}});
  return {appRoute,simulated,page,device,screenWorkspace,...workspace,...preview,...pane,...connection,...styles,...screens,activeAuto,

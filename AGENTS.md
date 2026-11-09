@@ -67,3 +67,50 @@ machine layout or a prohibition on other explicit configurations. Alternative
 paths and version profiles are allowed when deliberately configured and validated.
 Do not silently change versions based on historical verification reports.
 - Owner authorization 2026-10-28: for NaCBORUIforLVGL firmware work, independently build and flash the identified target, including bootloader, partition table, application and filesystem changes required by the task, without asking again. Owner explicitly declined backing up the current board in this deployment. Verify chip/MAC before writing; do not operate unrelated boards. Keep private device evidence ignored and public reports generic.
+
+- Owner decisions 2026-11-07: implement one grouped/described DataRegistry with
+  bounded selective HTTP/MCP discovery, optional application-owned history, and
+  Windows validation. Reverse events remain normal; only history is optional.
+  Preserve styles/multiple selector references as part of full redesign through
+  existing project MCP operations, including user-authored schemes. Read
+  docs/readme_data_catalog_ru.md. Android remains in plans. This iteration does
+  not authorize a new hardware acceptance claim or require touching NTP.
+
+- Owner request 2026-11-07: maintain a permanent Windows loopback HTTP API and
+  project-scoped nacborui_windows MCP over existing services. Normal npm player
+  enables port 5300; direct run.mjs needs --api/--api-port. Reuse ProjectService,
+  DataRegistry and FileProjectStore; don't add another styling/storage engine.
+  Read docs/readme_windows_api_ru.md. Keep data raw CBOR outside control framing;
+  Windows persistent paths are UTF-8/wide-CRT. Never use port 443.
+
+## Mandatory common stack — owner decision 2026-11-07
+
+All product networking, demos and network integration/acceptance tests MUST use
+our NaWServer stack on every supported platform, including Windows. This is
+required at minimum for end-to-end verification of the actual shared stack.
+Do not introduce alternate HTTP/WS listeners, proxies or test servers. Frontend
+compiler tooling and stdio MCP/JSON-CBOR codecs remain host tools; they do not
+serve product HTTP. Serve the built web editor through NaWServer itself.
+Any obsolete alternate-server source, test fixtures and documentation must be
+removed rather than retained as a fallback or historical implementation guide.
+
+## Agent instructions and real MCP availability — owner decision 2026-11-08
+
+Maintain prompt originals as examples/windows_player/assistant-*.ru.md. Keep their
+English siblings (*.md) aligned; the model and MCP documentation receive English.
+The documentation checker must not overwrite owner edits. Use the configured
+MCP tool catalog directly; do not introduce demo/ui/assistant namespace filters
+or a second host tool allowlist. Registered actions, source writability and
+event validity are enforced by the existing MCP/client/application registry.
+
+## MAUI designer — owner decision 2026-11-08
+
+The Windows/Android application in tools/designer MUST reuse SPLA for
+OpenAI-compatible/OpenRouter networking, conversation, orchestration and MCP.
+Only presentation/platform storage adapters belong here. Do not change SPLA or
+copy its engine sources. Until NuGet packages exist, use overridable ProjectReference
+paths and route all build artifacts into this repository's ignored local directory.
+The app has no HTTP listener. The first prototype's HTTP MCP gateway uses native
+NaWServer and the existing MCP SDK handlers, not a second API/codec implementation.
+Direct MCU MCP and voice input are not part of the current acceptance claim.
+Read docs/readme_maui_designer_ru.md before changing the integration.

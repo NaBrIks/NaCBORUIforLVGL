@@ -36,3 +36,23 @@ test('Invalid appearance catalog is rejected before native application',async t=
   catalog.schemes.cream.primary='#e18f2f';catalog.default='missing';await writeFile(file,JSON.stringify(catalog));
   await assert.rejects(compileSchemes(file),/default/);
 });
+
+test('registry presets vary geometry through shared style props and keep readable palettes',async()=>{
+ const path=new URL('../examples/windows_player/registry-schemes.json',import.meta.url),catalog=JSON.parse(await readFile(path,'utf8'));
+ const project=decodeProject((await compileSchemes(path)).bytes);
+ assert.deepEqual(Object.values(catalog.schemes).map(p=>p.name),['Строгая классика','Космическое будущее','Розовый пони']);
+ assert.equal(project.styles['classic.button'].props.radius,0);assert.equal(project.styles['space.button'].props.border_width,1);assert.equal(project.styles['pony.button'].props.radius,18);
+ for(const palette of Object.values(catalog.schemes)){
+  const roles=roleStyles(palette);assert.ok(contrast(palette.canvas,palette.text)>=4.5,palette.name);assert.ok(contrast(roles.button.bg_color,roles.button.text_color)>=4.5,palette.name+' button');assert.ok(contrast(roles.button_pressed.bg_color,roles.button_pressed.text_color)>=4.5,palette.name+' pressed');assert.ok(contrast(roles.indicator.line_color,palette.surface)>=3,palette.name+' graph line');
+ }
+});
+
+test('a caller-defined scheme id and role geometry use the existing codec, without built-in branches',async t=>{
+ const dir=await mkdtemp(join(tmpdir(),'nacborui-custom-scheme-'));t.after(()=>rm(dir,{recursive:true,force:true}));const file=join(dir,'custom.json');
+ const catalog=JSON.parse(await readFile(new URL('../examples/windows_player/registry-schemes.json',import.meta.url),'utf8'));
+ const custom={format:catalog.format,default:'by_agent',schemes:{by_agent:{...catalog.schemes.classic,name:'Авторская',roleOverrides:{button:{radius:11,border_width:2}}}}};
+ await writeFile(file,JSON.stringify(custom));const result=await compileSchemes(file),project=decodeProject(result.bytes);assert.equal(result.default,'by_agent');assert.equal(project.styles['by_agent.button'].props.radius,11);
+ custom.schemes.by_agent.roleOverrides={missing:{radius:2}};await writeFile(file,JSON.stringify(custom));await assert.rejects(compileSchemes(file),/role override/);
+ custom.schemes.by_agent.roleOverrides={button:{made_up_property:2}};await writeFile(file,JSON.stringify(custom));await assert.rejects(compileSchemes(file));
+ custom.schemes.by_agent.roleOverrides={button:{radius:'invalid'}};await writeFile(file,JSON.stringify(custom));await assert.rejects(compileSchemes(file));
+});

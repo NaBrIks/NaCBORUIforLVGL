@@ -72,7 +72,11 @@ static bool execute_arc(lv_obj_t *obj, uint16_t method, CborValue &cursor, Widge
 #if LV_USE_LINE
 static bool execute_line(lv_obj_t *obj, uint16_t method, CborValue &cursor, WidgetContext &context) {
   switch (method) {
-  case 256: return invoke_widget(set_line_points, obj, cursor, context);
+  case 256: {
+    size_t count;
+    if (!cbor_value_is_array(&cursor) || cbor_value_get_array_length(&cursor, &count) != CborNoError || count < line_min_points || count > line_max_points) return false;
+    return invoke_widget(set_line_points, obj, cursor, context);
+  }
   default: return false;
   }
 }

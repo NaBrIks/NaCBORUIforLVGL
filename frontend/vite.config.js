@@ -10,7 +10,6 @@ const referenceFiles={
 };
 function references(){return {
  name:'local-lvgl-references',
- configureServer(server){server.middlewares.use(async(req,res,next)=>{const path=(req.url??'').split('?')[0];if(!path.startsWith('/reference/'))return next();const file=referenceFiles[path.slice('/reference/'.length)];if(!file){res.statusCode=404;res.end('Reference not found');return;}try{const source=await readFile(new URL('../docs/'+file,import.meta.url));res.setHeader('Content-Type',file.endsWith('.json')?'application/json; charset=utf-8':'text/html; charset=utf-8');res.end(source);}catch(error){next(error);}});},
  async generateBundle(){for(const [fileName,file] of Object.entries(referenceFiles))this.emitFile({type:'asset',fileName:'reference/'+fileName,source:await readFile(new URL('../docs/'+file,import.meta.url))});}
 };}
 export default defineConfig({plugins:[vue(),references()],build:{assetsInlineLimit:1000000},server:{fs:{allow:['..']}}});

@@ -1,0 +1,465 @@
+@page "/"
+@implements IDisposable
+@inject DesignerSessionAdapter Session
+@inject IJSRuntime JS
+@inject UiText T
+
+<PageTitle>NaCBORUIforLVGL</PageTitle>
+
+<div class="app-root @(DarkTheme ? "theme-dark" : string.Empty)" lang="@T.Language">
+<div class="designer-shell">
+    <header class="topbar">
+        <div class="brand"><span class="brand-mark" aria-hidden="true">N</span><span>NaCBORUIforLVGL</span></div>
+        <div class="connection-status @(Session.IsConnected ? "connected" : "disconnected")" title="@Session.Status"><span class="status-dot"></span><span>@(Session.NeedsReconnect ? T["Переподключить"] : Session.IsConnected ? T["Подключено"] : T["Не подключено"])</span></div>
+        <div class="top-actions">
+            <button class="button compact language-button" type="button" title="RU / EN" aria-label="RU / EN" @onclick="ToggleLanguage">@T.Language.ToUpperInvariant()</button>
+            <button class="button secondary" disabled="@(Session.IsBusy || Session.PendingCount > 0)" @onclick="Connect">@(Session.IsConnected ? T["Переподключить"] : T["Подключить"])</button>
+
+            <button class="button secondary" disabled="@(!Session.IsInitialized || Session.IsBusy)" @onclick="NewChat">@T["Новый чат"]</button>
+            <button class="icon-button theme-button" title="@T["Сменить тему"]" aria-label="@T["Сменить тему"]" @onclick="ToggleTheme">@(DarkTheme ? "☼" : "◐")</button>
+            <button class="button primary" disabled="@Session.IsBusy" @onclick="OpenSettings">@T["Настройки"]</button>
+        </div>
+    </header>
+
+    <main class="work-area" @ref="WorkAreaElement" style="@PaneStyle">
+        <section class="chat-pane" aria-label="@T["Чат конструктора"]">
+            <div class="chat-heading">
+                <div><h1>@T["Конструктор интерфейса"]</h1><span class="subheading">@T["Чат и проверка через общий LVGL runtime"]</span></div>
+                <div class="mode-switch" role="group" aria-label="@T["Режим ответа"]">
+                    <button class="@(!Session.ShowReasoning ? "selected" : "")" @onclick="() => SetMode(false)">@T["Обычный"]</button>
+                    <button class="@(Session.ShowReasoning ? "selected" : "")" @onclick="() => SetMode(true)">@T["Подробный"]</button>
+                </div>
+            </div>
+
+            <div class="conversation" @ref="ConversationElement">
+                @if (Session.Messages.Count == 0 && string.IsNullOrWhiteSpace(Session.LiveText))
+                {
+                    <div class="empty-state">
+                        <h2>@T["Опишите экран или правку"]</h2>
+                        <p>@T["Можно приложить изображение или JSON. Изображения и JSON остаются в истории чата."]</p>
+                        <div class="starter-prompts">
+                            <button @onclick="PromptSettings">@T["Экран настроек"]</button>
+                            <button @onclick="PromptReview">@T["Проверить JSON"]</button>
+                        </div>
+                    </div>
+                }
+                @foreach (var message in Session.Messages)
+                {
+                    <article class="message @(message.Role == "user" ? "user-message" : "assistant-message")">
+                        <header class="message-head"><span>@(message.Role == "user" ? T["Вы"] : T["Модель"])</span><time>@(message.Timestamp?.ToLocalTime().ToString("HH:mm") ?? string.Empty)</time></header>
+                        @if (!string.IsNullOrWhiteSpace(message.Reasoning))
+                        {
+                            <details class="reasoning-block"><summary>@T["Подробности"]</summary><div class="markdown-body">@((MarkupString)MarkdownRenderer.ToSafeHtml(message.Reasoning))</div></details>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(message.Text)) { <div class="markdown-body">@((MarkupString)MarkdownRenderer.ToSafeHtml(message.Text))</div> }
+                        @if (message.Attachments.Count > 0)
+                        {
+                            <div class="message-attachments">
+                                @foreach (var attachment in message.Attachments)
+                                {
+                                    @if (attachment.PreviewDataUrl is not null) { <img src="@attachment.PreviewDataUrl" alt="@attachment.Name" /> }
+                                    else { <span class="file-chip">@attachment.Name</span> }
+                                }
+                            </div>
+                        }
+                    </article>
+                }
+                @if (!string.IsNullOrWhiteSpace(Session.LiveText) || !string.IsNullOrWhiteSpace(Session.LiveReasoning))
+                {
+                    <article class="message assistant-message live-message">
+                        <header class="message-head"><span>@T["Модель"]</span><span>@T["Ответ поступает"]</span></header>
+                        @if (Session.ShowReasoning && !string.IsNullOrWhiteSpace(Session.LiveReasoning))
+                        {
+                            <details class="reasoning-block" open><summary>@T["Подробности"]</summary><div class="markdown-body">@((MarkupString)MarkdownRenderer.ToSafeHtml(Session.LiveReasoning))</div></details>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Session.LiveText)) { <div class="markdown-body">@((MarkupString)MarkdownRenderer.ToSafeHtml(Session.LiveText))</div> }
+                    </article>
+                }
+                @foreach (var queued in Session.PendingMessages)
+                {
+                    <article class="message user-message queued-message">
+                        <header class="message-head">@T["Вы"] · @(Session.QueuePaused ? "Ожидает продолжения" : T["В очереди"])</header>
+                        <div class="markdown-body">@((MarkupString)MarkdownRenderer.ToSafeHtml(queued.Text))</div>
+                        @foreach (var image in queued.Attachments) { <img class="queued-image" src="@image.PreviewDataUrl" alt="@image.Name" /> }
+                    </article>
+                }
+            </div>
+
+            @if (DraftAttachments.Count > 0)
+            {
+                <div class="draft-attachments" aria-label="@T["Вложения"]">
+                    @foreach (var attachment in DraftAttachments)
+                    {
+                        <div class="draft-attachment">
+                            @if (attachment.PreviewDataUrl is not null) { <img src="@attachment.PreviewDataUrl" alt="" /> }
+                            <span title="@attachment.Name">@attachment.Name</span>
+                            <button class="icon-button" type="button" title="@T["Удалить вложение"]" aria-label="@T.Format("Удалить {0}", attachment.Name)" @onclick="() => RemoveAttachment(attachment)">×</button>
+                        </div>
+                    }
+                </div>
+            }
+
+            <footer class="composer">
+                <div class="composer-tools">
+                    <button class="icon-button" type="button" title="@T["Добавить изображение"]" aria-label="@T["Добавить изображение"]" @onclick="PickImage">＋</button>
+                    <button class="text-action" type="button" @onclick="PickJson">@T["Прикрепить JSON"]</button>
+                    <span class="composer-hint">@T["Enter — отправить · Shift+Enter — новая строка"]</span>
+                </div>
+                <textarea @bind="DraftText" @bind:event="oninput" @onkeydown="OnComposerKeyDown" rows="3" placeholder="@T["Опишите, что нужно создать или изменить…"]" aria-label="@T["Сообщение"]"></textarea>
+                <div class="reasoning-controls" title="@T[Session.ReasoningInfo]">
+                    <label>@T["Рассуждения"]
+                        <select aria-label="@T["Рассуждения"]" disabled="@Session.LoadingReasoning" value="@ReasoningModeValue" @onchange="ChangeReasoningMode">
+                            <option value="">@T["По умолчанию"]</option>
+                            <option value="on" disabled="@(!Session.Reasoning.Supported)">@T["Вкл"]</option>
+                            <option value="off" disabled="@(!Session.Reasoning.CanDisable)">@T["Выкл"]</option>
+                        </select>
+                    </label>
+                    <label>@T["Уровень"]
+                        <select aria-label="@T["Уровень рассуждений"]" value="@ReasoningEffortValue" disabled="@(Session.LoadingReasoning || Session.Reasoning.Efforts.Count == 0 || Session.ReasoningLevel == "off")" @onchange="ChangeReasoningEffort">
+                            <option value="">@T["По умолчанию"]</option>
+                            @foreach (var effort in Session.Reasoning.Efforts) { <option value="@effort">@effort</option> }
+                        </select>
+                    </label>
+                    <button class="button secondary" disabled="@(!Session.QueuePaused || Session.PendingCount == 0)" @onclick="Session.ResumePending">@T["Продолжить"]</button>
+                    <button class="button secondary stop-button" disabled="@(!Session.IsBusy)" @onclick="Session.Cancel">@T["Остановить"]</button>
+                </div>
+                <div class="usage-line" title="@T["Токены по данным провайдера. Контекст — вход последнего запроса; лимит из каталога модели. Σ — расход с начала запуска приложения."]">
+                    <span>↑ @Tokens(Session.Usage?.InputTokens)</span>
+                    <span>↓ @Tokens(Session.Usage?.OutputTokens)</span>
+                    <span>Σ @Tokens(Session.Usage?.SessionTotalTokens)</span>
+                    <span class="context-usage">@T["Контекст"] @Tokens(Session.Usage?.ContextUsedTokens) / @Tokens(Session.Usage?.ContextLimitTokens)</span>
+                </div>
+                <div class="composer-bottom">
+                    <span class="elapsed">@Elapsed.Elapsed.TotalSeconds.ToString("0") @T["с"]</span>
+                    <span class="status-copy" title="@Session.Status">@Session.Status @(Session.PendingCount > 0 ? "· " + T.Format("в очереди {0}", Session.PendingCount) : "")</span>
+                    <details class="error-details @(!string.IsNullOrWhiteSpace((LocalError ?? Session.LastError)) ? "has-error" : "")">
+                        <summary title="@T["Подробности состояния"]" aria-label="@T["Подробности состояния"]">ⓘ</summary>
+                        <p>@(T[(LocalError ?? Session.LastError) ?? "Ошибок нет. "] + (LocalError is null && Session.LastError is null ? Session.Status : ""))</p>
+                    </details>
+
+                    <button class="button primary send-button" type="button" disabled="@(string.IsNullOrWhiteSpace(DraftText) && DraftAttachments.Count == 0)" @onclick="Send">@(Session.IsBusy ? T["В очередь"] : T["Отправить"])</button>
+                </div>
+
+            </footer>
+        </section>
+
+        <div class="pane-splitter" @ref="SplitterElement" role="separator" tabindex="0" aria-orientation="vertical" aria-label="@T["Ширина панелей"]" title="@T["Ширина панелей"]" aria-valuemin="25" aria-valuemax="75" aria-valuenow="@PaneRatio.ToString(System.Globalization.CultureInfo.InvariantCulture)"></div>
+        <aside class="preview-pane @(PreviewExpanded ? "preview-expanded" : "")" aria-label="@T["Предпросмотр LVGL"]">
+            <header class="pane-heading">
+                <div><h2>@T["Предпросмотр LVGL"]</h2><span>@T["Настоящий дисплей · MCP"]</span></div>
+                <div class="preview-actions"><button class="icon-button" type="button" title="@T["Размер предпросмотра"]" aria-label="@T["Развернуть предпросмотр"]" @onclick="() => PreviewExpanded = !PreviewExpanded">@(PreviewExpanded ? "×" : "⛶")</button>
+                <button class="icon-button copy-frame-button" type="button" title="@T["Копировать экран в буфер"]" aria-label="@T["Копировать экран в буфер"]" disabled="@(string.IsNullOrWhiteSpace(Session.PreviewDataUrl))" @onclick="CopyPreview"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="1.5"/><path d="M16 8V3H3v13h5"/></svg></button>
+                <button class="icon-button refresh-button" type="button" title="@T["Обновить кадр"]" aria-label="@T["Обновить кадр"]" disabled="@(!Session.IsConnected || Session.IsBusy)" @onclick="RefreshPreview">↻</button></div>
+            </header>
+
+            <div class="layout-debug-inline" aria-label="@T["Настройки диагностики разметки"]">
+                <div class="debug-level-scroll">
+                    <table class="debug-level-table" aria-label="@T["Диагностика разметки"]">
+                        <thead><tr><th scope="col">@T["Слой"]</th>
+                        @for (var depth = 0; depth < (Session.LayoutDebug?.Levels.Length ?? 0); depth++)
+                        { <th scope="col">@depth</th> }
+                        </tr></thead>
+                        <tbody>
+                        @for (var rowIndex = 0; rowIndex < 4; rowIndex++)
+                        {
+                            var row = rowIndex;
+                            <tr><th scope="row">@T[DebugRowName(row)]</th>
+                            @for (var index = 0; index < (Session.LayoutDebug?.Levels.Length ?? 0); index++)
+                            {
+                                var depth = index;
+                                var level = Session.LayoutDebug!.Levels[depth];
+                                var fill = row >= 2;
+                                <td>
+                                @if (row == 0 || row == 3)
+                                {
+                                    <input type="checkbox" aria-label="@T.Format("{0}: слой {1}", T[DebugRowName(row)], depth)" @bind:get="@(fill ? level.Digit : level.Outline)" @bind:set="(bool enabled) => ChangeDebugLevel(depth, fill, enabled)" disabled="@DebugUnavailable" />
+                                }
+                                else
+                                {
+                                    <input class="debug-level-color" type="color" aria-label="@T.Format("{0}: слой {1}", T[DebugRowName(row)], depth)" title="@T.Format("{0}: слой {1}", T[DebugRowName(row)], depth)" value="@ColorHex(fill ? level.DigitColor : level.OutlineColor)" @onchange="(ChangeEventArgs e) => ChangeDebugColor(depth, fill, e.Value?.ToString())" disabled="@DebugUnavailable" />
+                                }
+                                </td>
+                            }
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="debug-shared-options">
+                    <label class="debug-type" title="@T["G — Grid, F — Flex; выключено — номер слоя"]"><input type="checkbox" aria-label="G/F" @bind:get="@(Session.LayoutDebug?.LayoutType ?? false)" @bind:set="ChangeDebugType" disabled="@DebugUnavailable" />G/F</label>
+                    <label title="@T["Толщина рамки"]"><input type="number" aria-label="@T["Толщина рамки"]" min="1" max="16" @bind:get="@(Session.LayoutDebug?.OutlineWidth ?? 3)" @bind:set="ChangeOutlineWidth" disabled="@DebugUnavailable" />px</label>
+                    <label class="debug-opacity" title="@T["Непрозрачность фона"]">α<input type="range" aria-label="@T["Непрозрачность фона"]" min="0" max="255" @bind:get="@(Session.LayoutDebug?.Opacity ?? 192)" @bind:set="ChangeDebugOpacity" disabled="@DebugUnavailable" /><span>@((Session.LayoutDebug?.Opacity ?? 192) * 100 / 255)%</span></label>
+                </div>
+            </div>
+            <div class="preview-stage">
+                @if (!string.IsNullOrWhiteSpace(Session.PreviewDataUrl)) { <img class="preview-image" src="@Session.PreviewDataUrl" alt="@T["Последний фактический кадр LVGL"]" /> }
+                else { <div class="preview-empty"><span class="preview-glyph" aria-hidden="true">▦</span><span>@T["Кадр ещё не получен"]</span></div> }
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Session.PreviewDescription)) { <p class="preview-meta">@Session.PreviewDescription</p> }
+            <details class="activity-details" open="@Session.ShowReasoning">
+                <summary>@T["События сессии"] <span>@Session.Logs.Count</span></summary>
+                <div class="activity-list">
+                    @foreach (var entry in Session.Logs.TakeLast(80).Reverse())
+                    {
+                        <div class="activity-row"><time>@entry.At.ToLocalTime().ToString("HH:mm:ss")</time><span class="activity-kind">@entry.Kind</span><span>@entry.Text</span></div>
+                    }
+                </div>
+            </details>
+
+
+        </aside>
+    </main>
+</div>
+@if (SettingsOpen)
+{
+    <SettingsPanel Settings="Session.Settings" OnSave="SaveSettings" OnClose="CloseSettings" OnLoadModels="LoadModels" Models="Models" LoadingModels="LoadingModels" Error="@SettingsError" />
+}
+</div>
+
+@code {
+    private ElementReference ConversationElement, WorkAreaElement, SplitterElement;
+    private double PaneRatio = Preferences.Default.Get("nacborui.designer.chat-width", 62.0);
+    private string PaneStyle => $"--chat-track:{PaneRatio.ToString(System.Globalization.CultureInfo.InvariantCulture)}fr;--preview-track:{(100 - PaneRatio).ToString(System.Globalization.CultureInfo.InvariantCulture)}fr";
+    private static string DebugRowName(int row) => row switch { 0 => "Рамка", 1 => "RGB рамки", 2 => "RGB фона", _ => "Фон" };
+    private void ToggleLanguage() => T.Toggle();
+    [JSInvokable]
+    public Task SavePaneRatio(double ratio) => InvokeAsync(() =>
+    {
+        PaneRatio = Math.Clamp(ratio, 25, 75);
+        Preferences.Default.Set("nacborui.designer.chat-width", PaneRatio);
+        StateHasChanged();
+    });
+    private readonly System.Diagnostics.Stopwatch Elapsed = new();
+    private System.Threading.Timer? Clock;
+    private string? LocalError;
+    private string DraftText { get; set; } = string.Empty;
+    private List<DraftFile> DraftAttachments { get; } = new();
+    private bool PreviewExpanded;
+    private bool SettingsOpen { get; set; }
+    private bool DarkTheme { get; set; }
+    private bool LoadingModels { get; set; }
+    private string? SettingsError { get; set; }
+    private IReadOnlyList<string> Models { get; set; } = Array.Empty<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Session.Changed += HandleSessionChanged;
+        Clock = new System.Threading.Timer(_ => { if (Session.IsBusy) _ = InvokeAsync(StateHasChanged); }, null, 1000, 1000);
+        DarkTheme = Preferences.Default.Get("nacborui.designer.dark-theme", false);
+        await Session.InitializeAsync();
+    }
+
+    private DotNetObjectReference<Home>? PasteReference;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            PasteReference = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("designerUi.bindPaste", PasteReference);
+            await JS.InvokeVoidAsync("designerUi.bindSplitter", WorkAreaElement, SplitterElement, PasteReference);
+        }
+        await JS.InvokeVoidAsync("designerUi.followChat", false);
+    }
+
+    [JSInvokable]
+    public Task PasteImage(string name, string mime, string dataUrl) => InvokeAsync(() =>
+    {
+        try
+        {
+            LocalError = null;
+            if (DraftAttachments.Count >= 8) throw new InvalidOperationException(T["Не более 8 вложений."]);
+            if (dataUrl.Length > 11200000 || !mime.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ||
+                !dataUrl.StartsWith($"data:{mime};base64,", StringComparison.Ordinal))
+                throw new InvalidOperationException(T["Некорректное изображение буфера."]);
+            var bytes = Convert.FromBase64String(dataUrl[(dataUrl.IndexOf(',') + 1)..]);
+            if (bytes.Length > 8 * 1024 * 1024) throw new InvalidOperationException(T["Изображение больше 8 МБ."]);
+            DraftAttachments.Add(new DraftFile(name, mime, dataUrl, null));
+        }
+        catch (Exception ex) { LocalError = ex.Message; }
+        StateHasChanged();
+    });
+
+    [JSInvokable]
+    public Task PasteError(string message) => InvokeAsync(() => { LocalError = T[message]; StateHasChanged(); });
+
+    private void HandleSessionChanged()
+    {
+        if (Session.IsBusy && !Elapsed.IsRunning) Elapsed.Restart();
+        else if (!Session.IsBusy) Elapsed.Stop();
+        _ = InvokeAsync(StateHasChanged);
+    }
+    private static string Tokens(long? count) => count is null ? "—" : count >= 1000000 ? $"{count / 1000000.0:0.#}M" : count >= 1000 ? $"{count / 1000.0:0.#}k" : count.Value.ToString();
+    private string ReasoningModeValue => SPLA.Domain.Llm.ReasoningChoice.Parse(Session.ReasoningLevel).Mode switch { SPLA.Domain.Llm.ReasoningMode.Default => "", SPLA.Domain.Llm.ReasoningMode.Off => "off", _ => "on" };
+    private string ReasoningEffortValue => Session.Reasoning.Efforts.Contains(Session.ReasoningLevel) ? Session.ReasoningLevel : "";
+    private void ChangeReasoningMode(ChangeEventArgs args) => Session.SetReasoningLevel(args.Value?.ToString() ?? "");
+    private void ChangeReasoningEffort(ChangeEventArgs args) => Session.SetReasoningLevel(string.IsNullOrEmpty(args.Value?.ToString()) ? "on" : args.Value!.ToString()!);
+    private void SetMode(bool detailed) => Session.SetDetailedMode(detailed);
+    private async Task Connect()
+    {
+        await Session.ConnectAsync();
+        if (Session.IsConnected) await Session.RefreshPreviewAsync();
+    }
+    private void OpenSettings() => SettingsOpen = true;
+    private void ToggleTheme()
+    {
+        DarkTheme = !DarkTheme;
+        Preferences.Default.Set("nacborui.designer.dark-theme", DarkTheme);
+    }
+    private void CloseSettings() { SettingsOpen = false; SettingsError = null; }
+    private void NewChat() { Session.NewChat(); DraftText = string.Empty; DraftAttachments.Clear(); }
+    private void PromptSettings() => DraftText = "Create a compact LVGL settings screen with a title, two labeled fields, and Apply and Cancel actions.";
+    private void PromptReview() => DraftText = "Review the attached LVGL project JSON and suggest a focused correction.";
+    private void RemoveAttachment(DraftFile file) => DraftAttachments.Remove(file);
+
+    private async Task SaveSettings(DesignerSettings settings)
+    {
+        try { await Session.SaveSettingsAsync(settings); CloseSettings(); }
+        catch (Exception ex) { SettingsError = ex.Message; }
+    }
+
+    private async Task LoadModels(DesignerSettings settings)
+    {
+        LoadingModels = true; SettingsError = null;
+        try { Models = await Session.GetModelsAsync(settings); }
+        catch (Exception ex) { SettingsError = ex.Message; }
+        finally { LoadingModels = false; }
+    }
+
+    private async Task CopyPreview() => await Session.CopyPreviewAsync();
+    private async Task RefreshPreview() => await Session.RefreshPreviewAsync();
+    private bool DebugUnavailable => !Session.IsConnected || Session.IsBusy || Session.UpdatingLayoutDebug || Session.LayoutDebug is null;
+    private static string ColorHex(int rgb) => $"#{rgb:X6}";
+    private async Task ChangeDebugLevel(int depth, bool digits, bool enabled)
+    {
+        if (Session.LayoutDebug is not { } options) return;
+        var levels = options.Levels.ToArray();
+        levels[depth] = digits ? levels[depth] with { Digit = enabled } : levels[depth] with { Outline = enabled };
+        await Session.SetLayoutDebugAsync(options with { Levels = levels });
+    }
+    private async Task ChangeDebugType(bool type)
+    {
+        if (Session.LayoutDebug is { } options)
+            await Session.SetLayoutDebugAsync(options with { LayoutType = type });
+    }
+    private async Task ChangeDebugColor(int depth, bool digits, string? value)
+    {
+        if (Session.LayoutDebug is not { } options || value is null || value.Length != 7 || value[0] != '#' ||
+            !int.TryParse(value.AsSpan(1), System.Globalization.NumberStyles.HexNumber, null, out var color)) return;
+        var levels = options.Levels.ToArray();
+        levels[depth] = digits ? levels[depth] with { DigitColor = color } : levels[depth] with { OutlineColor = color };
+        await Session.SetLayoutDebugAsync(options with { Levels = levels });
+    }
+    private async Task ChangeDebugOpacity(int value) { if (Session.LayoutDebug is { } o) await Session.SetLayoutDebugAsync(o with { Opacity = value }); }
+    private async Task ChangeOutlineWidth(int value) { if (Session.LayoutDebug is { } o && value is >= 1 and <= 16) await Session.SetLayoutDebugAsync(o with { OutlineWidth = value }); }
+
+    private async Task Send()
+    {
+
+        LocalError = null;
+        if (!Session.IsConnected || string.IsNullOrWhiteSpace(Session.Settings.Model))
+        {
+            LocalError = T["Подключите MCP и выберите модель в настройках. Введённый запрос сохранён."];
+            return;
+        }
+        if (Session.IsBusy && Session.QueuePaused) { LocalError = T["Дождитесь завершения остановки. Запрос сохранён."]; return; }
+        var text = DraftText.Trim();
+        var imageInputs = new List<SPLA.Domain.Models.ImageAttachment>();
+        foreach (var file in DraftAttachments)
+        {
+            if (file.MimeType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                imageInputs.Add(new SPLA.Domain.Models.ImageAttachment(file.DataUrl!, file.Name));
+            else if (file.TextContent is not null)
+                text += Environment.NewLine + Environment.NewLine + "Attached JSON file " + file.Name + ":" + Environment.NewLine + "```json" + Environment.NewLine + file.TextContent + Environment.NewLine + "```";
+        }
+        try { Session.ValidateEnqueue(imageInputs); }
+        catch (Exception ex) { LocalError = ex.Message; return; }
+        DraftText = string.Empty;
+        DraftAttachments.Clear();
+        await JS.InvokeVoidAsync("designerUi.followChat", true);
+        await Session.SendAsync(text, imageInputs);
+    }
+
+    private async Task PickImage()
+    {
+        LocalError = null;
+        try { await PickImageCore(); }
+        catch (Exception ex) { LocalError = ex.Message; }
+    }
+
+    private async Task PickJson()
+    {
+        LocalError = null;
+        try { await PickJsonCore(); }
+        catch (Exception ex) { LocalError = ex.Message; }
+    }
+
+    private async Task PickImageCore()
+    {
+        var file = await FilePicker.Default.PickAsync(new PickOptions { PickerTitle = T["Выберите изображение"], FileTypes = FilePickerFileType.Images });
+        if (file is not null) await AddFile(file, 8 * 1024 * 1024);
+    }
+
+    private async Task PickJsonCore()
+    {
+        var types = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+        {
+            [DevicePlatform.WinUI] = new[] { ".json" },
+            [DevicePlatform.Android] = new[] { "application/json", "text/json" }
+        });
+        var file = await FilePicker.Default.PickAsync(new PickOptions { PickerTitle = T["Выберите JSON"], FileTypes = types });
+        if (file is not null) await AddFile(file, 512 * 1024);
+    }
+
+    private async Task AddFile(FileResult file, int maxBytes)
+    {
+        if (DraftAttachments.Count >= 8) throw new InvalidOperationException(T["Не более 8 вложений в одном сообщении."]);
+        if (DraftAttachments.Any(item => item.Name.Equals(file.FileName, StringComparison.OrdinalIgnoreCase))) return;
+        await using var input = await file.OpenReadAsync();
+        using var memory = new MemoryStream();
+        var buffer = new byte[16 * 1024];
+        int read;
+        while ((read = await input.ReadAsync(buffer)) > 0)
+        {
+            if (memory.Length + read > maxBytes) throw new InvalidOperationException(T.Format("Файл больше допустимого предела {0} КБ.", maxBytes / 1024));
+            await memory.WriteAsync(buffer.AsMemory(0, read));
+        }
+        var bytes = memory.ToArray();
+        if (file.FileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            var content = System.Text.Encoding.UTF8.GetString(bytes);
+            using var _ = System.Text.Json.JsonDocument.Parse(content);
+            DraftAttachments.Add(new DraftFile(file.FileName, "application/json", null, content));
+        }
+        else
+        {
+            var mime = string.IsNullOrWhiteSpace(file.ContentType) ? "image/jpeg" : file.ContentType;
+            if (!mime.StartsWith("image/", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException(T["Поддерживаются только изображения и JSON."]);
+            DraftAttachments.Add(new DraftFile(file.FileName, mime, $"data:{mime};base64,{Convert.ToBase64String(bytes)}", null));
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnComposerKeyDown(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter" && !args.ShiftKey) await Send();
+    }
+
+    public void Dispose()
+    {
+        _ = JS.InvokeVoidAsync("designerUi.unbindSplitter", SplitterElement);
+        PasteReference?.Dispose();
+        Clock?.Dispose();
+        Session.Changed -= HandleSessionChanged;
+        foreach (var file in DraftAttachments) file.Dispose();
+    }
+
+    private sealed class DraftFile(string name, string mimeType, string? dataUrl, string? textContent) : IDisposable
+    {
+        public string Name { get; } = name;
+        public string MimeType { get; } = mimeType;
+        public string? DataUrl { get; } = dataUrl;
+        public string? TextContent { get; } = textContent;
+        public string? PreviewDataUrl => DataUrl;
+        public void Dispose() { }
+    }
+}

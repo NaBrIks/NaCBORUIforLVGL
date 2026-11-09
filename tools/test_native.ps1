@@ -42,4 +42,8 @@ try {
  if ($LASTEXITCODE) { throw 'System status reducer failed' }
  & "local/native-build/$Configuration/composition_tests.exe" local/composition-fixtures
  if ($LASTEXITCODE) { throw 'Composition lifecycle integration failed' }
+ & "local/native-build/$Configuration/data_catalog_tests.exe"
+ if ($LASTEXITCODE) { throw 'Data catalog tests failed' }
+ & "local/native-build/$Configuration/data_history_tests.exe"
+ if ($LASTEXITCODE) { throw 'Data history tests failed' }
 } finally { Pop-Location }

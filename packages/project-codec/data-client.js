@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Oleg Kozhevnikov
 import {encode} from 'cborg';
 import {bindingText,validateBindingCapabilities,validateDataValue,validateDataPath,dataSchemaAtPath} from '../screen-codec/index.js';
+import {normalizeDataQuery,readBoundedDataJson,validateDataPage,DataQueryError} from './data-query.js';
 
 // Shared browser/host transport over the existing application-owned DataApi.
 // The MCU remains authoritative for actions, setters, events and page lifetimes.
@@ -16,6 +17,18 @@ export class DataClient {
   const value=JSON.parse(text);return {status:response.status,value};
  }
  async read(){return (await this.request()).value;}
+ async boundedGet(query,maxBytes){
+  const url=new URL('/api/data',this.origin());
+  for(const [key,value] of Object.entries(query??{}))url.searchParams.set(key,String(value));
+  const response=await this.fetcher(url.href,{method:'GET',cache:'no-store',redirect:'error',signal:AbortSignal.timeout(this.timeout)});
+  const value=await readBoundedDataJson(response,maxBytes);
+  if(!response.ok)throw new DataQueryError(typeof value?.error==='string'?value.error:'data_http_'+response.status,'Data HTTP '+response.status,{status:response.status,response:value});
+  return value;
+ }
+ async readBounded({maxBytes=4096}={}){return this.boundedGet(null,normalizeDataQuery({maxBytes}).maxBytes);}
+ async query(options={}){
+  const query=normalizeDataQuery(options);return validateDataPage(await this.boundedGet(query,query.maxBytes),query);
+ }
  async receipt(id){
   if(!Number.isSafeInteger(id)||id<=0)throw Error('Data command id');
   const snapshot=await this.read(),result=snapshot.commands?.find(command=>command.id===id);

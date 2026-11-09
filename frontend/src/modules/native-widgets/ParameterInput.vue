@@ -2,11 +2,16 @@
 Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import {computed} from 'vue';
-import {defaultParameter} from '@lvgl-cbor/screen-codec';
+import {defaultParameter,screenContract} from '@lvgl-cbor/screen-codec';
 import Icon from '../../components/Icon.vue';
 const props=defineProps({schema:{type:[String,Object],required:true},modelValue:null,label:{type:String,default:'Аргумент'}});
 const emit=defineEmits(['update:modelValue']);
-const spec=computed(()=>typeof props.schema==='string'?{type:props.schema}:props.schema);
+const spec=computed(()=>{
+ const s=typeof props.schema==='string'?{type:props.schema}:props.schema;
+ if(s.type!=='points')return s;
+ const r=screenContract.valueRules.points;
+ return {...s,type:'array',minItems:s.minItems??r.minItems,maxItems:s.maxItems??r.maxItems,items:{type:'tuple',items:['X','Y'].map(title=>({type:'int32_t',title,min:s.min??r.min,max:s.max??r.max}))}};
+});
 const sequence=computed(()=>Array.isArray(props.modelValue)?props.modelValue:defaultParameter(props.schema));
 const tupleArray=computed(()=>spec.value.type==='array'&&spec.value.items?.type==='tuple');
 const columns=computed(()=>'20px '+spec.value.items.items.map(s=>(typeof s==='object'?s.type:s)==='bool'?'32px':'minmax(44px,1fr)').join(' '));

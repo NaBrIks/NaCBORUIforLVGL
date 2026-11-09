@@ -96,12 +96,16 @@ namespace lab_system
 	bool register_data(DataRegistry &registry, std::string &error)
 	{
 		data = &registry;
+		if(!registry.add_group({"system", "System", "Clock and network information", ""}, error))return false;
+
 		if(!registry.add_source({"system.network", DataSchema::object({
-				{"connected", DataSchema::boolean()}, {"ip", DataSchema::text(15)}}), {}, "Network status"}, error) ||
+				{"connected", DataSchema::boolean()}, {"ip", DataSchema::text(15)}}), {}, "Network status",
+		                         "Confirmed network availability and address", "system"}, error) ||
 		    !registry.add_source({"system.clock", DataSchema::object({
 				{"syncState", DataSchema::text(16)}, {"timezone", DataSchema::text(63)},
 				{"localTime", DataSchema::text(8)}, {"unixSeconds", DataSchema::integer(0)},
-				{"lastSyncAgeSeconds", DataSchema::integer(0)}, {"error", DataSchema::text(96)}}), {}, "System clock"},
+				{"lastSyncAgeSeconds", DataSchema::integer(0)}, {"error", DataSchema::text(96)}}), {}, "System clock",
+		                          "Synchronization state, local time and freshness", "system"},
 		    error))
 			return false;
 

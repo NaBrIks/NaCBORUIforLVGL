@@ -27,7 +27,7 @@ public:
 	~DataApi();
 	bool begin();
 	void process();
-	bool canHandle(NaWServer::Request *) override;
+	NaWServer::RouteDescriptors routes() const override;
 	void handleRequest(NaWServer::Request *, NaWServer::Response &) override;
 private:
 	struct Command;
@@ -38,6 +38,7 @@ private:
 	QueueHandle_t queue_{};
 	std::atomic<uint32_t> next_id_{0}, rejected_{0};
 	std::shared_ptr<const std::string> snapshot_;
+	std::shared_ptr<const lvgl_cbor::DataView> view_;
 	std::deque<Result> results_;
 	int64_t next_snapshot_{};
 	bool execute(const Command &, std::string &);

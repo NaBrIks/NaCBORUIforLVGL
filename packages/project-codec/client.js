@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Oleg Kozhevnikov
 import {encode} from 'cborg';
 import {encodeProject,decodeProject,maxProjectBytes} from './index.js';
+import {projectDocumentTarget,projectDocumentOutline} from './document-selection.js';
 
 // Shared browser/MCP transport. No Vue, Node, filesystem or MCP dependency.
 export class ProjectClient {
@@ -27,6 +28,19 @@ export class ProjectClient {
  save(project,options){return this.transfer('save',project,options);}
  preview(project,screen,options){return this.transfer('preview',project,{...options,screen});}
  async show(screen){return (await this.request('show',{method:'POST',body:encode({screen})})).json();}
+ async refresh(){return (await this.request('refresh',{method:'POST',body:encode({})})).json();}
  async reset({kind,name,revision}={}){return (await this.request('reset',{method:'POST',body:encode({kind:kind??'',name:name??'',revision:revision??''})})).json();}
- async write(kind,name,document,{capabilities}={}){const client=new ProjectClient(this.origin(),{fetcher:this.fetcher,timeout:this.timeout,saveTimeout:this.saveTimeout}),{project,revision}=await client.read(capabilities);if(!['screens','styles'].includes(kind))throw Error('Project kind');Object.defineProperty(project[kind],name,{value:document,enumerable:true,writable:true,configurable:true});return client.save(project,{capabilities,revision});}
+ async readDocument(kind,name,{capabilities,node,outline=false}={}){
+  const {project,revision}=await this.read(capabilities),target=projectDocumentTarget(project,kind,name,node);
+  if(outline){if(kind!=='screens')throw Error('Outline requires a screen');return {outline:projectDocumentOutline(project.screens[name],node===undefined?undefined:target.document),revision};}
+  return {document:target.document,revision,...(node===undefined?{}:{screen:{id:project.screens[name].id,size:project.screens[name].size,styles:project.screens[name].styles??{}}})};
+ }
+ async write(kind,name,document,{capabilities,revision:expected,node}={}){
+  const client=new ProjectClient(this.origin(),{fetcher:this.fetcher,timeout:this.timeout,saveTimeout:this.saveTimeout}),{project,revision}=await client.read(capabilities);
+  if(expected!==undefined&&expected!==revision)throw Error('project_revision_conflict');
+  if(!['screens','styles'].includes(kind))throw Error('Project kind');
+  if(node!==undefined){const target=projectDocumentTarget(project,kind,name,node);if(document?.id!==node)throw Error('Replacement node must preserve selected ID');target.container[target.key]=document;}
+  else Object.defineProperty(project[kind],name,{value:document,enumerable:true,writable:true,configurable:true});
+  return client.save(project,{capabilities,revision});
+ }
 }

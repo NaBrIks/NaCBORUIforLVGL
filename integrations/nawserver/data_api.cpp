@@ -119,9 +119,10 @@ bool DataApi::begin()
 	return queue_ != nullptr;
 }
 
-bool DataApi::canHandle(NaWServer::Request *request)
+NaWServer::RouteDescriptors DataApi::routes() const
 {
-	return request->path() == "/api/data";
+	static const NaWServer::RouteDescriptor descriptor{"/api/data"};
+	return {&descriptor, 1};
 }
 
 void DataApi::handleRequest(NaWServer::Request *request, NaWServer::Response &response)
@@ -134,6 +135,28 @@ void DataApi::handleRequest(NaWServer::Request *request, NaWServer::Response &re
 
 	if(request->method() == NaWServer::HttpMethod::Get)
 	{
+		if(request->query("kind"))
+		{
+			lvgl_cbor::DataValue::Object args;
+			for(const char *key : {"kind", "group", "prefix", "name", "path", "descendants", "detail", "offset",
+			                       "limit", "maxBytes", "catalogRevision"})
+				if(auto value = request->query(key)) args[key] = std::string(*value);
+
+			lvgl_cbor::DataQuery query; std::string error, body;
+			const auto view = std::atomic_load(&view_);
+			const bool ok = lvgl_cbor::parse_data_query(args, query, error) && view && view->query_json(query, body,
+			        error);
+			if(!ok)
+			{
+				if(error.empty()) error = "data_query_not_ready";
+
+				json(response, error == "data_catalog_revision" ? 409 : error == "data_query_record_limit" ? 413 : 400,
+				    "{\"error\":" + quote(error) + "}"); return;
+			}
+
+			json(response, 200, body); return;
+		}
+
 		const auto snapshot = std::atomic_load(&snapshot_);
 		json(response, 200, *snapshot);
 		return;
@@ -241,6 +264,7 @@ bool DataApi::execute(const Command &command, std::string &error)
 
 void DataApi::publish_snapshot()
 {
+	std::atomic_store(&view_, std::make_shared<const lvgl_cbor::DataView>(data_.view()));
 	auto body = data_.snapshot_json();
 	if(body.empty() || body.back() != '}')  return;
 

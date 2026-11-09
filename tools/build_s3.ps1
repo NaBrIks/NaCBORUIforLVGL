@@ -28,11 +28,11 @@ $sdkConfig=Join-Path $projectRoot "examples/s3_style_lab/sdkconfig.$buildEnviron
 if(Test-Path -LiteralPath $sdkConfig){
  $originalConfig=[IO.File]::ReadAllText($sdkConfig)
  $configText=$originalConfig
- if($configText -notmatch '(?m)^CONFIG_NAWSERVER_BACKEND_TCP=y\r?$' -or
-    $configText -match '(?m)^CONFIG_NAWSERVER_BACKEND_HTTPD=y\r?$' -or
-    $configText -notmatch '(?m)^CONFIG_NAWSERVER_WEBSOCKET=y\r?$'){
-  $configText=[regex]::Replace($configText,'(?m)^(?:# )?CONFIG_(?:NAWSERVER_BACKEND_(?:TCP|HTTPD)|NAWSERVER_WEBSOCKET)(?:=.*| is not set)\r?\n?','').TrimEnd()
-  $configText+="`nCONFIG_NAWSERVER_BACKEND_TCP=y`n# CONFIG_NAWSERVER_BACKEND_HTTPD is not set`nCONFIG_NAWSERVER_WEBSOCKET=y`n"
+ # NaWServer now has one TCP engine; legacy backend switches are invalid.
+ $configText=[regex]::Replace($configText,'(?m)^(?:# )?CONFIG_NAWSERVER_BACKEND_(?:TCP|HTTPD)(?:=.*| is not set)\r?\n?','')
+ if($configText -notmatch '(?m)^CONFIG_NAWSERVER_WEBSOCKET=y\r?$'){
+  $configText=[regex]::Replace($configText,'(?m)^(?:# )?CONFIG_NAWSERVER_WEBSOCKET(?:=.*| is not set)\r?\n?','').TrimEnd()
+  $configText+="`nCONFIG_NAWSERVER_WEBSOCKET=y`n"
  }
  # Rich UI catalog/project handlers need a larger worker stack than minimal routes.
  $configText=[regex]::Replace($configText,'(?m)^CONFIG_NAWSERVER_TCP_HTTP_STACK_SIZE=\d+\r?$','CONFIG_NAWSERVER_TCP_HTTP_STACK_SIZE=12288')

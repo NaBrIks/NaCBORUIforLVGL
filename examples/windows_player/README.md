@@ -17,20 +17,25 @@ CMake 3.24+, Node.js matching the root README, and `npm ci` at the repository ro
 Also provide LVGL **9.6.0** and TinyCBOR **0.6.1** sources. If the S3 example has
 already downloaded these dependencies, CMake reuses only those source trees.
 It neither builds nor contacts the board. Otherwise supply independent source
-directories; ESP-IDF and NaWServer are not needed:
+directories. The desktop HTTP/WS adapter uses NaWServer; ESP-IDF is not needed.
 
 ```powershell
-./examples/windows_player/build.ps1 -LvglSource '<deps>/lvgl' -TinyCborSource '<deps>/tinycbor'
+./examples/windows_player/build.ps1 -LvglSource '<deps>/lvgl' -TinyCborSource '<deps>/tinycbor' -NaWServerSource '<deps>/NaWServer'
 # Or, with dependencies already available:
 npm run player:build
+npm run build
 npm run player
 npm run player -- '<projects>/interface.json' --watch
 npm run player -- '<projects>/interface.cbor'
 npm run player -- '<projects>/interface.json' --entry details
 ```
 
-Sources: [LVGL v9.6.0](https://github.com/lvgl/lvgl/tree/v9.6.0) and
-[TinyCBOR v0.6.1](https://github.com/intel/tinycbor/tree/v0.6.1).
+Sources: [LVGL v9.6.0](https://github.com/lvgl/lvgl/tree/v9.6.0),
+[TinyCBOR v0.6.1](https://github.com/intel/tinycbor/tree/v0.6.1), and
+[NaWServer](https://github.com/NaBrIks/NaWServer).
+NaWServer's native Windows CMake integration must be available. CMake also checks
+the sibling `NaWServer` checkout and `local/deps/NaWServer`; alternatively set
+`NAWSERVER_SOURCE_DIR` explicitly.
 Do not point `TinyCborSource` at its inner `src` directory.
 Build output is ignored under `local/windows-player`. The earlier build directory
 is left untouched, so a running older player need not be stopped to build this version.
@@ -58,8 +63,9 @@ the selected palette is displayed immediately and consistently.
 
 The application menu **Оформление: Кремовая → Цветовая схема** offers **Светлая,
 Кремовая, Изумрудная, Тёмная**, in the UI-standard order, with the current choice
-checked. The default is Cream. Only color appearance is implemented in this
-Windows prototype; screen geometry, density and radius profiles are unchanged.
+checked. The default catalog uses Cream. Custom catalogs may override ordinary
+role style properties, including radius/borders; the registry example provides
+Classic, Space and Pony variants. See [custom appearance](../../docs/readme_appearance_ru.md).
 
 The palette data in `schemes.json` comes from TechnicalShell's standard color
 tokens. These are data values, not a copy of its CSS or frontend implementation.
@@ -112,10 +118,12 @@ or banner covers the interface. The previous project remains on a failed root
 load. A failed nested page uses the existing runtime's red-cross placeholder.
 
 The initial logical display size comes from the chosen screen's `size`; Windows
-DPI scaling stretches its image without changing that layout. Opening another
-resolution prepares a new native window before closing the old session. This
-restarts its application demo data. Same-size reload keeps the application data
-and replaces the project composition/cache, like the existing project loader.
+DPI scaling stretches its image without changing that layout. With NaWServer
+enabled, opening/reloading projects keeps the same native process, window,
+server and application data; normal responsive layout uses its current viewport.
+Without the API, opening another resolution prepares a new native window before
+closing the old session and restarts application demo data. Same-size reload
+keeps application data and replaces the project composition/cache.
 The source document is never rewritten or automatically saved.
 
 ## Included application capabilities
@@ -149,8 +157,9 @@ emulated. Font resources are `ui_20`, `ui_28`, `montserrat_20`, and `montserrat_
 ## Optional local control
 
 `--control` accepts one JSON command per line on stdin and returns JSON-line
-results on stdout. It is an application test/data adapter, not an HTTP/MCP server.
-It opens no port and never connects to a device. Examples:
+results on stdout. This stdin adapter itself opens no port and never connects
+to a device. The optional `--api` enables native NaWServer; MCP remains a separate
+stdio process. Examples:
 
 ```json
 {"op":"write","source":"demo.running","value":false,"id":1}
@@ -182,6 +191,52 @@ codecs own JSON parsing/compilation; no JSON library is added to C++ or firmware
 Launch through Node for JSON loading, file dialogs and watch support. The native
 executable alone can open a compiled `.cbor` via `--project`, `--width`, `--height`.
 
+## Native NaWServer, web editor and the same MCP
+
+`npm run player` enables the local API at `http://127.0.0.1:5300`. Direct launcher
+invocation enables it with `--api`, `--api-port PORT` or `--api-store PREFIX`;
+without API-related options it retains the no-listener mode. `--api-port 0` is for isolated tests and emits its
+actual origin as `api_ready`. Port 443 is rejected. NaWServer is loopback-only;
+foreign Host/Origin requests are rejected. Build the editor with `npm run build`;
+the native server serves `frontend/dist` at its root. Use `--web-root PATH` for a
+different built frontend. HTTP and binary-CBOR `/ws` and `/screen-ws` share the
+same native services as the application.
+
+```powershell
+node examples/windows_player/run.mjs examples/windows_player/registry-demo.json --schemes examples/windows_player/registry-schemes.json --api --api-store '<data>/windows-project'
+node examples/windows_player/test-api.mjs '<build>/Release/nacborui_player.exe'
+```
+
+The real `/api/info`, `/api/capabilities`, `/api/data` and `/api/project` endpoints
+call the native registry and ProjectService. Connect a **separate** MCP target
+using the existing `integrations/mcp/index.js` and
+`LVGL_CBOR_DEVICE=http://127.0.0.1:5300`; preserve the board target. Enable preview,
+save and data tools independently with the existing permission environment flags.
+There is no new `set_theme` tool or duplicate Windows project/style engine.
+
+An agent reads the actual catalog, authors ordinary `project.styles` and ordered
+`styles[]` references, then uses `preview_project`. This calls the real native
+`ProjectService::preview`; `read_project` still returns the saved project.
+`save_project` uses FileProjectStore with revision checks and does not switch
+the display. `show_project_screen` applies the saved variant separately. Restart
+with the same project/store prefix restores the accepted changes. The source
+JSON file and application live values are not implicitly overwritten/persisted.
+
+`test-api.mjs` starts the production launcher and stdio MCP, with hidden real
+LVGL windows, a temporary persistent store and an ephemeral loopback port.
+Project mutations use MCP/HTTP; stdin is used
+for inspection/snapshots/shutdown. It checks invalid-style preservation,
+stacked selectors, preview/save/show separation, conflicts, data receipts,
+restart and reset. The real Unicode parent directory and exact names of both
+store slots are checked, including spaces and Cyrillic characters.
+Unsupported CBOR byte-string and over-depth action arguments
+must produce failed receipts while subsequent MCP calls and native bindings keep
+working. It checks editor HTML/JS delivery, CBOR WebSocket ACKs and a
+`project_changed` event matching the stored revision. `test-catalog.mjs` also
+uses the native NaWServer API for discovery and authored project previews.
+See [the detailed API guide](../../docs/readme_windows_api_ru.md) for limits,
+persistence, permission groups and current browser/WS boundaries.
+
 ## Verification
 
 ```powershell
@@ -189,6 +244,8 @@ npm test
 npm run player:test
 npm run player:test-system
 npm run player:test-resize
+npm run player:test-catalog
+npm run player:test-api
 ```
 
 The second command uses hidden Win32 LVGL windows without activating them or
@@ -250,8 +307,9 @@ to the initial size, visits every page, checks parent/viewport bounds, stable
 instances/values and CBOR reload in a resized display. It exports measurements
 and snapshots under ignored `local/windows-resize` without OS mouse/key input.
 
-This is the first desktop target. It does not yet host the editor's HTTP/WS API,
-package a standalone Node runtime, or claim MCU memory/timing equivalence.
+This is the first desktop target. Its optional native NaWServer supports the web
+editor, HTTP clients and MCP. It does not package a standalone Node runtime or
+claim MCU memory/timing equivalence.
 
 ## Windows system overview
 
@@ -293,11 +351,19 @@ reads the same style resources on every draw; there is no alternate UI engine.
 Its catalog is embedded by CMake and published through the existing capabilities
 mechanism. The core, shared ABI, editor, common example modules and LilyGO do not
 change for Windows telemetry. The ordinary JSON page is generated by
-`system-page.mjs`; `demo.json` includes a reviewable 32-processor/two-GPU example.
-Only the bundled demo is adapted to actual topology before the shared compiler;
-user-opened JSON/CBOR files keep their own definitions.
+`system-page.mjs`. The authored `demo.json` contains neutral CPU/GPU placeholders,
+not the machine topology that happened to be used when the demo was created.
+Before compiling the bundled system demo, the launcher takes the exact fixed-array
+sizes from the actual `system.cores` / `system.gpus` registry schemas. No adapter names
+or counter values are authored into the page. Projects without a system page are
+left untouched; user-opened JSON/CBOR files keep their own definitions.
 
-Bounds: up to 64 logical processors and four hardware adapters, detected at
+DXGI hardware adapters can include distinct entries with the same model name;
+these are not merged by display name. A discovered adapter without matching PDH
+counters stays visible with unavailable readings, rather than acquiring invented
+zeroes. This list describes DXGI adapters, not a guaranteed count of physical cards.
+
+Bounds: up to 64 logical processors and four DXGI hardware adapters, detected at
 startup; CPU total still covers all processors. `count` and `displayed` make any
 CPU truncation explicit. Up to 32 processors and two GPUs fit without scrolling;
 larger supported topologies scroll only their own core/GPU region. Counter-array
@@ -313,3 +379,55 @@ snapshots and local measurements to ignored `local/windows-system`. Add
 load/memory counters on the acceptance machine.
 
 [Подробное руководство на русском](../../docs/readme_windows_player_ru.md)
+
+## Grouped catalog, optional history and custom design
+
+```powershell
+npm run player -- examples/windows_player/registry-demo.json --schemes examples/windows_player/registry-schemes.json --no-settings
+npm run player:test-catalog
+```
+
+The additional example uses a 32-point/200 ms optional sampler, ordinary slider/switch
+bindings and three appearance choices: strict classic, space future and pink pony.
+Custom `--schemes` catalogs support ordinary style `roleOverrides`, compiled by the
+shared style codec. `LVGL_CBOR_HISTORY=OFF` excludes the generic sampler; the original
+SystemMetrics histories remain independent. Test the OFF executable with
+`node examples/windows_player/test-catalog.mjs PATH_TO_EXE --expect-history-off`.
+
+For a new design through MCP, edit ordinary project styles and ordered component
+references, then use the existing preview/save operations. The native hidden test
+verifies real stdio MCP discovery and preview through the application's NaWServer.
+See [catalog/history](../../docs/readme_data_catalog_ru.md),
+[custom appearance via MCP](../../docs/readme_appearance_ru.md) and
+[validation](../../docs/reviews/REVIEW_20261107_data-catalog-history.md).
+
+## Native graphics gallery
+
+`npm run player:graphics` opens the separate Graphics page alongside Overview,
+Data, System and Settings. It shows 18 real LVGL decoder/vector/Canvas samples,
+including animated GIF and MIT Tabler SVG icons. The original demo remains intact.
+Run `npm run player:test-graphics` for hidden native pixel/animation acceptance.
+
+`LVGL_CBOR_GRAPHICS_GALLERY=ON` is the default Windows CMake profile; OFF excludes
+the extra native component/resources and heavy decoder/vector flags. MCU profiles
+are unchanged. See [formats, flags and validation](../../docs/readme_graphics_ru.md).
+
+A saved Windows project survives authored-base upgrades through the existing
+ProjectService and FileProjectStore. Legacy stores without a cached original base
+can use `--base-recovery original.json` once; an incorrect base never resets user
+changes. See [Windows storage and verification](../../docs/readme_windows_api_ru.md).
+
+The graphics agent loads [its permanent system prompt](assistant-system-prompt.md)
+before every new request, followed by the complete separate
+[layout](assistant-layout-reference.md) and [style](assistant-styles-reference.md)
+JSON references. Grid/Flex are preferred without prescribing a design.
+MCP exposes authoring documentation and actual capabilities/data, not codec contracts. `get_display_frame` returns real LVGL image feedback through
+the existing NaWServer API; PNG encoding runs on the external MCP host.
+[Formats, MCU boundaries and verification](../../docs/readme_display_feedback_ru.md).
+
+The three prompt documents have maintained Russian originals (`*.ru.md`) and
+English translations (`*.md`). The agent and MCP references use English.
+The reference checker validates both languages without overwriting owner edits.
+The configured MCP catalog supplies the complete tool list; no demo/ui/assistant
+namespace filters or separate host tool list apply. Source writability, schemas,
+registered actions and execution receipts use the actual application API.

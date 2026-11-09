@@ -100,6 +100,7 @@ namespace
 #endif
 	std::shared_ptr<const std::string> capabilities_snapshot;
 	size_t capabilities_revision{};
+	uint64_t data_catalog_revision{};
 	void publish_capabilities()
 	{
 		lvgl_cbor::CapabilityLimits limits; limits.style_packet_bytes = max_style_packet;
@@ -114,8 +115,10 @@ namespace
 		body += ",\"project\":{\"format\":\"lvgl-project-service-1\",\"events\":[\"project_changed\"],\"maxBytes\":" +
 		    std::to_string(lab_project::limits.bytes) + "}}";
 #endif
+		body.pop_back(); body += ",\"dataQuery\":{\"format\":\"lvgl-data-page-1\",\"maxBytes\":16384,\"maxItems\":64}}";
 		std::shared_ptr<const std::string> next = std::make_shared<std::string>(std::move(body));
 		std::atomic_store(&capabilities_snapshot, std::move(next)); capabilities_revision = widget_registry.revision();
+		data_catalog_revision = data_registry.catalog_revision();
 	}
 
 	std::string quote(const char *s)
@@ -208,13 +211,18 @@ namespace
 #if LVGL_CBOR_EMBED_EDITOR
 	class Assets : public HandlerBase
 	{
-		bool canHandle(Request *r)override
+		RouteDescriptor descriptors_[sizeof(assets) / sizeof(assets[0])]{};
+	public:
+		Assets()
 		{
+			size_t index{};
 			for(const auto &asset:assets)
-				if(r->path() == asset.path)
-					return true;
+				descriptors_[index++].path = asset.path;
+		}
 
-			return false;
+		RouteDescriptors routes() const override
+		{
+			return {descriptors_, sizeof(descriptors_) / sizeof(descriptors_[0])};
 		}
 
 		void handleRequest(Request *r, Response &response)override
@@ -447,8 +455,14 @@ extern "C" void app_main()
 	int64_t previous = esp_timer_get_time(); static Packet packet;
 	for(;;)
 	{
-		if(capabilities_revision != widget_registry.revision())
+		if(capabilities_revision != widget_registry.revision() ||
+		    data_catalog_revision != data_registry.catalog_revision())
+		{
 			publish_capabilities();
+			const auto bytes = lvgl_cbor::encode_data_value(lvgl_cbor::DataValue::Object{{"v", 1},
+						{"event", "data_catalog_changed"}, {"catalogRevision", data_catalog_revision}});
+			(void)websocket.send_binary(bytes.data(), bytes.size());
+		}
 
 		screen_endpoint.process(); if(xQueueReceive(packets, &packet, 0) == pdTRUE)
 		{

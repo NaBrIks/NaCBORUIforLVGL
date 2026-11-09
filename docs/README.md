@@ -1,5 +1,21 @@
 # Документация NaCBORUIforLVGL
 
+- [Хранилища Designer, ключи и границы агента](readme_designer_storage_ru.md)
+
+- [Границы и цифры глубины: диагностика штатными стилями](readme_layout_debug_ru.md)
+
+- [Реальный MAUI чат Windows/Android через SPLA/OpenRouter](reviews/REVIEW_20261109_maui-real-chat.md)
+
+- [MAUI Windows/Android: чат и MCP через SPLA](readme_maui_designer_ru.md)
+
+- [Свежий кадр LVGL через MCP: host PNG, RGB565/монохром и границы MCU](readme_display_feedback_ru.md)
+
+- [Генерация UI моделью: JSON-язык LVGL, два справочника и проверка без ручных подсказок](readme_assistant_design_ru.md)
+
+- [Новый NaWServer: сборка, S3 и Windows-проверка 07.11.2026](reviews/REVIEW_20261107_web-stack-s3.md)
+- [Предложение: каталог по разделам, динамические источники и история](ideas/IDEA_20261107_data-catalog-history.md)
+- [План: Android, голосовой конструктор и настоящий LVGL](plans/PLAN_20261107_android-voice-designer.md)
+
 - [Единый стиль C/C++: Uncrustify 0.83.0_f, область и проверки](reviews/REVIEW_20261030_cpp-style.md)
 
 - [Windows: размер окна, адаптивные страницы и сохранение состояния](reviews/REVIEW_20261030_windows-resize.md)
@@ -103,3 +119,30 @@
 - [Общая ESP-IDF 5.5.6 и конфигурация сборки](readme_shared_idf_ru.md).
 
 - [Рекомендуемая структура и версии окружения, перенос между рабочими местами](readme_development_environment_ru.md).
+
+- [Реестр с группами, выборочный каталог HTTP/MCP и отключаемая история](readme_data_catalog_ru.md)
+- [ADR: группированный реестр и выборочный каталог](adr/ADR_20261107_data-catalog-history.md)
+- [Приёмка каталога, истории и Windows MCP](reviews/REVIEW_20261107_data-catalog-history.md)
+
+- [Пользовательские схемы через MCP и стек стилей компонента](readme_appearance_ru.md)
+
+- [Постоянный Windows HTTP API и проектный MCP](readme_windows_api_ru.md)
+- [ADR: Windows API поверх общих сервисов](adr/ADR_20261107_windows-http-api.md)
+- [Приёмка настоящего Windows HTTP/MCP и постоянного store](reviews/REVIEW_20261107_windows-api.md)
+
+- [Графика LVGL: реальные возможности, форматы и кривые](readme_graphics_ru.md)
+
+- [План: inline CBOR-изображения и URI ресурсов](plans/PLAN_20261107_image-resources.md)
+
+- [Windows: две демки, живой сайт и встроенный агент](readme_graphics_studio_ru.md)
+
+- [Встроенный помощник: модели, MCP и ограничения](readme_windows_assistant_ru.md)
+
+- [Приёмка Windows Graphics Studio 2026-11-08](reviews/REVIEW_20261108_graphics-studio.md)
+
+- [Веб-студия: запрос, экран, модели и видимый процесс](reviews/REVIEW_20261108_llm-studio.md)
+
+- [Подробный лог, рамка дисплея и восстановление раскладки](readme_assistant_log_ru.md)
+- [Приёмка журнала и восстановления](reviews/REVIEW_20261108_log-recovery.md)
+
+[Чат с историей, «Новый чат» и предыдущие версии в JSON](readme_assistant_chat_ru.md)

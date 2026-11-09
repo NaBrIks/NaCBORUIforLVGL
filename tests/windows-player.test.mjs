@@ -8,7 +8,7 @@ import {join} from 'node:path';
 import {loadProject} from '../examples/windows_player/loader.mjs';
 import {encodeProject} from '../packages/project-codec/index.js';
 import {screenContract} from '../packages/screen-codec/index.js';
-import {exampleCapabilities,systemPage} from '../examples/windows_player/system-page.mjs';
+import {exampleCapabilities,systemPage,adaptSystemPage} from '../examples/windows_player/system-page.mjs';
 
 const example=new URL('../examples/windows_player/demo.json',import.meta.url);
 test('Windows settings demonstrates every standard runtime widget',async()=>{
@@ -49,7 +49,7 @@ test('Windows loader rejects invalid files and actual-target capability mismatch
 test('System overview compiles bounded core/GPU topology without changing the engine',async()=>{
   const capabilities=exampleCapabilities();
   const p=JSON.parse(await readFile(example,'utf8'));
-  for(const [cores,gpus] of [[0,0],[32,2],[64,4]]) {
+  for(const [cores,gpus] of [[0,0],[1,0],[3,1],[32,2],[64,4]]) {
     p.screens.system=systemPage(cores,gpus);
     assert.ok(encodeProject(p,capabilities).length>0);
     const area=p.screens.system.root.children.find(n=>n.id==='cpu_group').children.find(n=>n.id==='core_area');
@@ -59,6 +59,28 @@ test('System overview compiles bounded core/GPU topology without changing the en
     assert.equal(grid.style.min_height,cores?Math.ceil(cores/8)*36-4:0);
   }
   assert.throws(()=>systemPage(65,2),/limits/);
+});
+
+test('Bundled system topology is neutral until the actual registry describes its arrays',async()=>{
+  const p=JSON.parse(await readFile(example,'utf8'));
+  assert.deepEqual(p.screens.system,systemPage());
+  const counts=screen=>{
+    const nodes=[];const visit=node=>{nodes.push(node);node.children.forEach(visit);};visit(screen.root);
+    return [nodes.filter(n=>/^core_\d+$/.test(n.id)).length,nodes.filter(n=>/^gpu_name_\d+$/.test(n.id)).length];
+  };
+  assert.deepEqual(counts(p.screens.system),[0,0]);
+  for(const [cores,gpus] of [[0,0],[1,0],[3,1],[64,4]]) {
+    const caps={binding:{sources:[{name:'system.cores',schema:{type:'array',maxItems:cores}},
+      {name:'system.gpus',schema:{type:'array',maxItems:gpus}}]}};
+    assert.equal(adaptSystemPage(p,caps),p);
+    assert.deepEqual(counts(p.screens.system),[cores,gpus]);
+    assert.deepEqual(p.screens.system,systemPage(cores,gpus));
+  }
+  adaptSystemPage(p,{binding:{sources:[]}});assert.deepEqual(counts(p.screens.system),[0,0]);
+  const unrelated={screens:{graphic:{root:{id:'root'}}}};
+  const before=structuredClone(unrelated);assert.equal(adaptSystemPage(unrelated,{}),unrelated);
+  assert.deepEqual(unrelated,before);
+  assert.throws(()=>adaptSystemPage(p,{binding:{sources:[{name:'system.cores',schema:{type:'number'}}]}}),/array source/);
 });
 
 test('Windows pages declare responsive LVGL layouts and preserve design dimensions',async()=>{
