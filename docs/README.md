@@ -1,5 +1,6 @@
 # Документация NaCBORUIforLVGL
 
+- [Макет / LVGL: пассивный просмотр в общем редакторе, Windows + Chromium](reviews/REVIEW_20261109_editor-native-preview.md)
 - [Хранилища Designer, ключи и границы агента](readme_designer_storage_ru.md)
 
 - [Границы и цифры глубины: диагностика штатными стилями](readme_layout_debug_ru.md)

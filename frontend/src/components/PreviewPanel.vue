@@ -2,17 +2,24 @@
 Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import {useRuntimeCapabilities} from '../state/runtime-capabilities.js';
-import {computed,inject,ref,watch} from 'vue';
+import {computed,inject,nextTick,ref,useId,watch} from 'vue';
 import {t} from '../state/appearance';
 import {useScreenPreviewSettings} from '../state/screen-preview-settings.js';
 import VirtualScreen from './VirtualScreen.vue';
 import Icon from './Icon.vue';
+import NativeViewer from './NativeViewer.vue';
 import PagePreviewTarget from './PagePreviewTarget.vue';
 import {flattenNodes} from '../screen-model';
 import {unsupportedProperties} from '../preview-style';
 const {standardWidgets:availableWidgets}=useRuntimeCapabilities();
 const project=inject('lvgl-project',null);
-const props=defineProps({screen:{type:Object,required:true},settings:{type:Object,required:true},selected:String,mode:{type:String,default:'component'},componentType:{type:String,default:'label'},text:{type:String,default:'LVGL preview'}});
+const props=defineProps({deviceOrigin:{type:String,default:''},nativeAvailable:{type:Boolean,default:false},screen:{type:Object,required:true},settings:{type:Object,required:true},selected:String,mode:{type:String,default:'component'},componentType:{type:String,default:'label'},text:{type:String,default:'LVGL preview'}});
+const tab=ref('layout'),tabId=useId();
+function tabKey(event){
+ if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+ event.preventDefault();tab.value=event.key==='Home'?'layout':event.key==='End'?'lvgl':tab.value==='layout'?'lvgl':'layout';
+ const list=event.currentTarget;void nextTick(()=>list.querySelector('[aria-selected="true"]')?.focus());
+}
 const emit=defineEmits(['update:settings','resize','select','update:componentType','update:text']);
 const {showHidden}=useScreenPreviewSettings(()=>props.screen.id);
 const contained=ref(false),interactive=ref(false),sizing=ref('design'),viewport=ref({...props.screen.size});
@@ -29,8 +36,12 @@ const unsupported=computed(()=>[...new Set(flattenNodes(props.screen.root).flatM
 function setting(key,value){emit('update:settings',{...props.settings,[key]:value});}
 function size(key,event){const value=Number(event.target.value);if(Number.isInteger(value)&&value>=1&&value<=8192){if(contained.value)viewport.value={...viewport.value,[key]:value};else emit('resize',{...props.screen.size,[key]:value});}}
 </script>
-<template><aside class="preview-panel panel"><div class="panel-head"><h2>{{mode==='component'?'Компонент':'Раскладка экрана'}}</h2><span class="muted" data-tooltip="Быстрый предпросмотр средствами CSS. Шрифты, темы LVGL и часть эффектов могут отличаться; код LVGL в браузере не исполняется.">CSS ≈ LVGL</span></div>
+<template><aside class="preview-panel panel"><div class="panel-head"><h2>{{mode==='component'?t('Компонент','Component'):t('Предпросмотр','Preview')}}</h2><span v-if="tab==='layout'" class="muted" data-tooltip="Быстрый предпросмотр средствами CSS. Шрифты, темы LVGL и часть эффектов могут отличаться; код LVGL в браузере не исполняется.">CSS ≈ LVGL</span></div>
+ <div class="preview-tabs" role="tablist" :aria-label="t('Предпросмотр','Preview')" @keydown="tabKey">
+  <button v-for="view in ['layout','lvgl']" :key="view" :id="tabId+'-'+view+'-tab'" role="tab" :aria-selected="tab===view" :aria-controls="tabId+'-'+view" :tabindex="tab===view?0:-1" @click="tab=view">{{view==='layout'?t('Макет','Layout'):'LVGL'}}</button>
+ </div>
  <slot name="actions"/>
+ <section v-show="tab==='layout'" :id="tabId+'-layout'" class="preview-content" role="tabpanel" :aria-labelledby="tabId+'-layout-tab'">
  <div class="preview-toolbar">
   <PagePreviewTarget v-if="mode==='screen'&&project?.pagePreview"/>
   <label :data-tooltip="contained?'Ширина контейнера просмотра, px; документ не меняется':'Проектная ширина страницы, px; сохраняется в документе'">W<input type="number" min="1" max="8192" aria-label="Ширина виртуального экрана" :value="editSize.width" @input="size('width',$event)"></label>
@@ -46,4 +57,9 @@ function size(key,event){const value=Number(event.target.value);if(Number.isInte
  </div>
  <VirtualScreen :width="displaySize.width" :height="displaySize.height" :screen="canvasScreen" :screens="plan?.project.screens" :focus-path="plan?.path" :grid="settings.grid" :zoom="settings.zoom" :selected="selected" :show-hidden="mode==='screen'&&showHidden" :interactive="mode==='screen'&&interactive" :contained="contained&&!inProjectContainer" :mount-sizing="sizing" @select="emit('select',$event)"/>
  <details class="preview-limitations"><summary>Точность предпросмотра{{unsupported.length?' · не показано: '+unsupported.length:''}}</summary><p>Размеры, min/max, border, outline, тени, Flex и Grid показаны приближённо. Образцы частей виджетов используют нейтральное оформление. Точные шрифты, тема, состояния, события и привязки требуют проверки в LVGL.</p><p v-if="unsupported.length">Не воспроизведены: <code>{{unsupported.join(', ')}}</code></p></details>
+ </section>
+ <section v-show="tab==='lvgl'" :id="tabId+'-lvgl'" class="preview-content" role="tabpanel" :aria-labelledby="tabId+'-lvgl-tab'">
+  <NativeViewer v-if="nativeAvailable&&deviceOrigin" embedded :interactive="false" :origin="deviceOrigin" :active="tab==='lvgl'"/>
+  <p v-else class="preview-native-unavailable">{{t('Просмотр LVGL требует подключения к устройству с API кадров (native_view).','LVGL view requires a connected device with the frame API (native_view).')}}</p>
+ </section>
  </aside></template>

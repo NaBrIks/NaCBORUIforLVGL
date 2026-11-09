@@ -213,8 +213,8 @@
         "origin": "authored"
       },
       "description": {
-        "v": "frontend/src/state/live-data.js и modules/bindings/preview-bindings.js: разовый bootstrap /api/data на connect, затем CBOR /ws. Shared evaluator/formatter; runtime-проекция не меняет Project/dirty/autoapply. Нативная графика остаётся на МК; браузер показывает параметры биндинга.",
-        "at": "2026-10-28T07:58:08Z",
+        "v": "frontend/src/state/live-data.js и modules/bindings/preview-bindings.js: разовый bootstrap /api/data на connect, затем CBOR /ws. Shared evaluator/formatter; runtime-проекция не меняет Project/dirty/autoapply. Макет — CSS-аппроксимация. Вкладка LVGL через общий NativeViewer читает /api/view/frame с origin выбранного подключения (native_view). Только чтение: выбор вкладок/страниц не вызывает preview/show/save/pointer; скрытый просмотр не запрашивает кадры. Старые кадры при смене подключения отбрасываются; сетевые CORS/Origin-проверки сохраняются.",
+        "at": "2026-11-09T11:05:28Z",
         "origin": "authored"
       }
     },

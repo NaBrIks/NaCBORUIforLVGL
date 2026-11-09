@@ -26,6 +26,7 @@
     "player:test-api": "node examples/windows_player/test-api.mjs",
     "player:graphics": "node examples/windows_player/run.mjs --profile graphics --api",
     "player:test-graphics": "node examples/windows_player/test-graphics.mjs",
+    "player:test-editor-preview": "node examples/windows_player/test-editor-preview.mjs",
     "player:test-native-view": "node examples/windows_player/test-native-view.mjs",
     "player:test-base-migration": "node examples/windows_player/test-base-migration.mjs"
   },

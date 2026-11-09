@@ -23,6 +23,11 @@ Copyright (c) 2026 Oleg Kozhevnikov */
  overflow:hidden;
  & .panel-head {flex-shrink:0;}
 }
+.preview-content {flex:1;min-height:0;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
+.preview-tabs {display:flex;flex:none;gap:2px;border-bottom:1px solid var(--lu-border);padding-top:2px;}
+.preview-tabs [role=tab] {padding:2px 12px;border:1px solid var(--lu-border);border-bottom:0;border-radius:3px 3px 0 0;background:var(--lu-surface-alt);color:var(--lu-text-muted);}
+.preview-tabs [aria-selected=true] {background:var(--lu-surface);color:var(--lu-primary);border-color:var(--lu-primary);font-weight:600;}
+.preview-native-unavailable {padding:12px;color:var(--lu-text-muted);overflow-wrap:anywhere;}
 .preview-actions {
  display:flex;
  align-items:center;
