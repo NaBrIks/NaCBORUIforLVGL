@@ -22,7 +22,7 @@ Cross-launch chat archives are not implemented in this first host. Images are na
 SPLA ImageAttachment data URLs. ToolImage feedback is decoded by SPLA and uses the
 existing last-tool-image policy; user reference pictures remain in the conversation.
 Binary documents and audio attachments are not silently represented as pictures.
-The three maintained English Windows assistant prompt originals are embedded by link,
+The three maintained English shared Designer prompt originals are embedded by link,
 so the MAUI client does not acquire a second set of copied instructions.
 
 The UI consumes Messages, LiveText, LiveReasoning, Status, IsBusy, LastError, Log,

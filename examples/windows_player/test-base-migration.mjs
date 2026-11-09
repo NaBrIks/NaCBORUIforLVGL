@@ -27,7 +27,7 @@ async function removeTestCache(prefix,revision){
  return removed;
 }
 async function launch(prefix,recovery){
- const child=spawn(process.execPath,[join(here,'run.mjs'),basePath,'--profile','graphics','--exe',exe,'--api-port','0','--api-store',prefix,'--assistant-store',prefix+'.assistant.enc','--control','--hidden','--no-settings',...(recovery?['--base-recovery',recovery]:[])],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
+ const child=spawn(process.execPath,[join(here,'run.mjs'),basePath,'--profile','graphics','--exe',exe,'--api-port','0','--api-store',prefix,'--control','--hidden','--no-settings',...(recovery?['--base-recovery',recovery]:[])],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
  let loaded=false,url,stderr='',closed=false,resolveReady,rejectReady,next=0,mcp;
  const jobs=new Map(),ready=new Promise((yes,no)=>{resolveReady=yes;rejectReady=no;}),startup=setTimeout(()=>rejectReady(Error('Migration startup timeout '+stderr)),15000);
  child.stdin.on('error',()=>{});child.stderr.on('data',bytes=>stderr+=bytes);

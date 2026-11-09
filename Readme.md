@@ -160,7 +160,7 @@ revision-checked save, styles, bindings and events execute in native shared serv
 `npm run player:test-api` verifies the production path and restart persistence.
 See [Windows API](docs/readme_windows_api_ru.md).
 
-See [Windows demos, live native view and embedded assistant](docs/readme_graphics_studio_ru.md).
+See [Windows demos and live native view](docs/readme_graphics_ru.md).
 
 ### Designer application
 

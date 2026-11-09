@@ -8,7 +8,6 @@
 #endif
 #include "project_api.hpp"
 #include "base_migration.hpp"
-#include "secret_protection.hpp"
 #include "../../common/sample_image.hpp"
 #include <fstream>
 #include <array>
@@ -70,19 +69,6 @@ Application::Application(bool graphics)
   : resources_(appearance.resources()), graphics_(graphics)
 {
 	if(!graphics_) metrics = std::make_unique<SystemMetrics>(data.registry);
-
-	if(graphics_)
-		agent = std::make_unique<HostAgent>(data.registry, [this](){
-			if(project_)
-				for(const auto &v:project_->status().views)
-				{
-					auto *n = project_->find(v.page_instance, "assistant_key");
-					if(n && lv_obj_check_type(n, &lv_textarea_class))
-						return std::string(lv_textarea_get_text(n));
-				}
-
-			return std::string{};
-		});
 
 	if(lv_display_get_default()) view_pointer_ = std::make_unique<native_view::Pointer>(lv_display_get_default());
 
@@ -261,8 +247,6 @@ void Application::tick()
 {
 	if(metrics)metrics->drain();
 
-	if(agent)agent->tick();
-
 	if(view_pointer_)view_pointer_->tick();
 
 	data.tick();
@@ -333,18 +317,7 @@ bool Application::load(const std::filesystem::path &path, const std::string &ent
 DataValue Application::command(const DataValue &request)
 {
 	const auto op = text(field(request, "op")); std::string error;
-	if(op == "protect_secret" || op == "unprotect_secret")
-	{
-		return DataValue::Object{{"event", "result"}, {"ok", true},
-			{"text", protect_secret(text(field(request, "text")), op == "unprotect_secret")}};
-	}
-	else if(op == "host_reply")
-	{
-		if(!agent)throw std::runtime_error("Assistant unavailable");
-
-		agent->reply(field(request, "reply"));
-	}
-	else if(op == "capabilities")
+	if(op == "capabilities")
 		return DataValue::Object{{"event", "result"}, {"op", op}, {"ok", true}, {"capabilitiesJson", capabilities()}};
 	else if(op == "project")
 	{
@@ -601,29 +574,12 @@ void Application::connection(const std::string &url)
 {
 	std::string e;
 	if(!data.registry.publish("host.connection",
-	    DataValue::Object{{"site", url + (graphics_ ? "/editor/" : "/viewer")},
-			{"editor", url + (graphics_ ? "/editor/?mode=manual" : "/editor/")},
+	    DataValue::Object{{"site", url + "/viewer"},
+			{"editor", url + "/editor/"},
 			{"mcp", graphics_ ? "nacborui_graphics (stdio)" : "nacborui_windows (stdio)"}}, e))
 		throw std::runtime_error(e);
 
 	data.registry.flush();
-}
-
-bool Application::host_request(DataValue &v)
-{
-	if(!agent || !agent->take(v)) return false;
-
-	const auto &o = std::get<DataValue::Object>(v.value);
-	const auto &payload = std::get<DataValue::Object>(o.at("payload").value);
-	if(payload.count("key") && project_)
-		for(const auto &view:project_->status().views)
-		{
-			auto *node = project_->find(view.page_instance, "assistant_key");
-			if(node && lv_obj_check_type(node, &lv_textarea_class))
-				lv_textarea_set_text(node, "");
-		}
-
-	return true;
 }
 
 std::vector<uint8_t> Application::view_frame()

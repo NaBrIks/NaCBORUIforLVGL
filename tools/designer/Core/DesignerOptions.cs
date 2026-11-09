@@ -24,7 +24,7 @@ public sealed class DesignerOptions
     public int? MaxTokens { get; set; } = 8192;
     public string? ReasoningLevel { get; set; }
     public SPLA.Domain.Models.ReasoningCapability ModelReasoning { get; set; } = SPLA.Domain.Models.ReasoningCapability.Unknown;
-    /// <summary>Empty uses the existing Windows player's three English prompt originals.</summary>
+    /// <summary>Empty uses the shared Designer prompt documents.</summary>
     public string SystemPrompt { get; set; } = string.Empty;
 }
 

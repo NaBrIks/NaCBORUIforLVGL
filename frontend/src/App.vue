@@ -3,7 +3,6 @@ Copyright (c) 2026 Oleg Kozhevnikov -->
 <script setup>
 import {defineAsyncComponent,onBeforeUnmount,onMounted,ref} from 'vue';
 import NativeViewer from './components/NativeViewer.vue';
-import GraphicsStudio from './components/GraphicsStudio.vue';
 import {applicationMode} from './state/app-route.js';
 const EditorApp=defineAsyncComponent(()=>import('./components/EditorApp.vue'));
 const locationRoute={pathname:location.pathname,search:location.search};
@@ -18,6 +17,6 @@ onMounted(async()=>{
 });
 onBeforeUnmount(()=>{disposed=true;controller?.abort();});
 </script>
-<template><GraphicsStudio v-if="mode==='studio'"/><NativeViewer v-else-if="mode==='viewer'"/><EditorApp v-else-if="mode==='editor'"/><main v-else class="app-start"><strong>NaCBORUIforLVGL</strong></main></template>
+<template><NativeViewer v-if="mode==='viewer'"/><EditorApp v-else-if="mode==='editor'"/><main v-else class="app-start"><strong>NaCBORUIforLVGL</strong></main></template>
 <style scoped>.app-start{height:100dvh;padding:8px;background:var(--lu-bg-canvas);color:var(--lu-text);}</style>
 

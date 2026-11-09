@@ -41,7 +41,7 @@ target_include_directories(player_runtime PUBLIC "${ROOT}/include")
 target_compile_features(player_runtime PUBLIC cxx_std_17)
 target_link_libraries(player_runtime PUBLIC lvgl::lvgl player_cbor)
 add_executable(nacborui_player src/main.cpp src/application.cpp src/appearance.cpp src/host_fonts.cpp
-  src/system_metrics.cpp src/history_plot.cpp src/project_api.cpp src/web_server.cpp src/native_view.cpp src/base_migration.cpp src/host_agent.cpp src/secret_protection.cpp
+  src/system_metrics.cpp src/history_plot.cpp src/project_api.cpp src/web_server.cpp src/native_view.cpp src/base_migration.cpp
   ../common/appearance/appearance.cpp ../common/demo_data/demo_data.cpp)
 if(LVGL_CBOR_GRAPHICS_GALLERY)
   target_sources(nacborui_player PRIVATE src/graphics_gallery.cpp ../common/polygon_button/polygon_button.cpp)
@@ -55,7 +55,7 @@ file(READ "${CMAKE_CURRENT_LIST_DIR}/history-plot.json" HISTORY_PLOT_CATALOG)
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/history-plot.json")
 configure_file(src/history_plot_catalog.hpp.in "${CMAKE_CURRENT_BINARY_DIR}/history_plot_catalog.hpp" @ONLY)
 target_include_directories(nacborui_player PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
-target_link_libraries(nacborui_player PRIVATE player_runtime user32 gdi32 imm32 shcore comdlg32 pdh dxgi crypt32)
+target_link_libraries(nacborui_player PRIVATE player_runtime user32 gdi32 imm32 shcore comdlg32 pdh dxgi)
 if(MSVC)
   target_compile_options(nacborui_player PRIVATE /utf-8 /W4)
 endif()

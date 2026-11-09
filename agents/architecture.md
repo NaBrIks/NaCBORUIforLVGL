@@ -77,3 +77,10 @@ Latest owner UI refinement 2026-11-09: Designer uses a four-row diagnostic matri
 and a persisted desktop splitter with a short centered two-bar grip. EN/RU .resx
 localization and interface preferences belong to the MAUI presentation; SPLA
 conversation/tool execution and target project/runtime contracts are unchanged.
+
+Owner decision 2026-11-09: remove the independent Node/native LLM assistant from
+the LVGL demo, including assistant registry, provider settings and key storage.
+The demo retains NaWServer, project/data APIs, MCP, native frames/pointer input
+and its graphics/binding pages. `/viewer` is native viewing, `/editor/` the common
+editor. SPLA Designer owns agent execution and SecureStorage; shared bilingual
+prompts/references now live in tools/designer/prompts and still feed generic MCP.

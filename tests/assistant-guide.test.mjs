@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Oleg Kozhevnikov
 import test from 'node:test';import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';import {spawnSync} from 'node:child_process';
-import {assistantInstructions,assistantGuideVersion,readAssistantGuide} from '../examples/windows_player/assistant-guide.mjs';
+import {assistantInstructions,assistantGuideVersion,readAssistantGuide} from '../tools/designer/prompts/guide.mjs';
 import {serializeDocument,parseDocument} from '../packages/document-io/index.js';
 import {authoringCatalog} from '../packages/document-io/ui-reference.js';
 import {screenContract} from '../packages/screen-codec/contract.js';

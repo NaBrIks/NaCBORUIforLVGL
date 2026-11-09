@@ -17,7 +17,7 @@ const require=createRequire(new URL('../../integrations/mcp/package.json',import
 const {Client}=await import(pathToFileURL(require.resolve('@modelcontextprotocol/client')));
 const {StdioClientTransport}=await import(pathToFileURL(require.resolve('@modelcontextprotocol/client/stdio')));
 const temporary=await mkdtemp(join(tmpdir(),'nacborui-graphics-'));
-const child=spawn(process.execPath,[join(here,'run.mjs'),join(here,'graphics-gallery.json'),'--profile','graphics','--exe',exe,'--api-port','0','--api-store',join(temporary,'store'),'--assistant-store',join(temporary,'assistant.json'),'--control','--hidden','--no-settings','--scheme','dark'],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
+const child=spawn(process.execPath,[join(here,'run.mjs'),join(here,'graphics-gallery.json'),'--profile','graphics','--exe',exe,'--api-port','0','--api-store',join(temporary,'store'),'--control','--hidden','--no-settings','--scheme','dark'],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
 let stderr='',next=0,closed=false,loaded=false,url,mcp;const pending=new Map();
 let readyResolve,readyReject;const ready=new Promise((a,b)=>{readyResolve=a;readyReject=b;});
 const startup=setTimeout(()=>readyReject(Error('Gallery startup timeout '+stderr)),20000);
@@ -115,7 +115,6 @@ try {
  pageResults.controller={instance:p.instance,events:'reset/+1/+10/STOP/OK',counter:11,httpPointer:true,exteriorPointsRejected:5,pressedState:true,geometricArrows:4,arrowSchemes:4,decorativeArrowsSkipFocus:true,mcpReshape:{oldInteriorRejected:true,newTriangleInteriorClicked:true,sameAction:true},focusOutlinePixels:outlinePixels};
  p=await page('settings');r=await p.inspect();healthy(r);for(const n of r.nodes)assert.ok(n.found,n.id);
  for(const scheme of ['light','cream','emerald','dark']){await event('scheme_'+scheme,p.instance);await wait(80);r=await p.inspect();healthy(r);assert.match(r.nodes.find(n=>n.id==='current_scheme').text,/Текущая:/);}
- const secret=r.nodes.find(n=>n.id==='assistant_key');assert.ok(secret);assert.equal(secret.text,'[redacted]','password native inspect is redacted');
  assert.equal((await command({op:'snapshot',path:join(output,'settings-dark.bmp')})).ok,true);pageResults.settings={nodes:r.nodes.length,schemes:4};
  p=await page('canvas');r=await p.inspect();healthy(r);assert.equal(r.nodes.length,1,'initial MCP canvas has only its empty root');
  // Author on the blank page through the existing MCP/ProjectService, then execute its normal event.

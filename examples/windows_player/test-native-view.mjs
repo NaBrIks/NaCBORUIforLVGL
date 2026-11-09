@@ -19,7 +19,7 @@ const require=createRequire(new URL('../../integrations/mcp/package.json',import
 const {Client}=await import(pathToFileURL(require.resolve('@modelcontextprotocol/client')));
 const {StdioClientTransport}=await import(pathToFileURL(require.resolve('@modelcontextprotocol/client/stdio')));
 const temporary=await mkdtemp(join(tmpdir(),'nacborui-native-view-')),output=join(root,'local/windows-native-view');
-const child=spawn(process.execPath,[join(here,'run.mjs'),'--profile','graphics','--exe',exe,'--api-port','0','--api-store',join(temporary,'project'),'--assistant-store',join(temporary,'assistant.enc'),'--control','--hidden','--no-settings'],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
+const child=spawn(process.execPath,[join(here,'run.mjs'),'--profile','graphics','--exe',exe,'--api-port','0','--api-store',join(temporary,'project'),'--control','--hidden','--no-settings'],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
 let next=0,stderr='',apiUrl,loaded=false,closed=false,readyResolve,readyReject,mcp;
 const pending=new Map(),ready=new Promise((yes,no)=>{readyResolve=yes;readyReject=no;}),wait=ms=>new Promise(yes=>setTimeout(yes,ms));
 const startup=setTimeout(()=>readyReject(Error('Native viewer startup timeout '+stderr)),15000);
@@ -42,9 +42,9 @@ try{
  await ready;await mkdir(output,{recursive:true});const info=await (await fetch(new URL('/api/info',apiUrl))).json();assert.equal(info.profile,'graphics');assert.equal(info.native_view,true);assert.equal(info.server,'NaWServer');
  assert.equal((await fetch(new URL('/viewer',apiUrl))).status,200);assert.equal((await fetch(new URL('/editor/',apiUrl))).status,200);
  const initial=await frame('graphics');const caps=await (await fetch(new URL('/api/capabilities',apiUrl))).json();
- assert.ok(caps.binding.sources.some(item=>item.name==='assistant.completion'));assert.ok(caps.binding.actions.some(item=>item.name==='assistant.send'));
- const client=new DataClient(apiUrl);
- const dummy='native-view-dpapi-smoke';const protectedValue=await command({op:'protect_secret',text:dummy});assert.equal(protectedValue.ok,true);assert.ok(protectedValue.text&&!protectedValue.text.includes(dummy));const decrypted=await command({op:'unprotect_secret',text:protectedValue.text});assert.equal(decrypted.ok,true);assert.equal(decrypted.text,dummy);
+ assert.ok(!caps.binding.sources.some(item=>item.name.startsWith('assistant.')));assert.ok(!caps.binding.actions.some(item=>item.name.startsWith('assistant.')));
+ assert.equal((await command({op:'protect_secret',text:'unsupported'})).ok,false);
+ assert.equal((await command({op:'unprotect_secret',text:'unsupported'})).ok,false);
  mcp=new Client({name:'native-view-test',version:'1.0.0'});await mcp.connect(new StdioClientTransport({command:process.execPath,args:[join(root,'integrations/mcp/index.js')],cwd:root,env:{PATH:process.env.PATH,LVGL_CBOR_DEVICE:apiUrl,LVGL_CBOR_ALLOW_PREVIEW:'1',LVGL_CBOR_ALLOW_DATA:'1'},stderr:'pipe'}));
  const call=async(name,args={})=>{const response=await mcp.callTool({name,arguments:args},undefined,{timeout:20000});assert.equal(response.isError,undefined,JSON.stringify(response.content));return JSON.parse(response.content[0].text);};
  const screen=createBlankScreen('viewer_test','Viewer input');screen.size={width:initial.width,height:initial.height};screen.root.flags={SCROLLABLE:false};screen.root.style={width:initial.width,height:initial.height,pad_all:0,border_width:0,radius:0,bg_color:'#f4ede0',bg_opa:255,text_font:'ui_20'};
@@ -57,13 +57,11 @@ try{
  const after=await frame('after');assert.notDeepEqual(before.bytes,after.bytes,'native frame pixels follow the live binding');
  const event=await call('send_event',{node:'remote_button',event:'clicked'});assert.equal(event.state,'completed');assert.equal(event.result.ok,true);await until(result=>counter(result)===4,'MCP event did not reach the same runtime');
  await pointer(x,y,true);await until(result=>counter(result)===6,'500 ms pointer release watchdog did not release the held button');
- const generation=(await client.query({kind:'values',name:'assistant.completion',detail:true,maxBytes:512})).items[0].value.generation;
- const cancelled=await client.invoke('assistant.cancel',true,caps);assert.equal(cancelled.state,'completed');await until(result=>{const record=JSON.parse(result.dataJson).sources.find(item=>item.name==='assistant.completion');return record?.value.generation>generation&&record.value.ok===true;},'host completion generation did not advance');
  assert.equal((await command({op:'resize',width:2048,height:1152})).ok,true);await wait(80);const oversized=await fetch(new URL('/api/view/frame',apiUrl));assert.equal(oversized.status,413);assert.match(await oversized.text(),/pixel_limit/);
  assert.equal((await command({op:'resize',width:initial.width,height:initial.height})).ok,true);await wait(80);await frame('restored');
- await writeFile(join(output,'measurements.json'),JSON.stringify({server:'NaWServer',profile:'graphics',width:initial.width,height:initial.height,pointerClick:2,mcpEvent:4,watchdogRelease:6,framePixelLimit:2097152,oversizedFrameStatus:413,dpapiRoundtrip:true,assistantCompletion:true,providerRequests:false,executableSha256:createHash('sha256').update(await readFile(exe)).digest('hex')},null,2));
+ await writeFile(join(output,'measurements.json'),JSON.stringify({server:'NaWServer',profile:'graphics',width:initial.width,height:initial.height,pointerClick:2,mcpEvent:4,watchdogRelease:6,framePixelLimit:2097152,oversizedFrameStatus:413,noAgentRegistry:true,noSecretOperations:true,providerRequests:false,executableSha256:createHash('sha256').update(await readFile(exe)).digest('hex')},null,2));
  await mcp.close();mcp=null;child.stdin.end('{"op":"quit"}\n');assert.equal(await exit,0);
- console.log('PASS: graphics native NaWServer viewer/frame BMP, real independent pointer hit-testing and binding pixels, MCP event, 500 ms release watchdog, bounded frame rejection/recovery, DPAPI roundtrip and assistant completion; no provider requests or OS input');
+ console.log('PASS: graphics native NaWServer viewer/frame BMP, real independent pointer hit-testing and binding pixels, MCP event, 500 ms release watchdog, bounded frame rejection/recovery, absent agent registry/secret operations; no provider requests or OS input');
 }finally{
  clearTimeout(startup);await mcp?.close().catch(()=>{});for(const job of pending.values())clearTimeout(job.timer);
  if(!closed){child.stdin.end('{"op":"quit"}\n');await Promise.race([exit,wait(3000).then(()=>child.kill())]);}

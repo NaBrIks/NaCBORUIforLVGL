@@ -116,8 +116,7 @@ screens.controller=page('controller','Фигурный пульт',[
  label('title','Пульт · фигуры из CBOR',26,{text_font:'ui_20'}),label('subtitle','Все контуры, подписи и действия заданы Project. Нажатия, состояния и биндинги — штатные LVGL.'),
  base('controller_body','obj',{width:full,height:full,flex_grow:1,min_height:520,bg_opa:0},{},[stage])]);
 screens.controller.styles['remote.arrow']={props:{bg_color:'#1b1b1b',bg_opa:255,border_width:0,outline_width:0}};
-// Compact theme preview and assistant use the same writable registry and event pipeline.
-// READY has no value in the core ABI. The host-owned key adapter reads and clears this password field.
+// Theme preview uses the same writable registry and event pipeline.
 const appearance=base('appearance','obj',{width:300,min_width:300,height:'content',layout:'LV_LAYOUT_FLEX',flex_flow:'LV_FLEX_FLOW_COLUMN',pad_row:6,bg_opa:0},{},[label('appearance_title','Оформление и пример',26,{text_font:'ui_20'})]);
 for(const [id,title] of [['light','Светлая'],['cream','Кремовая'],['emerald','Изумрудная'],['dark','Тёмная']]){
  const b=button('scheme_'+id,title,{width:full},eventAction('ui.select_scheme',id));
@@ -130,29 +129,7 @@ toggle.bindings=[{scope:'common',method:'state',value:[{literal:4},{source:'demo
 const slider=base('preview_slider','slider',{width:full,height:16},{min:0,max:100,value:65});slider.styles=[role('track'),role('indicator','INDICATOR'),role('knob','KNOB')];slider.bindings=[{method:'value',value:{source:'demo.level'}}];slider.events=[{event:'value_changed',write:{source:'demo.level'},value:{event:'value'}}];
 appearance.children.push(label('preview_running_title','Генератор'),toggle,label('preview_level_title','Уровень'),slider,
  button('preview_action','Добавить 1',{width:full},eventAction('demo.step',1)),bindText(label('preview_count','Нажатия: 0'),'demo.clicks',[],{prefix:'Нажатия: '}));
-const field=(id,source,max,height=30,one=true)=>{
- const n=base(id,'textarea',{width:full,height,pad_all:4,border_width:1,bg_opa:255},{text:'',max_length:max,one_line:one});
- n.styles=[role('panel'),role('text'),role('indicator','CURSOR')];
- n.bindings=[{method:'text',value:{source}}];n.events=[{event:'value_changed',write:{source},value:{event:'value'}}];return n;
-};
-const assistant=base('assistant','obj',{width:640,min_width:500,flex_grow:1,height:'content',layout:'LV_LAYOUT_FLEX',flex_flow:'LV_FLEX_FLOW_COLUMN',pad_row:4,bg_opa:0},{},[
- label('assistant_title','Помощник · OpenAI-совместимый API',26,{text_font:'ui_20'}),
- label('endpoint_label','Адрес API'),field('assistant_endpoint','assistant.endpoint',512),
- label('model_label','Модель'),field('assistant_model','assistant.model',128)
-]);
-const models=base('assistant_models','dropdown',{width:full,height:30},{options:['—'],selected:0});models.styles=[role('panel'),role('text')];models.bindings=[{method:'options',value:{source:'assistant.models'}},{method:'selected',value:{source:'assistant.model_index'}}];models.events=[{event:'value_changed',write:{source:'assistant.model_index'},value:{event:'value'}}];
-const key=field('assistant_key','assistant.endpoint',2048);delete key.bindings;key.props={text:'',max_length:2048,one_line:true,password_mode:true};key.events=[{event:'ready',action:'assistant.key',args:{literal:''}}];
-assistant.children.push(models,button('assistant_list_models','Список моделей',{width:full},eventAction('assistant.list_models',true)),label('key_label','Ключ API · Enter или Сохранить'),key,
- bindText(label('assistant_key_present','Ключ: —'),'assistant.key_present',[],{prefix:'Ключ сохранён: '}),
- label('prompt_label','Задание'),field('assistant_prompt','assistant.prompt',4096,70,false));
-const actions=base('assistant_actions','obj',{width:full,height:32,layout:'LV_LAYOUT_FLEX',flex_flow:'LV_FLEX_FLOW_ROW',pad_column:6,bg_opa:0},{},[
- button('assistant_save','Сохранить',{flex_grow:1},eventAction('assistant.key','')),button('assistant_send','Отправить',{flex_grow:1},eventAction('assistant.send',true)),button('assistant_cancel','Отмена',{flex_grow:1},eventAction('assistant.cancel',true))]);
-actions.children[1].bindings=[{scope:'common',method:'state',value:[{literal:512},{source:'assistant.busy'}]}];
-assistant.children.push(actions,bindText(label('assistant_status','—',22),'assistant.status'));
-const reply=base('assistant_reply_area','obj',{width:full,height:88,pad_all:4,border_width:1},{},[bindText(label('assistant_reply','', 'content'),'assistant.reply')]);reply.flags.SCROLLABLE=true;reply.children[0].props.long_mode=0;
-assistant.children.push(reply);
-screens.settings=page('settings','Настройки',[
- base('settings_columns','obj',{width:full,height:'content',layout:'LV_LAYOUT_FLEX',flex_flow:'LV_FLEX_FLOW_ROW_WRAP',pad_column:14,pad_row:8,bg_opa:0},{},[appearance,assistant])]);
+screens.settings=page('settings','Настройки',[appearance]);
 const tabs=[['raster','Растр'],['vector','Вектор'],['canvas','Холст MCP'],['controller','Пульт'],['settings','Настройки']];
 const cell=(column,row,span=1)=>({grid_cell_column_pos:column,grid_cell_column_span:span,grid_cell_row_pos:row,grid_cell_row_span:1,grid_cell_x_align:'LV_GRID_ALIGN_STRETCH',grid_cell_y_align:'LV_GRID_ALIGN_STRETCH'});
 const status=base('status','obj',{width:full,height:full,...cell(0,0,5),pad_all:4,layout:'LV_LAYOUT_FLEX',flex_flow:'LV_FLEX_FLOW_COLUMN',pad_row:0},{},[

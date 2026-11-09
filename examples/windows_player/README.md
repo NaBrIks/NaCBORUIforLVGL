@@ -403,8 +403,8 @@ See [catalog/history](../../docs/readme_data_catalog_ru.md),
 
 ## Native graphics gallery
 
-`npm run player:graphics` opens the separate Graphics page alongside Overview,
-Data, System and Settings. It shows 18 real LVGL decoder/vector/Canvas samples,
+`npm run player:graphics` opens the separate five-page graphics application
+(Raster, Vector, MCP canvas, Controller, Settings), with real LVGL samples,
 including animated GIF and MIT Tabler SVG icons. The original demo remains intact.
 Run `npm run player:test-graphics` for hidden native pixel/animation acceptance.
 
@@ -417,17 +417,18 @@ ProjectService and FileProjectStore. Legacy stores without a cached original bas
 can use `--base-recovery original.json` once; an incorrect base never resets user
 changes. See [Windows storage and verification](../../docs/readme_windows_api_ru.md).
 
-The graphics agent loads [its permanent system prompt](assistant-system-prompt.md)
-before every new request, followed by the complete separate
-[layout](assistant-layout-reference.md) and [style](assistant-styles-reference.md)
-JSON references. Grid/Flex are preferred without prescribing a design.
-MCP exposes authoring documentation and actual capabilities/data, not codec contracts. `get_display_frame` returns real LVGL image feedback through
-the existing NaWServer API; PNG encoding runs on the external MCP host.
-[Formats, MCU boundaries and verification](../../docs/readme_display_feedback_ru.md).
+The demo is a native LVGL renderer/data/MCP target. It has no LLM agent, provider
+settings, key persistence or assistant registry. `/viewer` offers native frames and
+pointer input; `/editor/` is the ordinary project editor. NaWServer serves both.
 
-The three prompt documents have maintained Russian originals (`*.ru.md`) and
-English translations (`*.md`). The agent and MCP references use English.
-The reference checker validates both languages without overwriting owner edits.
-The configured MCP catalog supplies the complete tool list; no demo/ui/assistant
-namespace filters or separate host tool list apply. Source writability, schemas,
-registered actions and execution receipts use the actual application API.
+Use the [SPLA-based Designer](../../tools/designer/README.md) for model-driven
+authoring. Its shared bilingual instructions and method references live in
+`tools/designer/prompts`; MCP serves sections of the same documents.
+`get_display_frame` retains actual LVGL feedback with encoding on the MCP host.
+See [formats and MCU boundaries](../../docs/readme_display_feedback_ru.md).
+
+Upgrading an existing saved project preserves its old pages by design. If Settings
+was the unmodified old demo page, reset only its `screens/settings` override using
+`reset_project_changes` with the current revision, then refresh. Do not reset the
+whole project: the MCP-authored canvas and other owner documents must survive.
+The obsolete graphics-assistant.dpapi is no longer read or written; it may be deleted.

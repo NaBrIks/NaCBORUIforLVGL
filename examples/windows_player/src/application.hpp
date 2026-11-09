@@ -5,7 +5,6 @@
 #include "appearance.hpp"
 #include "host_fonts.hpp"
 #include "system_metrics.hpp"
-#include "host_agent.hpp"
 #include "native_view.hpp"
 #include "lvgl_cbor/capabilities.hpp"
 #include "lvgl_cbor/project_service.hpp"
@@ -20,7 +19,6 @@ public:
 	Appearance appearance;
 	DemoData data;
 	std::unique_ptr<SystemMetrics> metrics;
-	std::unique_ptr<HostAgent> agent;
 	void tick();
 	explicit Application(bool graphics = false);
 	bool graphics() const
@@ -30,7 +28,6 @@ public:
 
 	void start_metrics();
 	void connection(const std::string &);
-	bool host_request(lvgl_cbor::DataValue &);
 	std::vector<uint8_t> view_frame();
 	void view_input(int32_t, int32_t, bool);
 	void load_schemes(const std::filesystem::path &, const std::string &);

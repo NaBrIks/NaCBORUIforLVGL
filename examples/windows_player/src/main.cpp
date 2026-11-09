@@ -417,8 +417,6 @@ int wmain(int argc, wchar_t **argv)
 				});
 
 			{UiLock lock; app->tick(); if(web) web->poll();}
-			DataValue host; bool host_pending = false; {UiLock lock; host_pending = app->host_request(host);}
-			if(host_pending)emit(host);
 
 			refresh_scheme_menu(); // Scheme actions from CBOR pages share the native menu/persistence path.
 			lv_timer_handler(); Sleep(5);

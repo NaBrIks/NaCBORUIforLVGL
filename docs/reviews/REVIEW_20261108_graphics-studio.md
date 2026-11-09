@@ -49,7 +49,7 @@ ignored local. Прямое диагностическое чтение один
 повторно используемый keep-alive socket; повторное безопасное GET с отдельным
 соединением прошло. Автоматических повторов изменяющих операций не добавляли.
 
-Документация: [устройство демо](../readme_graphics_studio_ru.md),
+Документация: [устройство демо](../readme_graphics_ru.md),
 [форматы и геометрия](../readme_graphics_ru.md),
-[помощник](../readme_windows_assistant_ru.md),
+[помощник](../readme_maui_designer_ru.md),
 [общий нативный компонент](../readme_native_components_ru.md).

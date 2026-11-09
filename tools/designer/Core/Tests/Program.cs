@@ -16,6 +16,8 @@ if (args is ["--live", var endpoint])
     var status = await live.InvokeToolAsync("get_project_status", "{}");
     Check(!status.IsError, "Real NaWServer MCP get_project_status");
     Console.WriteLine(status.TextContent);
+    var reference = await live.InvokeToolAsync("get_ui_reference", "{\"kind\":\"screen\",\"topic\":\"index\"}");
+    Check(!reference.IsError && reference.TextContent.Contains("topics"), "Real SPLA MCP authoring reference after prompt relocation");
     var frame = await live.GetPreviewAsync(512);
     Check(frame?.MimeType == "image/png" && frame.DataUrl.Length > 100, "Real NaWServer MCP get_display_frame image");
     Console.WriteLine($"LIVE preview: {frame!.MimeType}, {frame.DataUrl.Length} data-URL characters");

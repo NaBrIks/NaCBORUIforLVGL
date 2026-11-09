@@ -6,12 +6,10 @@ import {encode} from 'cborg';
 import {appearance,t} from '../state/appearance';
 import AppearanceMenu from './AppearanceMenu.vue';
 import Icon from './Icon.vue';
-import AssistantPanel from './AssistantPanel.vue';
 const props=defineProps({embedded:{type:Boolean,default:false},active:{type:Boolean,default:true}});
 
 const image=ref(),details=ref(),frameUrl=ref(''),width=ref(0),height=ref(0),paused=ref(false);
 const frameError=ref(''),inputError=ref('');
-const assistantOpen=ref(false);
 const error=computed(()=>inputError.value||frameError.value);
 const status=computed(()=>paused.value?t('Пауза','Paused'):error.value?t('Нет связи','Disconnected'):frameUrl.value?t('Подключён','Connected'):t('Подключение…','Connecting…'));
 let disposed=false,frameTimer,frameController,holdTimer,pointerId=null,pressed=false,x=0,y=0,inputBusy=false;
@@ -94,12 +92,11 @@ onBeforeUnmount(()=>{
    <button class="icon-button" :aria-label="paused?t('Продолжить просмотр','Resume view'):t('Приостановить просмотр','Pause view')" :data-tooltip="t('Приостановить только передачу кадров; приложение продолжает работать','Pause frame delivery only; the application keeps running')" @click="togglePause"><Icon :name="paused?'player-play':'player-pause'"/></button>
    <button class="icon-button" :aria-label="t('Сведения о просмотре','View details')" :data-tooltip="t('Сведения о просмотре','View details')" @click="details.showModal()"><Icon name="info-circle"/></button>
    <a v-if="!embedded" href="/editor/">{{t('Редактор','Editor')}}</a>
-   <button v-if="!embedded" :aria-expanded="assistantOpen" @click="assistantOpen=!assistantOpen">{{t('Ассистент','Assistant')}}</button>
    <div v-if="!embedded" class="appearance-controls"><AppearanceMenu/><button class="language-button" @click="appearance.language=appearance.language==='ru'?'en':'ru'">{{appearance.language.toUpperCase()}}</button></div>
   </header>
   <div class="native-viewer-body"><section class="native-viewer-stage" :aria-label="t('Экран LVGL','LVGL screen')">
    <img v-if="frameUrl" ref="image" class="native-viewer-frame" :src="frameUrl" :alt="t('Экран работающего LVGL-приложения','The running LVGL application screen')" draggable="false" @pointerdown.prevent="down" @pointermove.prevent="move" @pointerup.prevent="release" @pointercancel="release" @lostpointercapture="release" @contextmenu.prevent>
-  </section><AssistantPanel v-if="!embedded&&assistantOpen" @close="assistantOpen=false"/></div>
+  </section></div>
   <dialog ref="details" class="native-viewer-details">
    <h2>{{t('Просмотр приложения','Application view')}}</h2>
    <p>{{t('Кадры рисует работающее LVGL-приложение. Нажатия передаются его отдельному указателю; события, биндинги и страницы исполняет тот же runtime.','Frames are rendered by the running LVGL application. Pointer input goes to its independent input device; the same runtime executes events, bindings and pages.')}}</p>

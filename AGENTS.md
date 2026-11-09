@@ -96,7 +96,7 @@ removed rather than retained as a fallback or historical implementation guide.
 
 ## Agent instructions and real MCP availability — owner decision 2026-11-08
 
-Maintain prompt originals as examples/windows_player/assistant-*.ru.md. Keep their
+Maintain prompt originals as tools/designer/prompts/assistant-*.ru.md. Keep their
 English siblings (*.md) aligned; the model and MCP documentation receive English.
 The documentation checker must not overwrite owner edits. Use the configured
 MCP tool catalog directly; do not introduce demo/ui/assistant namespace filters
@@ -114,3 +114,24 @@ The app has no HTTP listener. The first prototype's HTTP MCP gateway uses native
 NaWServer and the existing MCP SDK handlers, not a second API/codec implementation.
 Direct MCU MCP and voice input are not part of the current acceptance claim.
 Read docs/readme_maui_designer_ru.md before changing the integration.
+
+## No independent parallel subsystems — owner decision 2026-11-09
+
+Reuse the project's approved stack and existing shared implementations. Do not
+introduce an independent subsystem, parallel engine/client, new service or a
+separate persistence mechanism on an arbitrarily chosen runtime/framework without
+prior owner agreement. This applies to agent loops, LLM/OpenAI and MCP clients,
+HTTP/WS servers, storage and background processes, including demos, prototypes
+and experiments. A request for a feature alone does not authorize a second
+implementation on a different stack.
+
+First inspect the approved component. Extend or compose it where practical.
+If another subsystem/technology is needed, explain the missing capability,
+proposed boundary and reason, and obtain agreement before implementing it.
+Do not use "temporary", "demo" or "test" as an exception. Routine changes within
+already approved components need no additional approval.
+
+SPLA owns Designer model/conversation/orchestration/MCP; NaWServer owns product
+network listeners. Node.js remains approved for existing build/codecs/stdio MCP
+tooling; that is not permission to build another product/agent stack in it.
+The LVGL demo is a renderer/data/MCP target, not a second LLM application.

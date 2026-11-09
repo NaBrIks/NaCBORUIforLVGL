@@ -134,15 +134,17 @@
 
 - [План: inline CBOR-изображения и URI ресурсов](plans/PLAN_20261107_image-resources.md)
 
-- [Windows: две демки, живой сайт и встроенный агент](readme_graphics_studio_ru.md)
+- [Windows: две демки и нативный просмотр](readme_graphics_ru.md)
 
-- [Встроенный помощник: модели, MCP и ограничения](readme_windows_assistant_ru.md)
+- [Designer: модели, MCP и ограничения](readme_maui_designer_ru.md)
 
 - [Приёмка Windows Graphics Studio 2026-11-08](reviews/REVIEW_20261108_graphics-studio.md)
 
 - [Веб-студия: запрос, экран, модели и видимый процесс](reviews/REVIEW_20261108_llm-studio.md)
 
-- [Подробный лог, рамка дисплея и восстановление раскладки](readme_assistant_log_ru.md)
+- [Подробный лог, рамка дисплея и восстановление раскладки](readme_maui_designer_ru.md)
 - [Приёмка журнала и восстановления](reviews/REVIEW_20261108_log-recovery.md)
 
-[Чат с историей, «Новый чат» и предыдущие версии в JSON](readme_assistant_chat_ru.md)
+[Чат с историей, «Новый чат» и предыдущие версии в JSON](readme_maui_designer_ru.md)
+
+- [Удаление агента из демки, сохранность Designer и проекта](reviews/REVIEW_20261109_remove-demo-agent.md)

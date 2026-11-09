@@ -34,7 +34,7 @@ nested.root.children=[node('label','nested_label',{text_color:'#222222'},[],{tex
  node('obj','nested_box',{y:80,width:280,height:180,bg_color:'#293944',bg_opa:255,border_width:0,pad_all:12},[
  node('label','nested_inner',{text_color:'#ffffff'},[],{text:'Same native style path'})])];
 const fixture=join(temporary,'depth.json');await writeFile(fixture,JSON.stringify(createProject([main,nested],{id:'layout-debug',name:'Depth digits'})));
-const child=spawn(process.execPath,[join(here,'run.mjs'),fixture,'--profile','graphics','--exe',exe,'--api-port','0','--api-store',join(temporary,'project'),'--assistant-store',join(temporary,'assistant.enc'),'--control','--hidden','--no-settings'],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
+const child=spawn(process.execPath,[join(here,'run.mjs'),fixture,'--profile','graphics','--exe',exe,'--api-port','0','--api-store',join(temporary,'project'),'--control','--hidden','--no-settings'],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
 let next=0,stderr='',apiUrl,loaded=false,closed=false,readyResolve,readyReject,mcp;
 const pending=new Map(),ready=new Promise((yes,no)=>{readyResolve=yes;readyReject=no;}),wait=ms=>new Promise(yes=>setTimeout(yes,ms));
 const startup=setTimeout(()=>readyReject(Error('Native viewer startup timeout '+stderr)),15000);

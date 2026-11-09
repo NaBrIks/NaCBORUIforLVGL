@@ -1,55 +1,42 @@
-# Где хранятся данные Designer и Windows-демки
+# Хранилища Designer и Windows-демки
 
-## Подтверждённая текущая реализация
+## Designer (MAUI / SPLA)
 
-| Данные | Designer (MAUI / SPLA) | Старый помощник графической демки |
-|---|---|---|
-| Ключ LLM | MAUI SecureStorage, логическое имя nacborui.openrouter.api-key | graphics-assistant.dpapi |
-| Провайдер, API, модель, MCP | MAUI Preferences | Вместе с ключом в DPAPI-файле |
-| Язык, тема, ширина панелей, reasoning | MAUI Preferences | Отдельные настройки демки |
-| Чат, изображения, очередь | Память процесса; перезапуск очищает | Память Node-хоста |
-| Системные инструкции | Встроенные EN resources Designer.Core | Общие файлы инструкций Windows player |
-| Сам проект LVGL | На выбранном устройстве/хосте через явные MCP save-операции | Тот же ProjectService |
+| Данные | Хранение |
+|---|---|
+| Ключ LLM | MAUI SecureStorage, имя nacborui.openrouter.api-key |
+| Провайдер, API, модель, MCP, язык/тема/ширина | MAUI Preferences |
+| Чат, изображения, очередь | Память процесса; перезапуск очищает |
+| Системные инструкции | EN resources Designer.Core, исходники tools/designer/prompts |
+| Изменённый проект LVGL | На выбранном хосте/устройстве через явные MCP save-операции |
 
-На Windows Designer собран unpackaged. MAUI 10.0.110 сохраняет зашифрованные
-значения в `%LOCALAPPDATA%/<publisher>/org.nacborui.designer/Settings/securestorage.dat`,
-обычные настройки — в соседнем preferences.dat. Папка Data — сестра Settings.
-Сейчас publisher остался шаблонным `User Name` из Package.appxmanifest.
-Исправление издателя должно сопровождаться переносом существующих настроек;
-в этой проверке путь и ключи не менялись. SecureStorage использует Windows
-DataProtectionProvider с LOCAL=user; dat-файл не является открытым API-ключом.
+На unpackaged Windows это `%LOCALAPPDATA%/<publisher>/org.nacborui.designer/Settings/`:
+securestorage.dat с зашифрованными значениями и соседний preferences.dat.
+Сейчас publisher остаётся шаблонным `User Name` из Package.appxmanifest;
+исправлять его нужно с миграцией существующих настроек, путь в этом изменении
+не менялся. SecureStorage использует Windows DataProtectionProvider с LOCAL=user.
+На Android ключ хранится в закрытом shared preferences контейнере приложения,
+зашифрованном средствами MAUI/Android Keystore. В APK/репозиторий ключ не попадает.
 
-На Android ключ находится в закрытом shared preferences контейнере приложения
-org.nacborui.designer, зашифрованном средствами MAUI/Android Keystore. Обычные
-Preferences отделены от SecureStorage. Ничего из этого не включается в APK/репозиторий.
+## LVGL-демка
 
-Windows-демка использует другой механизм: `%LOCALAPPDATA%/NaCBORUIforLVGL/graphics-assistant.dpapi`,
-зашифрованный CryptProtectData для текущего пользователя. Модель и вызовы MCP
-обрабатывает examples/windows_player/assistant.mjs в Node-хосте run.mjs; поля
-на LVGL-экране и браузерная страница — интерфейсы к нему. Это не LLM-клиент внутри MCU.
-После ранее разрешённого копирования ключа в Designer прежняя копия не удалялась.
-Показатель «ключ сохранён» показывает наличие конфигурации, не раскрывает значение ключа.
+Агента, настроек LLM и хранилища ключа в демке больше нет. Её назначение —
+рендеринг LVGL, источники/действия, события, MCP/API, кадры и независимый указатель.
+Настройки демки — схемы, генератор и обычные demo-контролы.
 
-Сохранённые проекты Windows player размещает под
-`%LOCALAPPDATA%/NaCBORUIforLVGL/projects/<project-hash>/`, тему — в graphics-player.json.
-Ключи, Preferences, активные проекты и история не пишутся в каталог исходников.
+Схема Windows хранится в `%LOCALAPPDATA%/NaCBORUIforLVGL/graphics-player.json`,
+проекты — под projects/<project-hash>/ того же каталога. Прежний
+`graphics-assistant.dpapi` больше не читается/создаётся; существующий файл можно
+удалить без влияния на ключ Designer. В текущей локальной приёмке он удалён,
+а неизменность отдельного SecureStorage Designer подтверждена сравнением хеша.
 
-## Рекомендация, не выполненная миграция
+Реализованное разделение: агент — Designer.Core на SPLA, устройство — MCP/API.
+Самостоятельная работа Designer не требует Codex, но облачная модель требует сети.
+`/viewer` и `/editor/` на NaWServer остались браузерным просмотром и обычным
+редактором проекта; собственного LLM-цикла там нет.
 
-Основной автономный агент — Designer.Core на SPLA в Windows/Android приложении.
-Самостоятельность означает цикл prompt → модель → MCP → результат внутри приложения,
-без внешнего Codex; доступ к облачной модели всё ещё требует сети.
-LVGL runtime/MCU исполняет UI и предоставляет MCP/API, не нуждается в ключе LLM,
-провайдере и собственной копии агентного движка.
+История старой реализации остаётся в Git. Общее требование AGENTS.md запрещает
+создавать второй независимый стек/агент/хранилище без согласования с владельцем.
 
-Старый помощник демки полезен для проверки браузерного сценария, но сейчас это
-второй движок/хранилище. Развивать два параллельно не рекомендуется. Следующий
-отдельно согласованный шаг — убрать из обычного LVGL-примера настройки LLM либо
-сделать их явно опциональными; браузерный UI затем подключить к общему SPLA-хосту.
-Браузер, открытый прямо с MCU без такого хоста, требует собственного клиентского
-исполнения агента (JS/WASM); перенос SPLA туда пока не исследован и не обещан.
-В текущей проверке старый ключ не удалялся, агент демки не отключался.
-
-Исходники MAUI: [tools/designer](../tools/designer/README.md). Обработка ключа:
-App/Services/DesignerSessionAdapter.cs. Windows DPAPI: examples/windows_player/src/secret_protection.cpp.
-Платформенный механизм: [MAUI SecureStorage](https://learn.microsoft.com/dotnet/maui/platform-integration/storage/secure-storage?view=net-maui-10.0).
+[Designer](../tools/designer/README.md),
+[MAUI SecureStorage](https://learn.microsoft.com/dotnet/maui/platform-integration/storage/secure-storage?view=net-maui-10.0).

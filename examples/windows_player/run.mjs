@@ -13,12 +13,11 @@ import {loadProject} from './loader.mjs';
 import {compileSchemes} from './schemes.mjs';
 import {adaptSystemPage} from './system-page.mjs';
 import {createHash} from 'node:crypto';
-import {createAssistantEngine as createAssistant} from './assistant.mjs';
 
 const here=dirname(fileURLToPath(import.meta.url)),root=resolve(here,'../..');
 let path=join(here,'demo.json'),exe=join(root,'local/windows-player/Release/nacborui_player.exe');
 let entry,watchEnabled=false,control=false,hidden=false,selectedScheme,schemesPath=new URL('./schemes.json',import.meta.url);
-let assistantStore,baseRecovery,baseRecoveryFile;
+let baseRecovery,baseRecoveryFile;
 let profile='system',explicitPath=false,enableApi=false,apiPort,apiStore,webRoot=join(root,'frontend/dist');
 let settings=join(process.env.LOCALAPPDATA??join(homedir(),'.config'),'NaCBORUIforLVGL','player.json');
 for(let i=2;i<process.argv.length;i++) {
@@ -34,7 +33,6 @@ for(let i=2;i<process.argv.length;i++) {
   else if(arg==='--api')enableApi=true;
   else if(arg==='--api-port'&&process.argv[i+1]){const value=process.argv[++i];if(!/^\d+$/.test(value)||!Number.isInteger(Number(value))||Number(value)>65535||Number(value)===443)throw Error('Invalid API port');apiPort=Number(value);}
   else if(arg==='--base-recovery'&&process.argv[i+1])baseRecovery=resolve(process.argv[++i]);
-  else if(arg==='--assistant-store'&&process.argv[i+1])assistantStore=resolve(process.argv[++i]);
   else if(arg==='--api-store'&&process.argv[i+1]){apiStore=resolve(process.argv[++i]);enableApi=true;}
   else if(arg==='--web-root'&&process.argv[i+1])webRoot=resolve(process.argv[++i]);
   else if(arg==='--settings'&&process.argv[i+1])settings=resolve(process.argv[++i]);
@@ -70,7 +68,6 @@ function storeFor(candidate){
 }
 async function sessionFor(packet,store) {
   const file=join(directory,`${++generation}.cbor`);await writeFile(file,packet.bytes);
-  let assistant;
   const child=spawn(exe,['--profile',profile,'--project',file,'--entry',packet.entry,'--width',String(packet.width),
     '--height',String(packet.height),'--title',`NaCBORUIforLVGL - ${packet.project.manifest.name}`,
     '--schemes',schemeFile,'--scheme',selectedScheme,'--stdio',...(store?['--store',store]:[]),...(baseRecoveryFile?['--base-recovery',baseRecoveryFile]:[]),...(apiPort!==undefined?['--api-port',String(apiPort),'--web-root',webRoot]:[]),...(hidden?['--hidden']:[])],{windowsHide:true,stdio:['pipe','pipe','pipe']});
@@ -90,7 +87,6 @@ async function sessionFor(packet,store) {
       });
     },
     async stop() {
-      await assistant?.close();
       if(child.exitCode!==null||child.signalCode!==null)return;
       const payload=encode({op:'quit'}),frame=Buffer.alloc(4+payload.length);frame.writeUInt32LE(payload.length);frame.set(payload,4);
       child.stdin.end(frame);
@@ -107,15 +103,7 @@ async function sessionFor(packet,store) {
     if(event.event==='ready'){nativeReady=true;}
     else if(event.event==='api_ready'){
       apiReady=true;
-      if(profile==='graphics')assistant=createAssistant({origin:event.url,
-        storePath:assistantStore??join(process.env.LOCALAPPDATA??join(homedir(),'.config'),'NaCBORUIforLVGL','graphics-assistant.dpapi'),
-        secretProtect:async text=>{const r=await session.command({op:'protect_secret',text});if(!r.ok)throw Error(r.error);return r.text;},
-        secretUnprotect:async text=>{const r=await session.command({op:'unprotect_secret',text});if(!r.ok)throw Error(r.error);return r.text;},
-        onReply:reply=>session.command({op:'host_reply',reply})});
       emit(event);
-    }
-    else if(event.event==='host_request'){
-      if(assistant)void assistant.handle(event).catch(()=>{});
     }
     else if(event.event==='fatal'){readyReject(Error(event.error));emit(event);}
     else if(event.event==='scheme_changed'){rememberScheme(event.scheme);emit(event);}

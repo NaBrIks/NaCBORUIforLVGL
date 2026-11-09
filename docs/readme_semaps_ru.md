@@ -163,3 +163,6 @@ Windows HTTP transport и общего ProjectService/FileProjectStore. Моде
 
 UI 09.11: схема e_pc/e_runtime дополнена таблицей глубин, общим G/F,
 сохраняемым коротким splitter и EN/RU ресурсами. Исполнитель SPLA и API неизменны.
+
+09.11: e_windows_player обновлён через MCP после удаления LLM-агента.
+В демке только LVGL/data/API, viewer/editor и MCP; SPLA и инструкции — в Designer.

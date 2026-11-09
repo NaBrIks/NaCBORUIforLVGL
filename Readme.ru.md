@@ -164,7 +164,7 @@ preview, сохранение с revision, стили, биндинги и со�
 
 - [Графика LVGL: форматы изображений, кривые и цена на МК](docs/readme_graphics_ru.md)
 
-- [Две Windows-демки, живой сайт и встроенный агент](docs/readme_graphics_studio_ru.md)
+- [Две Windows-демки, нативный просмотр и внешний Designer](docs/readme_graphics_ru.md)
 
 ### MAUI-конструктор
 
