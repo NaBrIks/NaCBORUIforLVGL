@@ -3,7 +3,6 @@
 #include "demo_data.hpp"
 #include <cmath>
 #include <ctime>
-#include <stdexcept>
 using namespace lvgl_cbor;
 #if LVGL_CBOR_HAS_HISTORY
 namespace
@@ -16,39 +15,38 @@ DemoData::DemoData()
 #if LVGL_CBOR_HAS_HISTORY
   : history(registry)
 #endif
+{}
+
+bool DemoData::begin(std::string &error)
 {
 	using S = DataSchema;
-	std::string error;
-	const auto require = [&](bool ok) {
-			if(!ok) throw std::runtime_error(error);
-		};
-	require(registry.add_group({"demo", "Demo controls", "Autonomous speed and editable example values", {}}, error));
-	require(registry.add_group({"system", "System", "Host-provided system information", {}}, error));
+	if(!registry.add_group({"demo", "Demo controls", "Autonomous speed and editable example values", {}}, error)) return false;
+	if(!registry.add_group({"system", "System", "Host-provided system information", {}}, error)) return false;
 #if LVGL_CBOR_HAS_HISTORY
-	require(registry.add_group({"history", "Sample history", "Optional bounded time-series sampling", {}}, error));
+	if(!registry.add_group({"history", "Sample history", "Optional bounded time-series sampling", {}}, error)) return false;
 #endif
 	auto speed = S::number(0, 180);
 	speed.title = "Speed";
 	speed.description = "Smooth autonomous demonstration signal";
 	speed.unit = "km/h";
-	require(registry.add_source({"demo.speed", S::object({{"kmh", speed},
+	if(!registry.add_source({"demo.speed", S::object({{"kmh", speed},
 									 {"unit", S::text(8)}, {"sequence", S::integer(0)}}), {}, "Demo speed",
 	                             "Autonomous 25 Hz speed generator, independent of the displayed page", "demo"},
-	    error));
-	require(registry.add_source({"demo.running", S::boolean(),
+	    error)) return false;
+	if(!registry.add_source({"demo.running", S::boolean(),
 	                             [this](const DataPath &, const DataValue &value, std::string &e) {
 									 running_ = std::get<bool>(value.value);
 									 return registry.publish("demo.running", running_, e);
 								 }, "Speed generator enabled",
 	                             "Controls speed generation; history and system sampling remain independent", "demo"},
-	    error));
-	require(registry.add_source({"demo.clicks", S::integer(0), {}, "Click counter",
-	                             "Confirmed result of the step and reset actions", "demo"}, error));
+	    error)) return false;
+	if(!registry.add_source({"demo.clicks", S::integer(0), {}, "Click counter",
+	                             "Confirmed result of the step and reset actions", "demo"}, error)) return false;
 	auto local_time = S::text(8);
 	local_time.title = "Local time";
 	local_time.description = "Current host-local time in HH:mm:ss format";
-	require(registry.add_source({"system.clock", S::object({{"localTime", local_time}}), {},
-	                             "Clock", "System wall clock supplied by the platform", "system"}, error));
+	if(!registry.add_source({"system.clock", S::object({{"localTime", local_time}}), {},
+	                             "Clock", "System wall clock supplied by the platform", "system"}, error)) return false;
 	for(auto source : std::vector<DataSource>{
 		{"demo.level", S::integer(0, 100), {}, "Level", "Editable level; also sampled by optional history", "demo"},
 		{"demo.checked", S::boolean(), {}, "Checkbox", "Confirmed editable checkbox state", "demo"},
@@ -59,23 +57,23 @@ DemoData::DemoData()
 		source.write = [this, name](const DataPath &, const DataValue &value, std::string &e) {
 				return registry.publish(name, value, e);
 			};
-		require(registry.add_source(std::move(source), error));
+		if(!registry.add_source(std::move(source), error)) return false;
 	}
-	require(registry.publish("demo.level", 65, error));
-	require(registry.publish("demo.checked", true, error));
-	require(registry.publish("demo.choice", 0, error));
-	require(registry.publish("demo.text", "Текст", error));
-	require(registry.add_action({"demo.step", S::integer(1, 100),
+	if(!registry.publish("demo.level", 65, error)) return false;
+	if(!registry.publish("demo.checked", true, error)) return false;
+	if(!registry.publish("demo.choice", 0, error)) return false;
+	if(!registry.publish("demo.text", "Текст", error)) return false;
+	if(!registry.add_action({"demo.step", S::integer(1, 100),
 	                             [this](const DataValue &value, std::string &e) {
 									 clicks_ += std::get<int64_t>(value.value);
 									 return registry.publish("demo.clicks", clicks_, e);
 								 }, "Increment counter", "Add the positive integer argument to the click counter",
-	                             "demo"}, error));
-	require(registry.add_action({"demo.reset", S::null(),
+	                             "demo"}, error)) return false;
+	if(!registry.add_action({"demo.reset", S::null(),
 	                             [this](const DataValue &, std::string &e) {
 									 clicks_ = 0;
 									 return registry.publish("demo.clicks", clicks_, e);
-								 }, "Reset counter", "Set the click counter to zero", "demo"}, error));
+								 }, "Reset counter", "Set the click counter to zero", "demo"}, error)) return false;
 #if LVGL_CBOR_HAS_HISTORY
 	DataHistoryConfig samples;
 	samples.source = "demo.level";
@@ -86,12 +84,12 @@ DemoData::DemoData()
 	samples.unit = "%";
 	samples.capacity = 32;
 	samples.period_ms = 200;
-	require(history.add(std::move(samples), error));
-	require(registry.add_source({plot_source, S::object({{"label", S::text(255)},
+	if(!history.add(std::move(samples), error)) return false;
+	if(!registry.add_source({plot_source, S::object({{"label", S::text(255)},
 									 {"history", S::array(S::integer(-1, 100), 32, 32)}}), {}, "Level plot adapter",
 	                             "Example-only conversion to the registered percent plot; -1 denotes an undrawn point",
-	                             "history"}, error));
-	require(registry.add_source({"demo.history_enabled", S::boolean(),
+	                             "history"}, error)) return false;
+	if(!registry.add_source({"demo.history_enabled", S::boolean(),
 	                             [this](const DataPath &, const DataValue &value, std::string &e) {
 									 const bool enabled = std::get<bool>(value.value);
 									 const bool was_enabled = history.enabled();
@@ -115,13 +113,13 @@ DemoData::DemoData()
 
 									 return true;
 								 }, "History enabled", "Disabling frees sample rings; enabling starts a fresh timeline",
-	                             "history"}, error));
-	require(history.set_enabled(true, error));
-	require(registry.publish("demo.history_enabled", true, error));
+	                             "history"}, error)) return false;
+	if(!history.set_enabled(true, error)) return false;
+	if(!registry.publish("demo.history_enabled", true, error)) return false;
 #endif
-	require(registry.publish("demo.running", true, error));
-	require(registry.publish("demo.clicks", 0, error));
-	tick();
+	if(!registry.publish("demo.running", true, error)) return false;
+	if(!registry.publish("demo.clicks", 0, error)) return false;
+	return tick(error);
 }
 
 #if LVGL_CBOR_HAS_HISTORY
@@ -174,13 +172,12 @@ bool DemoData::publish_history_plot(std::string &error)
 
 #endif
 
-void DemoData::tick()
+bool DemoData::tick(std::string &error)
 {
 	const auto now = std::chrono::steady_clock::now();
-	if(now < next_) return;
+	if(now < next_) return true;
 
 	next_ = now + std::chrono::milliseconds(40);
-	std::string error;
 	if(running_)
 	{
 		const double seconds = std::chrono::duration<double>(now - start_).count();
@@ -188,7 +185,7 @@ void DemoData::tick()
 		// Exercise the same CBOR ingress as an application/transport data adapter.
 		const auto bytes = encode_data_value(DataValue::Object{{"kmh", speed_}, {"unit", "km/h"},
 					{"sequence", ++sequence_}});
-		if(!registry.publish_cbor("demo.speed", bytes.data(), bytes.size(), error)) throw std::runtime_error(error);
+		if(!registry.publish_cbor("demo.speed", bytes.data(), bytes.size(), error)) return false;
 	}
 
 	std::time_t seconds = std::time(nullptr);
@@ -202,19 +199,19 @@ void DemoData::tick()
 	std::strftime(text, sizeof(text), "%H:%M:%S", &local);
 	if(clock_ != text)
 	{
+		if(!registry.publish("system.clock", DataValue::Object{{"localTime", text}}, error)) return false;
 		clock_ = text;
-		if(!registry.publish("system.clock", DataValue::Object{{"localTime", clock_}}, error))
-			throw std::runtime_error(error);
 	}
 
 	registry.flush();
 #if LVGL_CBOR_HAS_HISTORY
 	const auto monotonic_ms = uint64_t(std::chrono::duration_cast<std::chrono::milliseconds>(now - start_).count());
-	if(!history.tick(monotonic_ms, error)) throw std::runtime_error(error);
+	if(!history.tick(monotonic_ms, error)) return false;
 
 	registry.flush();
-	if(!publish_history_plot(error)) throw std::runtime_error(error);
+	if(!publish_history_plot(error)) return false;
 
 	registry.flush();
 #endif
+	return true;
 }

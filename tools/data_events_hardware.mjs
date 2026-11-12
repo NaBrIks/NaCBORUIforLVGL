@@ -3,10 +3,12 @@
 // Explicit real-device acceptance; no project saves or firmware changes.
 import assert from 'node:assert/strict';
 import {decodePacket} from '../packages/style-codec/index.js';
-import {DeviceClient} from '../integrations/mcp/device.js';
+import {ProjectClient} from '../packages/project-codec/client.js';
+import {DataClient} from '../packages/project-codec/data-client.js';
+import {readDeviceJson} from './device_acceptance.mjs';
 const origin=process.argv[2];if(!origin)throw Error('Usage: node tools/data_events_hardware.mjs http://DEVICE');
-const client=new DeviceClient(origin,{timeout:15000});
-const before=await client.info(),project=await client.project.info(),frames=[];
+const projectClient=new ProjectClient(origin),dataClient=new DataClient(origin);
+const before=await readDeviceJson(origin,'/api/info'),project=await projectClient.info(),frames=[];
 const url=new URL('/ws',origin);url.protocol=url.protocol==='https:'?'wss:':'ws:';
 const socket=new WebSocket(url);socket.binaryType='arraybuffer';
 await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('WS timeout')),5000);socket.onopen=()=>{clearTimeout(timer);resolve();};socket.onerror=()=>{clearTimeout(timer);reject(Error('WS error'));};});
@@ -23,9 +25,9 @@ for(const frame of speeds){
 }
 assert.ok(speeds.some(frame=>!Number.isInteger(frame.get('value').get('kmh'))),'fractional needle input');
 assert.ok(frames.some(frame=>frame.get('source')==='system.clock'),'clock events');
-const snapshot=await client.data.read(),seq=snapshot.sources.find(source=>source.name==='demo.speed').value.sequence;
+const snapshot=await dataClient.read(),seq=snapshot.sources.find(source=>source.name==='demo.speed').value.sequence;
 await new Promise(resolve=>setTimeout(resolve,800));
-const latest=await client.data.read(),after=await client.info(),current=await client.project.info();
+const latest=await dataClient.read(),after=await readDeviceJson(origin,'/api/info'),current=await projectClient.info();
 assert.ok(latest.sources.find(source=>source.name==='demo.speed').value.sequence>=seq+15,'producer continues after socket close');
 assert.equal(after.boot_id,before.boot_id);assert.equal(latest.diagnostics.bindingErrors,0);
 assert.equal(current.project.revision,project.project.revision);

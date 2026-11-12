@@ -49,6 +49,16 @@ try:
                         emit({"serial": raw.decode("utf8", "replace")})
                     continue
                 value = json.loads(raw[marker + 4:])
+                if value.get("id") == record["id"] and value.get("frameBytes"):
+                    count = value["frameBytes"]
+                    if not isinstance(count, int) or not 32 <= count <= 4128:
+                        raise ValueError("Invalid LVF1 reply length")
+                    while len(buffered) < count and time.monotonic() < deadline:
+                        buffered.extend(device.read(count - len(buffered)))
+                    if len(buffered) < count or buffered[:4] != b"LVF1":
+                        raise ValueError("Missing LVF1 packet")
+                    value["frameHex"] = buffered[:count].hex()
+                    del buffered[:count]
                 emit(value)
                 if value.get("id") == record["id"]:
                     received = True

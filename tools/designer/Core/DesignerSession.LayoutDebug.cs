@@ -51,6 +51,6 @@ public sealed partial class DesignerSession
             throw new InvalidOperationException("Изменение диагностики не подтверждено устройством.");
     }
 
-    private bool HasRemoteTool(string name) => _tools is not null &&
-        Tools.Any(tool => tool.Function.Name == _tools.NameFor(name));
+    private bool HasRemoteTool(string name) => _activeToolHost is not null &&
+        Tools.Any(tool => tool.Function.Name == _activeToolHost.NameFor(name));
 }

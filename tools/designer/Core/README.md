@@ -8,7 +8,7 @@ the four ProjectReference entries; no engine sources are copied into this tool.
 
 The reusable stack is `Conversation` + `ConversationOrchestrator` +
 `LlmPipelineBlueprint`/`ProviderClientResolver`, `OpenAiCompatibleClient` and
-`OpenRouterProvider`, plus `McpServerSession`/`HttpTransport`/`StdioTransport` and
+`OpenRouterProvider`, plus `McpServerSession`/`HttpTransport` and
 `McpProxyTool`. The small `McpToolHostAdapter` only presents SPLA proxy tools through
 SPLA's IToolHost contract. It includes the complete discovered catalog. No second
 namespace filter or tool allowlist is maintained here. Source names are prefixed by
@@ -36,26 +36,14 @@ conversation history and does not replace or save the device project.
 
 ## MCP endpoint
 
-For Android select McpTransportKind.Http and provide a real MCP **Streamable HTTP**
-URL, for example `http://device.example:5301/mcp`. This is an illustrative address,
-not a claim that a server listens there. SPLA POSTs initialize, tools/list and
-tools/call to the same endpoint. Replies can be application/json or text/event-stream.
-SPLA handles Mcp-Session-Id and the negotiated MCP-Protocol-Version. This transport does
-not implement the older GET /sse + separate messages endpoint, and does not hold a
-standalone GET stream open for notifications arriving between calls.
+Direct API uses the application's bridge to the shared WebView codecs. Device
+MCP and MCP proxy profiles use the same SPLA HTTP client. The optional Windows
+player MCP and the opt-in Windows Designer listener are described in the
+[connection guide](../../../docs/readme_designer_connections_ru.md).
 
-A raw NaCBORUI /api/... HTTP endpoint is **not** an MCP endpoint. The existing
-integrations/mcp/index.js is a desktop stdio adapter. Windows can use it by selecting
-Stdio and supplying the Node executable, index.js argument, working directory and
-LVGL_CBOR_DEVICE / permission environment values. Android cannot launch that desktop
-process. It needs a reachable native NaWServer MCP endpoint implementing the same
-catalog/operations, or another explicitly provisioned compatible MCP host. This core
-neither starts a proxy listener nor guesses a protocol from the device URL. Connecting
-and reading a preview never save a project.
-
-GetPreviewAsync calls the advertised get_display_frame tool through SPLA, with maxEdge
-128..1024. The endpoint must return an MCP image content block; unsupported capture is
-reported as an error. Device-side frame support remains a separate acceptance concern.
+SPLA owns the session, negotiated protocol, cancellation and tool invocation.
+No substitute process or HTTP listener is started by this core. Discovery must
+come from the actual configured target, not a hardcoded local tool catalog.
 
 ## Build and verify
 

@@ -88,8 +88,7 @@ Do not silently change versions based on historical verification reports.
 All product networking, demos and network integration/acceptance tests MUST use
 our NaWServer stack on every supported platform, including Windows. This is
 required at minimum for end-to-end verification of the actual shared stack.
-Do not introduce alternate HTTP/WS listeners, proxies or test servers. Frontend
-compiler tooling and stdio MCP/JSON-CBOR codecs remain host tools; they do not
+Do not introduce alternate HTTP/WS listeners, proxies or test servers. Frontend compiler tooling and offline JSON-CBOR codecs remain host tools; they do not
 serve product HTTP. Serve the built web editor through NaWServer itself.
 Any obsolete alternate-server source, test fixtures and documentation must be
 removed rather than retained as a fallback or historical implementation guide.
@@ -110,9 +109,7 @@ OpenAI-compatible/OpenRouter networking, conversation, orchestration and MCP.
 Only presentation/platform storage adapters belong here. Do not change SPLA or
 copy its engine sources. Until NuGet packages exist, use overridable ProjectReference
 paths and route all build artifacts into this repository's ignored local directory.
-The app has no HTTP listener. The first prototype's HTTP MCP gateway uses native
-NaWServer and the existing MCP SDK handlers, not a second API/codec implementation.
-Direct MCU MCP and voice input are not part of the current acceptance claim.
+Direct MCU MCP and voice input are outside this acceptance. The opt-in Windows Designer listener is documented below.
 Read docs/readme_maui_designer_ru.md before changing the integration.
 
 ## No independent parallel subsystems — owner decision 2026-11-09
@@ -132,6 +129,101 @@ Do not use "temporary", "demo" or "test" as an exception. Routine changes within
 already approved components need no additional approval.
 
 SPLA owns Designer model/conversation/orchestration/MCP; NaWServer owns product
-network listeners. Node.js remains approved for existing build/codecs/stdio MCP
+network listeners. Node.js remains approved for existing offline build/codecs
 tooling; that is not permission to build another product/agent stack in it.
 The LVGL demo is a renderer/data/MCP target, not a second LLM application.
+
+## MCP lives inside targets only — owner mandate 2026-11-10
+
+This overrides every older permission or description of host-side MCP adapters.
+ALL MCP servers MUST be implemented INSIDE the actual firmware or demo executable,
+using our NaWServer stack and existing services directly. No external MCP process,
+bridge, gateway, sidecar, stdio adapter, proxy or separate listener executable.
+JavaScript/Node.js plus MCP SDK servers and HTTP-to-stdio bridges are prohibited,
+including prototypes, tests and temporary deployment helpers. Do not recreate them.
+Designer remains an SPLA MCP HTTP CLIENT connecting directly to the target.
+Node.js may compile frontend assets and run offline codecs/build tools; it MUST NOT
+implement or host the product MCP service. Missing native MCP is missing functionality,
+not permission to introduce a bridge. No fallback bridge instructions or launch configs.
+
+## Designer connection modes — owner decision 2026-11-10 (latest)
+
+This supersedes the blanket restriction above only for an explicitly configured
+external MCP proxy endpoint. Implement three selectable modes behind one Designer
+instrument interface: Direct API (DEFAULT), built-in target MCP, external MCP proxy.
+Both MCP modes reuse the SAME SPLA HTTP MCP client; no process is launched.
+Direct API executes the EXISTING shared JavaScript codecs inside BlazorWebView on
+Windows/Android, without Node.js at runtime. A bounded application HttpClient
+adapter provides network IO. Selecting a connection starts no proxy process or listener; the explicit Windows-only opt-in below is separate.
+SPLA still owns model APIs, chat history, queue and orchestration for every mode.
+
+Keep UI JSON parsing/compilation off the MCU in Direct API mode: the model's JSON
+is validated/compiled locally, and the existing device API receives CBOR. Do NOT
+rewrite codecs in C# or add a second renderer/runtime. Do NOT introduce native UI
+JSON compiler code merely to support this default mode.
+
+Native MCP is an OPTIONAL proof of concept, compiled inside the target on NaWServer.
+It is not the recommended MCU default: JSON-RPC/parser/output-buffer cost must stay
+optional, and disabling the feature must exclude these MCP-specific costs. Never
+advertise unsupported authoring tools as implemented. External-proxy mode selects
+a compatible endpoint explicitly; it does not authorize restoring the removed
+Node.js/MCP SDK server, background bridge or automatic fallback. Maintain separate
+mode/address settings, explicit errors and no silent rerouting. Validate on Windows
+first; do not flash S3 for this iteration.
+
+## Named connection catalog — owner refinement 2026-11-10
+
+Designer stores a bounded catalog of named target profiles, not one global target.
+Each stable-ID profile owns its mode, direct origin, native MCP URL, proxy MCP URL
+and MCP server ID. Preserve/migrate the previous single connection into the first
+profile. Catalog selection/editing is passive: no target save/show/preview, no
+automatic reconnect. A changed active profile requires an explicit reconnect;
+never send a prompt to the previous connection while showing a different target.
+Model/provider configuration remains global and the key remains in SecureStorage.
+Use a visible compact table/list, not a dropdown-only catalog. Profile deletion
+never deletes a device project, and cancelling Settings discards draft edits.
+
+## Model and target settings are separate — owner refinement 2026-11-10
+
+Settings has two explicit tabs: Model and Devices. Model/provider/API key settings
+are global and are saved independently from the named target catalog. Saving Model
+must not rewrite connection profiles, change the selected target, clear its frame
+or clear a pending reconnect. Saving Devices must not rewrite model credentials,
+change the model or refresh provider metadata. Keep separate drafts and scoped
+persistence/actions; switching tabs is passive and preserves unsaved edits.
+
+## S3 layout diagnostics — owner request 2026-11-10 (latest hardware scope)
+
+The owner now requests the existing outline/fill/depth/G-F/width/opacity diagnostic
+controls on the identified 7-inch S3. This explicitly supersedes the earlier
+no-S3 restriction only for that feature and its bounded real-frame transport.
+Reuse shared LayoutDebugOptions/runtime styles and DataRegistry CBOR actions;
+no MCP/JSON authoring parser is to be enabled on the MCU. Preserve the saved
+project, NVS, filesystem and NTP; verify the actual device and active OTA slot
+before firmware writes. Camera-free software checks are not physical LCD acceptance.
+## Physical LCD verification — lesson from owner acceptance
+
+A framebuffer screenshot and running VSYNC counter do not establish that the
+physical LCD displays that image. Record physical acceptance separately. During
+this investigation even an unchanged prebuilt vendor-derived demo showed cycling
+W/R/G/B until the owner completely removed power and waited. Do not diagnose that
+symptom as an MCP/render failure from screenshots alone, or keep changing RGB
+clock/power parameters blindly. Test a known prebuilt image and a true power-off;
+preserve the project and distinguish reset, bootloader mode, and loss of panel power.
+
+- Owner refinement 2026-11-10: select the active target in the Designer main form;
+  Settings/Devices edits only the connection catalog. Saving another catalog row
+  must preserve the active target, unless that target was removed. Diagnostic
+  controls wait for command ACK only; frame downloads run latest-only in the
+  background. Preview pointer input is opt-in, capability-gated and uses normal
+  LVGL input/events with original display coordinates, including release protection.
+
+## External agent access through Designer — owner clarification 2026-11-11
+
+Windows Designer may explicitly expose its connected Direct API tool catalog as
+a loopback MCP endpoint for comparison with external agents. This is the sole
+exception to the earlier client-only Designer rule. NaWServer runs in-process,
+and calls use the same existing Designer session, WebView codecs and target
+permissions. Keep the listener opt-in. Do not add a separate process or enable
+MCP/JSON on firmware for this purpose. External agents get the same English
+authoring instructions from `get_authoring_instructions`.

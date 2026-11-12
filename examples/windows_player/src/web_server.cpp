@@ -3,6 +3,10 @@
 #include "web_server.hpp"
 #include "application.hpp"
 #include "project_api.hpp"
+#if LVGL_CBOR_NATIVE_MCP
+#include "native_mcp.hpp"
+extern "C" unsigned lodepng_encode24(unsigned char **, size_t *, const unsigned char *, unsigned, unsigned);
+#endif
 #include "lvgl_cbor/contract.hpp"
 #include <NaWServer/backends/windows_tcp.h>
 #include <NaWServer/backends/tcp.h>
@@ -207,7 +211,11 @@ namespace
 		value.managed.websocket_tx_blocks_per_client = 2;
 		value.http_memory.enabled = true; value.http_memory.initial_requests = 2;
 		value.http_memory.maximum_requests = 8; value.managed.header_bytes = 8192;
-		value.managed.response_body_bytes = 8192; // RX, callback and two TX blocks plus bounded handshake metadata share each arena.
+		#if LVGL_CBOR_NATIVE_MCP
+		value.managed.response_body_bytes = NAWSERVER_MCP_OUTPUT_BYTES;
+#else
+		value.managed.response_body_bytes = 8192;
+#endif // RX, callback and two TX blocks plus bounded handshake metadata share each arena.
 		value.managed.stream_bytes_per_client = 196608;
 		value.managed.ingress_slots = 4; value.keep_alive.enabled = true; value.keep_alive.maximum_idle = 4;
 		value.keep_alive.idle_timeout_ms = 1500; value.buffer_memory.max_bytes = 2 * 1024 * 1024; return value;
@@ -215,7 +223,8 @@ namespace
 
 	HttpLimits limits()
 	{
-		HttpLimits value; value.max_body_size = 4096; value.max_connections = 16; value.max_header_bytes = 8192;
+		HttpLimits value; value.max_body_size = LVGL_CBOR_NATIVE_MCP ? 65535 : 4096; value.max_connections = 16;
+		value.max_header_bytes = 8192;
 		value.exchange_timeout_ms = 15000; return value;
 	}
 
@@ -251,7 +260,12 @@ struct WindowsWebServer::Impl : NaWServer::HandlerBase {
 					 if(url->empty() || !host || *host != url->substr(7) || (from && *from != *url))
 						 return NaWServer::responseResult(context.response.text(403, "api_host_or_origin"));
 
-					 if(context.request.method() == NaWServer::HttpMethod::Post &&
+					 if(!(LVGL_CBOR_NATIVE_MCP && context.request.path() == "/mcp") &&
+					     context.request.contentLength() > 4096)
+						 return NaWServer::responseResult(context.response.text(413, "request_body_limit"));
+
+					 if(!(LVGL_CBOR_NATIVE_MCP && context.request.path() == "/mcp") &&
+					     context.request.method() == NaWServer::HttpMethod::Post &&
 					     (context.request.path() == "/api/data" || context.request.contentLength()))
 					 {
 						 const auto type = context.request.header("Content-Type");
@@ -267,6 +281,14 @@ struct WindowsWebServer::Impl : NaWServer::HandlerBase {
 	NaWServer::HttpServer server;
 	struct Transfer {std::shared_ptr<std::vector<uint8_t> > bytes; size_t size{}, offset{};
 		             uint64_t epoch{}, deadline{}; std::string intent, revision, screen, token;};
+#if LVGL_CBOR_NATIVE_MCP
+	lvgl_cbor::NativeMcp native_mcp{[this](const std::string &name, const DataValue &args){
+										UiLock lock; return mcp_tool(name, args);
+									}, [](void *context, std::string_view from){
+										const auto &owner = *static_cast<Impl *>(context);
+										return from == *std::atomic_load(&owner.origin);
+									}, this};
+#endif
 	std::unique_ptr<Transfer> transfer;
 	struct Queued {uint64_t id{}, epoch{}; std::vector<uint8_t> bytes;};
 	std::deque<Queued> commands; std::deque<DataValue> receipts; uint64_t next_command{}, queue_rejected{};
@@ -359,6 +381,185 @@ struct WindowsWebServer::Impl : NaWServer::HandlerBase {
 		(void)response.sendOwnedSource(200, mime(path), std::move(owned));
 	}
 
+#if LVGL_CBOR_NATIVE_MCP
+	std::string png_frame(size_t edge)
+	{
+		const auto bmp = app.view_frame();
+		const auto width = uint32_t(lv_display_get_horizontal_resolution(nullptr)),
+		    height = uint32_t(lv_display_get_vertical_resolution(nullptr));
+		if(!width || !height)throw std::runtime_error("frame_dimensions");
+
+		for(edge = std::clamp<size_t>(edge, 64, 512); edge >= 64; edge /= 2)
+		{
+			const auto scale = std::min(1., double(edge) / std::max(width, height));
+			const auto w = std::max(1u, uint32_t(width * scale)), h = std::max(1u, uint32_t(height * scale));
+			std::vector<unsigned char> rgb(size_t(w) * h * 3);
+			for(uint32_t y = 0; y < h; ++y)
+				for(uint32_t x = 0; x < w; ++x)
+				{
+					auto from = 54 + size_t(std::min(height - 1,
+					    uint32_t((y + .5) / scale))) * width * 4 + size_t(std::min(width - 1,
+					    uint32_t((x + .5) / scale))) * 4;
+					auto to = (size_t(y) * w + x) * 3; rgb[to] = bmp[from + 2]; rgb[to + 1] = bmp[from + 1];
+					rgb[to + 2] = bmp[from];
+				}
+			unsigned char *png = nullptr; size_t size = 0;
+			auto code = lodepng_encode24(&png, &size, rgb.data(), w, h);
+			if(code){lv_free(png); throw std::runtime_error("frame_png_encode");}
+
+			if(size > 44000){lv_free(png); continue;}
+
+			static const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+			std::string encoded; encoded.reserve((size + 2) / 3 * 4);
+			for(size_t i = 0; i < size; i += 3)
+			{
+				const uint32_t a = png[i], b = i + 1 < size ? png[i + 1] : 0, c = i + 2 < size ? png[i + 2] : 0;
+				const uint32_t v = (uint32_t(a) << 16) | (uint32_t(b) << 8) | uint32_t(c);
+				encoded.push_back(alphabet[(v >> 18) & 63]); encoded.push_back(alphabet[(v >> 12) & 63]);
+				encoded.push_back(i + 1 < size ? alphabet[(v >> 6) & 63] : '=');
+				encoded.push_back(i + 2 < size ? alphabet[v & 63] : '=');
+			}
+			lv_free(png); return encoded;
+		}
+		throw std::runtime_error("frame_mcp_output_limit");
+	}
+
+	DataValue mcp_tool(const std::string &name, const DataValue &arguments)
+	{
+		auto *project = app.project_service(); if(!project)throw std::runtime_error("project_not_ready");
+
+		const auto &args = object(arguments);
+        if(name == "send_view_input")
+        {
+            keys(args,{"x","y","pressed"});
+            const auto x=std::get<int64_t>(args.at("x").value),y=std::get<int64_t>(args.at("y").value);
+            if(x<0 || y<0 || x>4095 || y>4095)throw Failure(400,"pointer_coordinates");
+            app.view_input(int32_t(x),int32_t(y),std::get<bool>(args.at("pressed").value));
+            return Object{{"ok",true}};
+        }
+		if(name == "get_display_frame")
+		{
+			size_t edge = 512; auto it = args.find("maxEdge"); if(it != args.end())
+				edge = size_t(std::get<int64_t>(it->second.value));
+
+			return png_frame(edge);
+		}
+
+		if(name == "get_project_status")
+		{
+			DataValue result; std::string error;
+			if(!native_json_value(windows_project_status_json(project->status()), result, error))
+				throw std::runtime_error(error);
+
+			return result;
+		}
+
+		if(name == "get_device")
+		{
+			const auto section = text(args, "section", 16), selected = text(args, "name", 63);
+			DataValue parsed; std::string error; if(!native_json_value(app.capabilities(), parsed, error))
+				throw std::runtime_error(error);
+
+			const auto &caps = object(parsed);
+			if(section.empty() || section == "summary")
+				return Object{{"section", "summary"}, {"platform", "windows"}, {"server", "NaWServer"},
+					{"lvgl", "9.6.0"}, {"native_mcp", true}, {"native_view", true}, {"native_view_input", app.view_input_available()}, {"mcp", "/mcp"},
+					{"sections", DataValue::Array{"widgets", "styles", "resources", "limits"}},
+					{"display",
+					 Object{{"width", lv_display_get_horizontal_resolution(nullptr)},
+						 {"height", lv_display_get_vertical_resolution(nullptr)}}}};
+
+			if(section == "limits")return caps.at("limits");
+
+			DataValue::Array all;
+			if(section == "widgets")
+			{
+				all = std::get<DataValue::Array>(object(caps.at("screen")).at("widgets").value);
+				const auto extra = caps.find("extensions"); if(extra != caps.end())
+					for(const auto &widget:std::get<DataValue::Array>(extra->second.value))
+						all.push_back(widget);
+			}
+			else if(section == "styles") all = std::get<DataValue::Array>(object(caps.at("style")).at("methods").value);
+			else if(section == "resources")all = std::get<DataValue::Array>(caps.at("resources").value);
+			else throw std::runtime_error("device_section");
+
+			DataValue::Array filtered; for(const auto &item:all)
+			{
+				if(selected.empty() || text(object(item), "name", 79) == selected)
+					filtered.push_back(item);
+			}
+			size_t offset = 0, limit = 16; if(args.count("offset"))
+				offset = size_t(std::get<int64_t>(args.at("offset").value));
+
+			if(args.count("limit")) limit = size_t(std::get<int64_t>(args.at("limit").value));
+
+			if(limit < 1 || limit > 64 || offset > filtered.size())throw std::runtime_error("device_page_limit");
+
+			const auto end = std::min(filtered.size(), offset + limit);
+			DataValue::Array page(filtered.begin() + offset, filtered.begin() + end);
+			return Object{{"section", section}, {"items", page}, {"total", filtered.size()}, {"nextOffset", end},
+				{"hasMore", end < filtered.size()}};
+		}
+
+		if(name == "get_ui_reference")
+		{
+			const auto kind = text(args, "kind", 16); const auto topic = text(args, "topic", 63);
+			const auto guide = web_root.parent_path().parent_path() / "tools/designer/prompts" / (kind ==
+			    "style" ? "assistant-styles-reference.md" : "assistant-layout-reference.md");
+			std::ifstream stream(guide, std::ios::binary);
+			std::string markdown((std::istreambuf_iterator<char>(stream)), {});
+			if(markdown.empty() || markdown.size() > 48000)
+				throw std::runtime_error("reference_missing_or_output_limit");
+
+			return Object{{"kind", kind}, {"topic", topic.empty() ? "index" : topic}, {"version", "native-1"},
+				{"topics", DataValue::Array{"index", "layout", "styles", "bindings", "events"}},
+				{"markdown", markdown}};
+		}
+
+		if(name == "get_data" || name == "get_data_catalog")
+		{
+			auto query_args = args; query_args.erase("snapshot");
+			if(name == "get_data" && args.count("snapshot") && std::get<bool>(args.at("snapshot").value))
+			{
+				DataValue result; std::string error;
+				if(!native_json_value(app.data.registry.snapshot_json(), result, error))
+					throw std::runtime_error(error);
+
+				return result;
+			}
+
+			if(!query_args.count("kind"))query_args["kind"] = name == "get_data" ? "values" : "groups";
+
+			DataQuery q; std::string output, error;
+			if(!parse_data_query(query_args, q, error) || !app.data.registry.query_json(q, output, error))
+				throw std::runtime_error(error);
+
+			DataValue result; if(!native_json_value(output, result, error))
+				throw std::runtime_error(error);
+
+			return result;
+		}
+
+		if(name == "show_project_screen" || name == "refresh_project_display")
+		{
+			Object command{{"action", name == "show_project_screen" ? "show" : "refresh"}};
+			if(name == "show_project_screen")command["screen"] = text(args, "screen", 63, true);
+
+			return windows_project_request(*project, command);
+		}
+
+		if(name == "invoke_action" || name == "write_source" || name == "send_event")
+		{
+			Object command = args; command.erase("wait");
+			command["kind"] = name == "invoke_action" ? "action" : name == "write_source" ? "write" : "event";
+			windows_data_command(project, app.data.registry, command); app.data.registry.flush();
+			return Object{{"state", "completed"}, {"result", Object{{"ok", true}}}};
+		}
+
+		throw std::runtime_error("unknown_native_tool");
+	}
+
+#endif
 	HttpReply api(NaWServer::Request &request)
 	{
 		auto *project = app.project_service(); if(!project)throw Failure(503, "project_not_ready");
@@ -371,8 +572,8 @@ struct WindowsWebServer::Impl : NaWServer::HandlerBase {
 			out.text = data_value_json(Object{{"source", "device"}, {"platform", "windows"}, {"server", "NaWServer"},
 						{"name", "NaCBORUIforLVGL Windows"}, {"boot_id", boot}, {"lvgl", "9.6.0"},
 						{"contract_sha256", contract_sha256}, {"screen_contract_sha256", screen_contract_sha256},
-						{"profile", app.graphics() ? "graphics" : "system"}, {"native_view", true},
-						{"component_preview", false}}); return out;
+						{"profile", app.graphics() ? "graphics" : "system"}, {"native_view", true}, {"native_view_input", app.view_input_available()},
+						{"native_mcp", bool(LVGL_CBOR_NATIVE_MCP)}, {"component_preview", false}}); return out;
 		}
 
 		if(path == "/api/view/frame" && request.method() == NaWServer::HttpMethod::Get)
@@ -539,12 +740,18 @@ struct WindowsWebServer::Impl : NaWServer::HandlerBase {
 
 	void handleRequest(NaWServer::Request *request, NaWServer::Response &response)override
 	{
-		try{if(request->path().substr(0, 5) != "/api/")
+		try{
+#if LVGL_CBOR_NATIVE_MCP
+			if(request->path() == "/mcp"){native_mcp.handleRequest(request, response); return;}
+
+#endif
+			if(request->path().substr(0, 5) != "/api/")
 			{
 				static_file(*request, response); return;
 			}
 
-			HttpReply reply; {UiLock lock; reply = api(*request);} send(response, std::move(reply));}
+			HttpReply reply; {UiLock lock; reply = api(*request);} send(response, std::move(reply));
+		}
 		catch(const Failure &error){send(response,
 			                            HttpReply{error.status, "application/json",
 			                                      data_value_json(Object{{"error", error.what()}}), {}, {}});}

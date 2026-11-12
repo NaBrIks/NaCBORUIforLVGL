@@ -1,18 +1,20 @@
 # NaCBORUI Designer (Windows / Android)
 
+Актуальные три режима подключения: [Прямой API / MCP устройства / MCP-прокси](../../docs/readme_designer_connections_ru.md). Основной — прямой API с JS-кодеками внутри приложения, без Node.js.
 The standard configuration application shipped with NaCBORUIforLVGL,
 not a demo-specific editor. Sources live in `tools/designer`.
 
 A Blazor Hybrid presentation over the existing SPLA libraries. The app runs the
-conversation, model requests and MCP tools locally through SPLA. It does not start
-an HTTP server. The browser editor remains available from the Windows LVGL demo.
+conversation, model requests and MCP tools locally through SPLA. The inbound Windows MCP endpoint is opt-in. The browser editor remains available from the Windows LVGL demo.
 See [Russian guide](../../docs/readme_maui_designer_ru.md).
 
 ## Source dependencies
 
 Install the .NET 10 MAUI Windows/Android workloads. The application pins SDK 10.0.403
-and MAUI 10.0.110. Check out SPLA beside the `esp32` directory, or pass
-`-p:SplaRoot=<absolute SPLA checkout>`. SPLA is referenced, never copied or modified.
+and MAUI 10.0.110. Install Node.js as specified in the root README and run
+`npm ci` at the repository root before building. Check out SPLA beside the
+`esp32` directory, or pass `-SplaRoot <absolute SPLA checkout>` to `build.ps1`.
+For direct MSBuild invocation use `-p:SplaRoot=<absolute SPLA checkout>`.
 The four ProjectReference entries can become package references when the owner's
 SPLA NuGet packages are available.
 
@@ -27,50 +29,49 @@ All dependency build outputs go to the repository's ignored `local/designer`.
 The Android debug APK embeds managed assemblies; it does not require fast deployment.
 This is a development-signed APK, not a store release.
 
-## Development target
+## Target connection
 
-The current LVGL player exposes its API, and its existing MCP adapter is stdio.
-For the phone prototype, a **NaWServer** native HTTP gateway carries the existing
-MCP SDK/tools to that API. It is a separate process/listener to avoid a same-listener
-synchronous callback deadlock. There is no second codec or project implementation.
+Direct API is the default: existing JavaScript codecs execute locally inside
+BlazorWebView, and the application's bounded HttpClient talks to the target.
+Direct API requires only the application and its selected target.
 
-From the repository root, with the graphics player already listening on port 5301:
+Settings also offer Device MCP and MCP proxy. Both reuse the same SPLA HTTP MCP
+client and store independent endpoint URLs. A proxy is explicitly selected, never
+automatically started. Native Windows MCP is an optional proof of concept
+(`LVGL_CBOR_NATIVE_MCP=ON`, default OFF), with metadata/data/actions/frame tools.
+UI JSON authoring remains in the local Direct API tools; it is not implemented
+by the native MCP PoC. MCU deployment is not part of this iteration.
 
-```powershell
-cmake -S integrations/mcp/native_gateway -B local/mcp-gateway
-cmake --build local/mcp-gateway --config Release
-node integrations/mcp/run-http.mjs --device=http://127.0.0.1:5301 --port=5302
-```
+Build the local module with `npm run designer:tools`; the MAUI build also generates
+it from shared sources. Node/Vite are build-time dependencies only.
 
-Gateway default: `http://127.0.0.1:5302/mcp`. It permits project preview/save/data
-operations through the existing MCP catalog. Keep this development endpoint private.
-It rejects browser Origin requests and is loopback-only by default. Port 443 is rejected.
-It is stateless Streamable HTTP, JSON responses; the SPLA client needs no SSE GET.
+Model endpoint, provider, model and target URL are independent app settings.
+The API key belongs to platform SecureStorage; ordinary settings use Preferences.
+Chat is held in memory by SPLA. Restarting or clearing chat does not replace the
+target project. Connect/refresh are passive.
 
-Windows app MCP URL: `http://127.0.0.1:5302/mcp`.
-Android emulator MCP URL: `http://10.0.2.2:5302/mcp`.
-For an Android phone connected by USB, without a LAN listener/firewall change:
-
-```powershell
-adb reverse tcp:5302 tcp:5302
-adb install -r '<signed android-arm64 APK>'
-```
-
-Then use `http://127.0.0.1:5302/mcp` in the phone app. The reverse mapping lasts
-for that adb connection; renew it after reconnecting. A real device with a native
-compatible HTTP MCP endpoint can instead be configured directly. This prototype
-does **not** add MCP HTTP to the MCU firmware or prove direct phone-to-MCU operation.
-
-Model endpoint, provider, model and MCP URL are independent app settings. Enter an API
-key once in Settings; the key goes to platform SecureStorage, ordinary settings to
-Preferences. No developer key is bundled. Connect/refresh do not save or replace the
-LVGL project. Chat is held in memory by SPLA; restarting the app clears conversation,
-not the target project. New Chat also leaves the target project untouched.
-
-For the prepared ARM64 APK the USB install/launch helper is:
+For a prepared ARM64 APK, the install helper is
 `./install-phone.ps1 -Serial <explicit adb phone serial>` (optionally `-Adb <adb executable>`).
-The physical Android default is loopback for that USB mapping. The emulator default
-remains 10.0.2.2. APKs and signing keys are deliberately ignored by Git.
-The `:free` checkbox filters model IDs with that suffix; SPLA's current string-only
-model catalog does not expose pricing/vision metadata. It is not a price guarantee
-for arbitrary compatible providers.
+APKs and signing keys remain ignored. The `:free` checkbox filters model IDs by
+suffix; it is not a pricing guarantee for arbitrary compatible providers.
+
+## Optional MCP for external agents on Windows
+
+`./build.ps1 -Target Windows -WithMcp` builds the NaWServer DLL beside Designer.
+It requires the adjacent NaWServer checkout with the MCP content callback.
+Set `NACBORUI_DESIGNER_MCP_PORT` (for example, `5303`) before starting
+`App.exe`, then connect a Direct API device. The app serves Streamable HTTP at
+`http://127.0.0.1:5303/mcp` while that target is connected.
+
+External tools call the same active Designer session and WebView codecs as chat.
+They receive the connected device's tool schemas, text errors, and display frames.
+Start with `get_authoring_instructions` to load the same complete English guide
+used by chat. Tool calls are serialized with chat and rejected after a target
+change until reconnect. The transport has a 64 KiB response budget. Use a
+document or subtree read for large projects, and a smaller `maxEdge` for frames.
+
+Antigravity uses a Streamable HTTP entry in its `mcp_config.json`:
+
+```json
+{"mcpServers":{"nacborui_designer":{"serverUrl":"http://127.0.0.1:5303/mcp"}}}
+```

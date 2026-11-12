@@ -4,6 +4,8 @@ param([string]$CoreDir=$env:PLATFORMIO_CORE_DIR,[switch]$WithoutEditor,[switch]$
 $ErrorActionPreference='Stop'
 if(!$CoreDir){$CoreDir=Join-Path $env:USERPROFILE '.platformio'}
 $projectRoot=Split-Path $PSScriptRoot -Parent
+& node (Join-Path $projectRoot 'tools/appearance_image.mjs')
+if($LASTEXITCODE){throw 'Appearance generation failed'}
 & node (Join-Path $projectRoot 'tools/native_widget_catalog.mjs')
 if($LASTEXITCODE){throw 'Native widget catalog generation failed'}
 $projectArgs=@(Join-Path $projectRoot 'tools/project_image.mjs')

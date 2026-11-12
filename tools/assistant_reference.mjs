@@ -5,7 +5,7 @@ import {readFile} from 'node:fs/promises';
 import {authoringCatalog,widgetEnumerations} from '../packages/document-io/ui-reference.js';
 import {contract} from '../packages/style-codec/contract.js';
 import {normalizeProperties} from '../packages/style-codec/index.js';
-import {readUiReference} from '../integrations/mcp/ui-reference.js';
+import {readUiReference} from './designer/prompts/ui-reference.mjs';
 import {readAssistantGuide} from './designer/prompts/guide.mjs';
 const catalog=authoringCatalog();
 const assert=(condition,message)=>{if(!condition)throw Error(message);};

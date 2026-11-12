@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.24)
+project(nacborui_designer_mcp LANGUAGES CXX)
+get_filename_component(DEFAULT_NAWSERVER "${CMAKE_CURRENT_LIST_DIR}/../../../../NaWServer" ABSOLUTE)
+set(NAWSERVER_SOURCE_DIR "${DEFAULT_NAWSERVER}" CACHE PATH "NaWServer checkout")
+include("${NAWSERVER_SOURCE_DIR}/cmake/NaWServer.cmake")
+include("${NAWSERVER_SOURCE_DIR}/cmake/NaWServerJson.cmake")
+nawserver_add_library(designer_http PLATFORM windows MANAGED NO_SSE NO_WEBSOCKET NO_AUTH NO_CLIENT_QUOTAS NO_API_KEYS)
+nawserver_attach_json(designer_http bounded)
+target_sources(designer_http PRIVATE "${NAWSERVER_SOURCE_DIR}/src/mcp/mcp.cpp")
+target_compile_definitions(designer_http PUBLIC NAWSERVER_MCP=1 NAWSERVER_JSON_INPUT_BYTES=65535
+  NAWSERVER_JSON_STRING_BYTES=65535 NAWSERVER_JSON_CONTAINER_ITEMS=8192 NAWSERVER_JSON_DEPTH=32
+  NAWSERVER_JSON_VALUE_CAPACITY=16384 NAWSERVER_JSON_WORKSPACE_BYTES=131072 NAWSERVER_MCP_OUTPUT_BYTES=65535)
+add_library(nacborui_designer_mcp SHARED designer_mcp.cpp)
+target_compile_features(nacborui_designer_mcp PRIVATE cxx_std_17)
+target_link_libraries(nacborui_designer_mcp PRIVATE designer_http)

@@ -45,6 +45,7 @@ namespace lvgl_cbor
 		std::string compiler_json;
 		WidgetEventReader read_event{};
 		WidgetActivation activate{};
+		bool keep_factory_styles{}; // Preserve widget-authored styles when the screen disables the LVGL theme.
 	};
 	class WidgetRegistry
 	{

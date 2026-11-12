@@ -221,6 +221,7 @@ namespace lvgl_cbor
 		ProjectService &operator=(const ProjectService &) = delete;
 		bool begin(std::string &error);
 		ProjectStatus status() const;
+		uint32_t display_generation() const; // Changes only when the displayed composition changes.
 		std::string revision() const;
 		bool persistent() const;
 		ProjectLimits limits() const;
@@ -240,6 +241,8 @@ namespace lvgl_cbor
 		bool refresh(ScreenReply &);
 		bool preview(ProjectBytes complete_project, const std::string &screen, ScreenReply &);
 		lv_obj_t *root() const;
+		// Resolve a style of the displayed project in the serialized LVGL context.
+		StyleHandle display_style(const std::string &name) const;
 		// Transient UI-context diagnostic, retained across load/preview/refresh.
 		void set_layout_debug(bool enabled);
 		bool layout_debug() const;

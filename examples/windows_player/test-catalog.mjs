@@ -3,11 +3,10 @@
 import {serializeDocument} from '../../packages/document-io/index.js';
 import {spawn} from 'node:child_process';
 import {createInterface} from 'node:readline';
-import {createRequire} from 'node:module';
 import {mkdir,mkdtemp,readFile,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve,dirname} from 'node:path';
-import {fileURLToPath,pathToFileURL} from 'node:url';
+import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {createProject} from '../../packages/project-codec/index.js';
 import {createBlankScreen} from '../../frontend/src/screen-model.js';
@@ -16,9 +15,7 @@ import {screenContract} from '../../packages/screen-codec/index.js';
 const here=dirname(fileURLToPath(import.meta.url)),root=resolve(here,'../..');
 const expectHistoryOff=process.argv.includes('--expect-history-off');
 const exe=resolve(process.argv.slice(2).find(arg=>!arg.startsWith('--'))??join(root,'local/windows-player/Release/nacborui_player.exe'));
-const require=createRequire(new URL('../../integrations/mcp/package.json',import.meta.url));
-const {Client}=await import(pathToFileURL(require.resolve('@modelcontextprotocol/client')));
-const {StdioClientTransport}=await import(pathToFileURL(require.resolve('@modelcontextprotocol/client/stdio')));
+import {connectNativeApi} from './native-api.mjs';
 const folder=await mkdtemp(join(tmpdir(),'nacborui-catalog-'));
 const palettes=JSON.parse(await readFile(join(here,'registry-schemes.json'),'utf8'));
 palettes.schemes.by_agent={...palettes.schemes.classic,name:'Авторская из файла',roleOverrides:{button:{radius:11,border_width:2},panel:{radius:11,border_width:1}}};
@@ -52,8 +49,8 @@ function region(bytes,[x1,y1,x2,y2]){
  return Buffer.concat(parts);
 }
 const output=join(root,'local/windows-catalog',expectHistoryOff?'history-off':'history-on');
-let mcp;const themeMeasurements=[];
-const deadline=setTimeout(()=>{const error=Error('Catalog end-to-end deadline (30 seconds)');loadedReject(error);for(const p of pending.values())p.no(error);for(const p of loads.values())p.no(error);child.stdin.end();void mcp?.close().catch(()=>{});},30000);
+let api;const themeMeasurements=[];
+const deadline=setTimeout(()=>{const error=Error('Catalog end-to-end deadline (30 seconds)');loadedReject(error);for(const p of pending.values())p.no(error);for(const p of loads.values())p.no(error);child.stdin.end();},30000);
 try{
  const [,apiUrl]=await Promise.all([loaded,apiReady]);let state=await command({op:'inspect'});healthy(state);
  assert.equal(state.historyAvailable,!expectHistoryOff);assert.equal(state.historyAllocatedPoints,expectHistoryOff?0:32);
@@ -61,37 +58,26 @@ try{
   state=await until(r=>entry(r,'demo.level_history')?.state==='known','History did not sample');
   const initialHistory=entry(state,'demo.level_history').value;assert.equal(initialHistory.history.length,32);assert.equal(initialHistory.periodMs,200);assert.ok(initialHistory.history.some(value=>value===null),'unused startup points remain unknown');
  }
+ const api=await connectNativeApi(apiUrl);
  const nativeCaps=await command({op:'capabilities'});assert.equal(nativeCaps.ok,true,nativeCaps.error);const capabilities=JSON.parse(nativeCaps.capabilitiesJson);
- mcp=new Client({name:'native-windows-catalog-test',version:'1.0.0'});
- await mcp.connect(new StdioClientTransport({command:process.execPath,args:[join(root,'integrations/mcp/index.js')],cwd:root,env:{PATH:process.env.PATH,LVGL_CBOR_DEVICE:apiUrl,LVGL_CBOR_ALLOW_PREVIEW:'1'},stderr:'pipe'}));
- const call=(name,args={})=>mcp.callTool({name,arguments:args},undefined,{timeout:8000});
- const result=async(name,args={})=>{const r=await call(name,args);assert.equal(r.isError,undefined,JSON.stringify(r.content));return JSON.parse(r.content[0].text);};
- const tools=(await mcp.listTools()).tools.map(t=>t.name);assert.ok(!tools.some(name=>['invoke_action','write_source','send_event','save_project'].includes(name)));assert.ok(tools.includes('preview_project'));
- const summary=await result('get_device');assert.equal(summary.section,'summary');assert.equal(summary.capabilities,undefined);assert.ok(summary.counts.sources>0);
- const widgetPage=await result('get_device',{section:'widgets',limit:2,maxBytes:512});assert.equal(widgetPage.items.length,2);assert.equal(widgetPage.hasMore,true);
- for(const name of [...capabilities.screen.widgets.filter(item=>capabilities.availableWidgets.includes(item.id)).map(item=>item.name),...(capabilities.extensions??[]).map(item=>item.name)]){
-  const selected=await result('get_device',{section:'widgets',name,maxBytes:16384});assert.equal(selected.items.length,1);assert.ok(Array.isArray(selected.items[0].methods));
-  for(const method of selected.items[0].methods){assert.equal(method.opcode,undefined);assert.equal(typeof method.name,'string');assert.ok(method.example);assert.ok(Array.isArray(method.parameters));}
- }
- const styles=await result('get_device',{section:'styles',limit:2,maxBytes:512});assert.equal(styles.items.length,2);assert.equal(styles.hasMore,true);
- const lineColor=await result('get_device',{section:'styles',name:'line_color',maxBytes:1024});assert.equal(lineColor.items[0].opcode,undefined);assert.equal(lineColor.items[0].example.style.line_color,'#336699');assert.ok(Array.isArray(lineColor.items[0].parameters));
- const groups=await result('get_data_catalog');assert.ok(groups.items.some(g=>g.name==='demo'));
- const first=await result('get_data_catalog',{kind:'sources',group:'demo',limit:2,maxBytes:512});assert.ok(first.items.length>0&&first.items.length<=2);assert.equal(first.hasMore,true);
+ assert.ok(capabilities.availableWidgets.length>0);
+ const groups=await api.catalog();assert.ok(groups.items.some(g=>g.name==='demo'));
+ const first=await api.catalog({kind:'sources',group:'demo',limit:2,maxBytes:512});assert.ok(first.items.length>0&&first.items.length<=2);assert.equal(first.hasMore,true);
  const names=first.items.map(item=>item.name);let page=first;
- while(page.hasMore){page=await result('get_data_catalog',{kind:'sources',group:'demo',offset:page.nextOffset,catalogRevision:first.catalogRevision,limit:2,maxBytes:512});names.push(...page.items.map(item=>item.name));assert.ok(names.length<=32);}
+ while(page.hasMore){page=await api.catalog({kind:'sources',group:'demo',offset:page.nextOffset,catalogRevision:first.catalogRevision,limit:2,maxBytes:512});names.push(...page.items.map(item=>item.name));assert.ok(names.length<=32);}
  assert.equal(names.length,first.total);assert.equal(new Set(names).size,names.length);assert.ok(names.includes('demo.level'));
- const fields=await result('get_data_catalog',{kind:'fields',name:'demo.speed'});assert.equal(fields.items.find(item=>item.field==='kmh').unit,'km/h');
- const value=await result('get_data',{name:'demo.speed',path:'/kmh'});assert.equal(value.items[0].state,'known');assert.equal(typeof value.items[0].value,'number');
+ const fields=await api.catalog({kind:'fields',name:'demo.speed'});assert.equal(fields.items.find(item=>item.field==='kmh').unit,'km/h');
+ const value=await api.values({name:'demo.speed',path:'/kmh'});assert.equal(value.items[0].state,'known');assert.equal(typeof value.items[0].value,'number');
  assert.equal((await command({op:'add_demo_sensor',name:'demo.dynamic_temperature'})).ok,true);
- const stale=await call('get_data_catalog',{kind:'sources',group:'demo',catalogRevision:first.catalogRevision});assert.equal(stale.isError,true);assert.equal(JSON.parse(stale.content[0].text).status,409);
- const dynamic=await result('get_data_catalog',{kind:'sources',name:'demo.dynamic_temperature',detail:true});assert.equal(dynamic.items[0].schema.unit,'C');assert.match(dynamic.items[0].schema.description,/dynamic sensor/i);assert.ok(dynamic.catalogRevision>first.catalogRevision);
- assert.equal((await result('get_data',{name:'demo.dynamic_temperature'})).items[0].value,23.5);
+ await assert.rejects(()=>api.catalog({kind:'sources',group:'demo',catalogRevision:first.catalogRevision}),error=>error.status===409);
+ const dynamic=await api.catalog({kind:'sources',name:'demo.dynamic_temperature',detail:true});assert.equal(dynamic.items[0].schema.unit,'C');assert.match(dynamic.items[0].schema.description,/dynamic sensor/i);assert.ok(dynamic.catalogRevision>first.catalogRevision);
+ assert.equal((await api.values({name:'demo.dynamic_temperature'})).items[0].value,23.5);
  await mkdir(output,{recursive:true});
  if(expectHistoryOff){
   assert.equal(entry(state,'demo.level_history'),undefined);assert.equal(entry(state,'demo.history_enabled'),undefined);
-  const absent=await result('get_data_catalog',{kind:'sources',prefix:'demo.level_history'});assert.equal(absent.total,0);
+  const absent=await api.catalog({kind:'sources',prefix:'demo.level_history'});assert.equal(absent.total,0);
  }else{
-  const metadata=await result('get_data_catalog',{kind:'sources',name:'demo.level_history',detail:true});assert.equal(metadata.items[0].schema.fields.history.items.nullable,true);
+  const metadata=await api.catalog({kind:'sources',name:'demo.level_history',detail:true});assert.equal(metadata.items[0].schema.fields.history.items.nullable,true);
  }
  const shipped=JSON.parse(await readFile(join(here,'registry-demo.json'),'utf8'));
  const shell=createBlankScreen('shell','Catalog-generated shell'),historyPage=expectHistoryOff?createBlankScreen('history','History'):structuredClone(shipped.screens.registry_demo),blank=createBlankScreen('blank','Blank');
@@ -105,7 +91,7 @@ try{
  if(expectHistoryOff)historyPage.root.children=[{id:'level',type:'slider',style:{x:15,y:375,width:500,height:25},props:{min:0,max:100},bindings:[{method:'value',value:{source:'demo.level'}}],events:[{event:'value_changed',write:{source:'demo.level'},value:{event:'value'}}]}];
  blank.root.children=[{id:'caption',type:'label',props:{text:'Sampling continues outside the history page'},style:{x:15,y:15,width:760,height:30}}];
  const project=createProject([shell,historyPage,blank]);
- await result('validate_document',{kind:'project',document:project});const packet=join(folder,'generated.cbor');await writeFile(packet,serializeDocument('project',project,'cbor',{capabilities}));
+ await api.validate({kind:'project',document:project});const packet=join(folder,'generated.cbor');await writeFile(packet,serializeDocument('project',project,'cbor',{capabilities}));
  const json=join(folder,'generated.json');await writeFile(json,JSON.stringify(project));
  // Both authoring JSON and CBOR take the existing loader/common codec path.
  await open(json);
@@ -151,9 +137,9 @@ try{
   assert.equal((await command({op:'event',node:'history_enabled',instance,event:'released'})).ok,true);
   state=await until(r=>entry(r,'demo.level_history')?.state==='known'&&entry(r,'demo.level_history').value.history.slice(-2).every(v=>v===90),'History did not restart with two visible points');assert.equal(state.historyAllocatedPoints,32);assert.ok(entry(state,'demo.level_history').value.history.filter(v=>v!==null).every(v=>v===90));
   // A new agent-authored design is ordinary project content, delivered through
-  // the existing MCP preview transfer and native ProjectService/style executor.
-  const custom=structuredClone(shipped);custom.manifest.name='MCP author design';
-  const customHeading=custom.screens.registry_demo.root.children.find(node=>node.id==='heading');delete customHeading.bindings;customHeading.props.text='Авторская схема / создана через MCP';
+  // the existing HTTP API preview transfer and native ProjectService/style executor.
+  const custom=structuredClone(shipped);custom.manifest.name='HTTP API author design';
+  const customHeading=custom.screens.registry_demo.root.children.find(node=>node.id==='heading');delete customHeading.bindings;customHeading.props.text='Авторская схема / создана через HTTP API';
   const authored={canvas:{bg_color:'#21102d',text_color:'#fbe9ff'},panel:{bg_color:'#32133e',border_color:'#995caa',text_color:'#fbe9ff',radius:12,border_width:2},text:{text_color:'#fbe9ff'},button:{bg_color:'#6b2785',text_color:'#ffffff',radius:10,border_width:2,border_color:'#f5a3db'},active:{bg_color:'#4f1767',text_color:'#ffffff',outline_color:'#ff93d5',outline_width:1},indicator:{bg_color:'#ff93d5',border_color:'#ff93d5',line_color:'#ff93d5'},track:{bg_color:'#673a77',border_color:'#995caa',radius:10},knob:{bg_color:'#ffe3f7',border_color:'#f5a3db',radius:10}};
   for(const [name,props] of Object.entries(authored))custom.styles['agent.'+name]={scope:'global',name:'agent.'+name,attach:false,props};
   function author(node){
@@ -165,21 +151,21 @@ try{
   }
   author(custom.screens.registry_demo.root);
   const invalid=structuredClone(custom);invalid.styles['agent.button'].props.made_up_property=1;
-  const old=await command({op:'inspect',nodes:[{id:'root',instance},{id:'choose_pony',instance}]});healthy(old);const savedBeforePreview=await result('read_project');
-  const rejected=await call('preview_project',{project:invalid,screen:'registry_demo'});assert.equal(rejected.isError,true);
+  const old=await command({op:'inspect',nodes:[{id:'root',instance},{id:'choose_pony',instance}]});healthy(old);const savedBeforePreview=await api.read();
+  await assert.rejects(()=>api.preview({project:invalid,screen:'registry_demo'}));
   const unchanged=await command({op:'inspect',nodes:[{id:'root',instance},{id:'choose_pony',instance}]});healthy(unchanged);assert.deepEqual(unchanged.nodes,old.nodes);
-  const preview=await result('preview_project',{project:custom,screen:'registry_demo'});assert.equal(preview.saved,false);
+  const preview=await api.preview({project:custom,screen:'registry_demo'});assert.equal(preview.saved,false);
   state=await command({op:'inspect',nodes:[{id:'root'},{id:'choose_pony'},{id:'plot'},{id:'mean'}]});healthy(state);assert.equal(state.nodes[0].background,rgb('#21102d'));assert.equal(state.nodes[1].background,rgb('#6b2785'));assert.equal(state.nodes[1].radius,10);assert.equal(state.nodes[2].indicatorLineColor,rgb('#ff93d5'));assert.equal(state.nodes[3].foreground,rgb('#fbe9ff'));
-  themeMeasurements.push({scheme:'mcp-agent-design',projectStyleNames:Object.keys(custom.styles),nodes:state.nodes});
-  assert.equal((await command({op:'snapshot',path:join(output,'mcp-agent-design.bmp')})).ok,true);
-  const saved=await result('read_project');assert.equal(saved.revision,savedBeforePreview.revision);assert.equal(saved.project.styles['agent.button'],undefined,'preview does not overwrite the saved project');
+  themeMeasurements.push({scheme:'api-authored-design',projectStyleNames:Object.keys(custom.styles),nodes:state.nodes});
+  assert.equal((await command({op:'snapshot',path:join(output,'api-authored-design.bmp')})).ok,true);
+  const saved=await api.read();assert.equal(saved.revision,savedBeforePreview.revision);assert.equal(saved.project.styles['agent.button'],undefined,'preview does not overwrite the saved project');
  }
  await writeFile(join(output,'measurements.json'),JSON.stringify({server:'NaWServer',historyAvailable:state.historyAvailable,historyAllocatedPoints:state.historyAllocatedPoints,catalogRevision:dynamic.catalogRevision,sources:names,themes:themeMeasurements},null,2));
- await mcp.close();mcp=null;
+
  child.stdin.end('{"op":"quit"}\n');assert.equal(await exit,0);
- console.log(`PASS: native Windows LVGL -> NaWServer -> real stdio MCP; grouped selective catalog paging, byte budget, dynamic metadata/revision conflict, generated JSON/CBOR project; history ${expectHistoryOff?'compiled out, zero allocation':'sampling, real plot pixels, mean, off-page accumulation and disable/free/restart; three preset designs, stacked styles and selector priority, caller-defined scheme, agent project.styles via MCP preview and rejected invalid style preserving UI'}`);
+ console.log(`PASS: native Windows LVGL -> NaWServer -> direct HTTP API; grouped selective catalog paging, byte budget, dynamic metadata/revision conflict, generated JSON/CBOR project; history ${expectHistoryOff?'compiled out, zero allocation':'sampling, real plot pixels, mean, off-page accumulation and disable/free/restart; three preset designs, stacked styles and selector priority, caller-defined scheme, agent project.styles via HTTP API preview and rejected invalid style preserving UI'}`);
 }finally{
- clearTimeout(startup);clearTimeout(deadline);await mcp?.close().catch(()=>{});
+ clearTimeout(startup);clearTimeout(deadline);
  for(const p of pending.values())clearTimeout(p.timer);for(const p of loads.values())clearTimeout(p.timer);
  if(!closed){child.stdin.end();await Promise.race([exit,wait(3000).then(()=>child.kill())]);}
  await rm(folder,{recursive:true,force:true});

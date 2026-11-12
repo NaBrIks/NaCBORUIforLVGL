@@ -13,7 +13,7 @@ export const widgetEnumerations={
 const bounds=m=>Object.fromEntries(['min','max','values','mask','constraint'].filter(k=>m[k]!==undefined).map(k=>[k,m[k]]));
 function widgetValue(method){const values=method.parameters.map(p=>p==='resource'?'registered_resource':defaultParameter(typeof p==='string'?{type:p,...bounds(method)}:p));return method.alias==='options'?['One','Two']:values.length===1?values[0]:values;}
 export function describeWidget(widget){return {
- type:widget.name,...(widget.create?{lvglCreate:widget.create}:{}),
+ type:widget.name,...(widget.description?{description:widget.description}:{}),...(widget.appearance?{appearance:widget.appearance}:{}),...(widget.create?{lvglCreate:widget.create}:{}),
  methods:widget.methods.filter(m=>!m.retired).map(m=>({json:'props.'+m.alias,name:m.alias,...(m.c?{lvgl:m.c==='set_line_points'?'lv_line_set_points':m.c}:{}),parameters:m.parameters,example:{props:{[m.alias]:widgetValue(m)}},...bounds(m),...(m.fixed?.length?{implicitArguments:m.fixed}:{}),...Object.fromEntries(m.parameters.filter(p=>typeof p==='string'&&widgetEnumerations[p]).map(p=>[p,widgetEnumerations[p]]))})),
  events:(widget.events??[]).map(e=>({name:e.name,...(e.value?{value:e.value}:{})}))
 };}

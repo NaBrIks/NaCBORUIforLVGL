@@ -1,5 +1,145 @@
 // Presentation only; agent, model and MCP execution stay in SPLA.
 window.designerUi = {
+  async requestProgressiveFrame(canvas, reference, progressive, resetVersion, connectionId = '', websocket = false, automatic = false) {
+    if (!canvas) return;
+    let state = canvas.progressiveFrameState;
+    if (!state) state = canvas.progressiveFrameState = {generation: 0, running: null, pending: false, surface: null, revision: null, scene: null, resetVersion: -1, connectionId: ''};
+    clearTimeout(state.timer);
+    if (state.connectionId !== connectionId || state.resetVersion !== resetVersion) {
+      state.generation++; state.controller?.abort(); state.surface?.clear();
+      state.frameSource?.close(); state.frameSource = null;
+      state.revision = null; state.scene = null; state.resetVersion = resetVersion; state.connectionId = connectionId;
+    }
+    if (state.websocket !== websocket) {
+      state.generation++;
+      state.controller?.abort();
+      if (state.websocket && !websocket)
+        void import('./js/browser-tools.js').then(module => module.closeFrameSocket()).catch(() => {});
+      state.websocket = websocket;
+    }
+    state.progressive = progressive;
+    state.requestArgs = {reference, progressive, resetVersion, connectionId, websocket};
+    state.pending = true;
+    state.pendingManual ||= !automatic;
+    if (state.running) return state.running;
+    const generation = state.generation;
+    let refreshInterval = 0;
+    state.running = (async () => {
+      try {
+        while (state.pending && state.generation === generation) {
+          state.pending = false;
+          const manual = state.pendingManual;
+          state.pendingManual = false;
+          const progressiveMode = state.progressive;
+          const controller = state.controller = new AbortController();
+          let module, paint, header, lastProgress = 0;
+          try {
+            module = await import('./js/browser-tools.js');
+            if (state.generation !== generation) return;
+            refreshInterval = module.nativeFrameRefreshInterval(websocket);
+            if (!manual && document.hidden) { refreshInterval = Math.max(1000, refreshInterval); continue; }
+            state.surface ??= module.createFrameSurface(canvas);
+            state.frameSource ??= module.registerPreviewFrame(state.surface);
+            const reportProgress = (received, total) => {
+              if (!controller.signal.aborted && state.generation === generation)
+                void reference.invokeMethodAsync('UpdateProgressiveFrame', header?.width ?? 0, header?.height ?? 0,
+                  received, total, header?.revision ?? '', connectionId).catch(() => {});
+            };
+            if (manual) reportProgress(0, 0);
+            const capture = async since => module.captureNativeFrame({since, websocket, force: manual, signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]),
+              onHeader(meta) {
+                if (since != null && state.scene != null && meta.scene !== undefined && meta.scene !== state.scene && !meta.full)
+                  throw Error('frame_scene_changed');
+                header = meta; paint = state.surface.begin(meta, {progressive: progressiveMode});
+                if (!manual) reportProgress(0, 0);
+              },
+              onRows(rows) { if (paint) paint.rows(rows); },
+              onProgress(progress) {
+                const now = performance.now();
+                if (now - lastProgress < 80 && progress.received < progress.total) return;
+                lastProgress = now;
+                reportProgress(progress.received, progress.total);
+              }
+            });
+            let result;
+            try { result = await capture(state.revision); }
+            catch (error) {
+              paint?.rollback(); paint = null;
+              if (controller.signal.aborted || state.generation !== generation) throw error;
+              // A failed delta may have crossed a scene or lost a packet. Recover once from a complete frame.
+              state.revision = null; state.scene = null;
+              header = null; lastProgress = 0; reportProgress(0, 0);
+              result = await capture(undefined);
+            }
+            if (state.generation !== generation || controller.signal.aborted) { paint?.rollback(); return; }
+            if (result.unchanged) {
+              void reference.invokeMethodAsync('ProgressiveFrameCompleted', canvas.width, canvas.height,
+                state.revision ?? '', connectionId).catch(() => {});
+            } else if (paint) {
+              paint.commit(); state.revision = result.revision; state.scene = result.scene ?? null;
+              state.frameSource.commit(result);
+              void reference.invokeMethodAsync('ProgressiveFrameCompleted', result.width, result.height,
+                result.revision ?? '', connectionId).catch(() => {});
+            }
+          } catch (error) {
+            paint?.rollback();
+            refreshInterval = Math.max(800, refreshInterval);
+            if (!controller.signal.aborted && state.generation === generation)
+              void reference.invokeMethodAsync('ProgressiveFrameError', String(error?.message ?? error), connectionId).catch(() => {});
+          } finally {
+            if (state.controller === controller) state.controller = null;
+          }
+        }
+      } finally {
+        state.running = null;
+        if (state.pending || (refreshInterval > 0 && state.generation === generation)) {
+          state.timer = setTimeout(() => {
+            if (!canvas.isConnected || !state.requestArgs) return;
+            const {reference, progressive, resetVersion, connectionId, websocket} = state.requestArgs;
+            void window.designerUi.requestProgressiveFrame(canvas, reference, progressive, resetVersion, connectionId, websocket, !state.pendingManual);
+          }, state.pending ? 0 : refreshInterval);
+        }
+      }
+    })();
+    return state.running;
+  },
+  clearProgressiveFrame(canvas) {
+    const state = canvas?.progressiveFrameState;
+    if (!state) return;
+    clearTimeout(state.timer);
+    state.requestArgs = null;
+    state.generation++; state.pending = state.pendingManual = false;
+    state.controller?.abort(); state.surface?.clear();
+    state.frameSource?.close(); state.frameSource = null;
+    state.controller = null; state.revision = null; state.scene = null; state.connectionId = '';
+  },
+  copyProgressiveFrame(canvas) {
+    if (!canvas || canvas.width < 1 || canvas.height < 1) throw Error('No progressive frame is available');
+    const data = canvas.toDataURL('image/png');
+    if (data.length > 11184832) throw Error('Progressive frame is too large to copy');
+    return data;
+  },
+  async bindPreviewPointer(image, reference, originalWidth, originalHeight, enabled, connectionId = '') {
+    if (!image) return;
+    const options = {width: originalWidth, height: originalHeight, enabled};
+    if (image.previewPointerBinding && image.previewPointerIdentity === connectionId) {
+      image.previewPointerBinding.update(options); return;
+    }
+    const generation = (image.previewPointerGeneration ?? 0) + 1;
+    image.previewPointerGeneration = generation;
+    image.previewPointerBinding?.dispose(); delete image.previewPointerBinding;
+    const module = await import('./js/browser-tools.js');
+    if (image.previewPointerGeneration !== generation || !image.isConnected) return;
+    const send = ({x, y, pressed}) => reference.invokeMethodAsync('SendPreviewPointer', x, y, pressed, connectionId);
+    const onError = error => { if (image.previewPointerGeneration === generation) void reference.invokeMethodAsync('PreviewPointerError', error.message).catch(() => {}); };
+    image.previewPointerIdentity = connectionId;
+    image.previewPointerBinding = module.bindPreviewPointer(image, send, {...options, onError});
+  },
+  unbindPreviewPointer(image) {
+    if (!image) return;
+    image.previewPointerGeneration = (image.previewPointerGeneration ?? 0) + 1;
+    image.previewPointerBinding?.dispose(); delete image.previewPointerBinding;
+  },
   bindSplitter(area, handle, reference) {
     if (!area || !handle || handle.splitterCleanup) return;
     let active = false;

@@ -1,10 +1,10 @@
 # Windows player (MIT)
 
 A real LVGL 9.6.0 application with the built-in Win32 display/input backend.
-JSON and CBOR projects go through the **same JavaScript codecs** as the editor
-and MCP. The native executable only receives CBOR and links the existing C++
-`ProjectService`, `ScreenRuntime`, `StyleService` and `DataRegistry` sources.
-There is no second renderer, binding engine or event dispatcher.
+The System and Graphics profiles use the same executable and start from
+different projects. JSON and CBOR project files go through the shared JavaScript
+codecs. The executable loads CBOR through the existing C++ `ProjectService`,
+`ScreenRuntime`, `StyleService` and `DataRegistry`.
 
 `Appearance` and `DemoData` now live in `../common` and are linked unchanged
 by this player and the T-Display-S3 target. This directory retains the Windows
@@ -24,7 +24,8 @@ directories. The desktop HTTP/WS adapter uses NaWServer; ESP-IDF is not needed.
 # Or, with dependencies already available:
 npm run player:build
 npm run build
-npm run player
+npm run player            # System profile, HTTP API on port 5300
+npm run player:graphics   # Graphics profile, HTTP API on port 5301
 npm run player -- '<projects>/interface.json' --watch
 npm run player -- '<projects>/interface.cbor'
 npm run player -- '<projects>/interface.json' --entry details
@@ -67,9 +68,9 @@ checked. The default catalog uses Cream. Custom catalogs may override ordinary
 role style properties, including radius/borders; the registry example provides
 Classic, Space and Pony variants. See [custom appearance](../../docs/readme_appearance_ru.md).
 
-The palette data in `schemes.json` comes from TechnicalShell's standard color
+The palette data in `../common/appearance/schemes.json` comes from TechnicalShell's standard color
 tokens. These are data values, not a copy of its CSS or frontend implementation.
-`schemes.mjs` compiles every variant through the shared project/style codecs.
+`../common/appearance/schemes.mjs` compiles every variant through the shared project/style codecs.
 The application exposes stable `const lv_style_t *` resources named `ui.canvas`,
 `ui.panel`, `ui.status`, `ui.text`, `ui.muted`, `ui.button`, `ui.button_pressed`,
 `ui.button_focus`, `ui.focus_outline`, `ui.button_disabled`, `ui.indicator`, `ui.track`, `ui.knob`,
@@ -129,7 +130,7 @@ The source document is never rewritten or automatically saved.
 ## Included application capabilities
 
 `demo.json` is an independent, standard-widget example: status clock, speed arc,
-numeric speed, action counter, writable controls, and three nested pages. It does not
+numeric speed, action counter, writable controls, and four nested pages. It does not
 contain any board driver, Bluetooth implementation, or copied S3 demo module.
 
 | Name | Contract |
@@ -157,9 +158,9 @@ emulated. Font resources are `ui_20`, `ui_28`, `montserrat_20`, and `montserrat_
 ## Optional local control
 
 `--control` accepts one JSON command per line on stdin and returns JSON-line
-results on stdout. This stdin adapter itself opens no port and never connects
-to a device. The optional `--api` enables native NaWServer; MCP remains a separate
-stdio process. Examples:
+results on stdout. This stdin adapter serves local diagnostics and opens no
+port. The separate `--api` flag starts native NaWServer. Example control
+commands:
 
 ```json
 {"op":"write","source":"demo.running","value":false,"id":1}
@@ -191,51 +192,26 @@ codecs own JSON parsing/compilation; no JSON library is added to C++ or firmware
 Launch through Node for JSON loading, file dialogs and watch support. The native
 executable alone can open a compiled `.cbor` via `--project`, `--width`, `--height`.
 
-## Native NaWServer, web editor and the same MCP
+## Native NaWServer and web editor
 
-`npm run player` enables the local API at `http://127.0.0.1:5300`. Direct launcher
-invocation enables it with `--api`, `--api-port PORT` or `--api-store PREFIX`;
-without API-related options it retains the no-listener mode. `--api-port 0` is for isolated tests and emits its
-actual origin as `api_ready`. Port 443 is rejected. NaWServer is loopback-only;
-foreign Host/Origin requests are rejected. Build the editor with `npm run build`;
-the native server serves `frontend/dist` at its root. Use `--web-root PATH` for a
-different built frontend. HTTP and binary-CBOR `/ws` and `/screen-ws` share the
-same native services as the application.
+`npm run player` enables the native API at `http://127.0.0.1:5300`. Direct launcher
+invocation enables it with `--api`, `--api-port PORT` or `--api-store PREFIX`.
+Without API options it retains no-listener mode. NaWServer serves the built editor,
+HTTP project/data APIs and binary-CBOR WebSocket events through the same native
+services. Foreign Host/Origin requests are rejected; local port 443 is forbidden.
 
-```powershell
-node examples/windows_player/run.mjs examples/windows_player/registry-demo.json --schemes examples/windows_player/registry-schemes.json --api --api-store '<data>/windows-project'
-node examples/windows_player/test-api.mjs '<build>/Release/nacborui_player.exe'
-```
+Preview, revision-checked save, show/reset, data actions and bindings reuse
+ProjectService, FileProjectStore and DataRegistry. Saving does not switch the
+display. Source JSON and application live values are not implicitly persisted.
 
-The real `/api/info`, `/api/capabilities`, `/api/data` and `/api/project` endpoints
-call the native registry and ProjectService. Connect a **separate** MCP target
-using the existing `integrations/mcp/index.js` and
-`LVGL_CBOR_DEVICE=http://127.0.0.1:5300`; preserve the board target. Enable preview,
-save and data tools independently with the existing permission environment flags.
-There is no new `set_theme` tool or duplicate Windows project/style engine.
+Designer normally connects to this player using Direct API. To test the
+limited native MCP proof of concept, build with `LVGL_CBOR_NATIVE_MCP=ON`
+(default `OFF`) and start the player with the API enabled. NaWServer then
+serves `/mcp` on the same loopback address and port. Use the
+[native MCP build and verification guide](../../docs/readme_windows_native_mcp_ru.md)
+for its supported operations.
 
-An agent reads the actual catalog, authors ordinary `project.styles` and ordered
-`styles[]` references, then uses `preview_project`. This calls the real native
-`ProjectService::preview`; `read_project` still returns the saved project.
-`save_project` uses FileProjectStore with revision checks and does not switch
-the display. `show_project_screen` applies the saved variant separately. Restart
-with the same project/store prefix restores the accepted changes. The source
-JSON file and application live values are not implicitly overwritten/persisted.
-
-`test-api.mjs` starts the production launcher and stdio MCP, with hidden real
-LVGL windows, a temporary persistent store and an ephemeral loopback port.
-Project mutations use MCP/HTTP; stdin is used
-for inspection/snapshots/shutdown. It checks invalid-style preservation,
-stacked selectors, preview/save/show separation, conflicts, data receipts,
-restart and reset. The real Unicode parent directory and exact names of both
-store slots are checked, including spaces and Cyrillic characters.
-Unsupported CBOR byte-string and over-depth action arguments
-must produce failed receipts while subsequent MCP calls and native bindings keep
-working. It checks editor HTML/JS delivery, CBOR WebSocket ACKs and a
-`project_changed` event matching the stored revision. `test-catalog.mjs` also
-uses the native NaWServer API for discovery and authored project previews.
-See [the detailed API guide](../../docs/readme_windows_api_ru.md) for limits,
-persistence, permission groups and current browser/WS boundaries.
+[API guide](../../docs/readme_windows_api_ru.md).
 
 ## Verification
 
@@ -307,9 +283,9 @@ to the initial size, visits every page, checks parent/viewport bounds, stable
 instances/values and CBOR reload in a resized display. It exports measurements
 and snapshots under ignored `local/windows-resize` without OS mouse/key input.
 
-This is the first desktop target. Its optional native NaWServer supports the web
-editor, HTTP clients and MCP. It does not package a standalone Node runtime or
-claim MCU memory/timing equivalence.
+The desktop target uses native NaWServer for the web editor and HTTP/WS API.
+The optional MCP profile uses that same listener. Install Node.js separately
+for the launcher and the JavaScript project codecs.
 
 ## Windows system overview
 
@@ -394,9 +370,9 @@ shared style codec. `LVGL_CBOR_HISTORY=OFF` excludes the generic sampler; the or
 SystemMetrics histories remain independent. Test the OFF executable with
 `node examples/windows_player/test-catalog.mjs PATH_TO_EXE --expect-history-off`.
 
-For a new design through MCP, edit ordinary project styles and ordered component
-references, then use the existing preview/save operations. The native hidden test
-verifies real stdio MCP discovery and preview through the application's NaWServer.
+For a new design, use Designer in Direct API mode to edit ordinary project styles
+and ordered component references, then preview or save the project.
+The optional native MCP proof of concept has its own verification guide.
 See [catalog/history](../../docs/readme_data_catalog_ru.md),
 [custom appearance via MCP](../../docs/readme_appearance_ru.md) and
 [validation](../../docs/reviews/REVIEW_20261107_data-catalog-history.md).
@@ -417,15 +393,11 @@ ProjectService and FileProjectStore. Legacy stores without a cached original bas
 can use `--base-recovery original.json` once; an incorrect base never resets user
 changes. See [Windows storage and verification](../../docs/readme_windows_api_ru.md).
 
-The demo is a native LVGL renderer/data/MCP target. It has no LLM agent, provider
-settings, key persistence or assistant registry. `/viewer` offers native frames and
-pointer input; `/editor/` is the ordinary project editor. NaWServer serves both.
-
-Use the [SPLA-based Designer](../../tools/designer/README.md) for model-driven
-authoring. Its shared bilingual instructions and method references live in
-`tools/designer/prompts`; MCP serves sections of the same documents.
-`get_display_frame` retains actual LVGL feedback with encoding on the MCP host.
-See [formats and MCU boundaries](../../docs/readme_display_feedback_ru.md).
+NaWServer serves native display and pointer input at `/viewer` and the project
+editor at `/editor/`. Use the [SPLA-based Designer](../../tools/designer/README.md)
+for model-driven authoring. It carries the bilingual instructions and method
+references in `tools/designer/prompts`. See
+[display transport and MCP feedback](../../docs/readme_display_feedback_ru.md).
 
 Upgrading an existing saved project preserves its old pages by design. If Settings
 was the unmodified old demo page, reset only its `screens/settings` override using

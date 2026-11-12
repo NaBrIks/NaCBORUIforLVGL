@@ -32,7 +32,7 @@ const deviceOrigin=computed(()=>{try{return origin();}catch{return '';}});
 <div class="workspace">
 <div ref="columns" class="lab-columns" :class="{'editor-columns':page==='styles'||page==='screens','screen-manager-columns':page==='project'||page==='screen-manager'}" :style="{'--inspector-width':inspectorWidth+'px','--inspector-min-width':inspectorMin+'px'}"><main class="lab-main" :class="{'screen-main':page==='screens','styles-main':page==='styles','screen-manager-main':page==='screen-manager'}">
 <WorkspaceSourceInfo v-if="page==='styles'||page==='screens'"/>
-<DeviceInfo v-if="page==='info'" :info="info" :http-online="httpOnline" :same-contract="sameContract"/>
+<DeviceInfo v-if="page==='info'" :info="info" :http-online="httpOnline" :same-contract="sameContract" :origin="deviceOrigin"/>
 <ProjectPage v-else-if="page==='project'"/>
 <ProjectStylesEditor v-else-if="page==='styles'" :observed="observed" :resources="info?.resources??[]" :can-apply="canApply&&!screenBusy" :auto-apply="autoStyle" :hex="hex" :decoded="decoded" :reply="reply" @apply="send"/>
 <template v-else-if="page==='screen-manager'"><ScreenManager :screens="screens" :screen-id="screenId" :deleted-screen="deletedScreen" @select="screenId=$event" @open="screenId=$event;page='screens'" @add="screenWorkspace.add()" @add-blank="screenWorkspace.add({blank:true});page='screens'" @add-example="screenWorkspace.addDocument(screenExamples[$event])" @remove="screenWorkspace.remove" @undo="screenWorkspace.undo()" @rename="screenWorkspace.rename" @duplicate="screenWorkspace.duplicate"/><p v-if="screenWarning" class="bad" role="alert">{{screenWarning}}</p></template>

@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 set(EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/../..")
-# Reuse pinned source libraries. No RGB-board or server code is linked.
+if(LILYGO_NATIVE_WS)
+  list(APPEND EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/../../../NaWServer")
+  set(SDKCONFIG_DEFAULTS "sdkconfig.defaults;sdkconfig.defaults.ws")
+endif()
+# Reuse pinned source libraries.
 list(APPEND EXTRA_COMPONENT_DIRS
   "${CMAKE_CURRENT_LIST_DIR}/managed_components/lvgl__lvgl"
   "${CMAKE_CURRENT_LIST_DIR}/managed_components/espressif__cbor")

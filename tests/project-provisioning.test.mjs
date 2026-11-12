@@ -6,7 +6,7 @@ import {readFile} from 'node:fs/promises';
 import {encodeScreen,screenContract} from '../packages/screen-codec/index.js';
 import {contract} from '../packages/style-codec/index.js';
 import {baseProject,storageProject,capabilities} from '../examples/s3_style_lab/project/demo.mjs';
-import {prepareProvisioningProject} from '../examples/s3_style_lab/project/provision.mjs';
+import {prepareProvisioningProject,prepareStockProject,provisioningCapabilities} from '../examples/s3_style_lab/project/provision.mjs';
 import {compileCatalog,inspectCatalog} from '../packages/project-codec/catalog.js';
 test('complete project JSON provisioning preserves identities, edits and styles while recompiling fingerprints',()=>{
  const original=structuredClone(storageProject);original.manifest.name='Owner project';original.manifest.description='Owner text';
@@ -28,4 +28,16 @@ test('exported owner project keeps all four screen packets and six authoring sty
  for(const [name,screen] of Object.entries(original.screens))
   assert.deepEqual(encodeScreen(next.screens[name],'preserved-owner',caps),encodeScreen(screen,'preserved-owner',caps),name);
  const {files}=compileCatalog(baseProject,next,caps);inspectCatalog(files.get('catalog.0'),files);
+});
+
+test('stock RGB S3 catalog boots the shell with four complete pages and a functional Setup',()=>{
+ const project=prepareStockProject(storageProject),caps=provisioningCapabilities(capabilities);
+ assert.equal(project.manifest.entry,'shell');
+ const {root}=project.screens.shell;
+ assert.deepEqual(root.children.find(node=>node.id==='content').view.pages.map(page=>page.screen),['dashboard','radar','trip','setup']);
+ const controls=project.screens.setup.root.children;
+ for(const action of ['ui.select_scheme','ui.display_mode','ui.display_buffers','ui.display_transfer','ui.display_restart'])
+  assert.ok(controls.some(node=>node.events?.some(event=>event.action===action)),action);
+ const {files}=compileCatalog(baseProject,project,caps);
+ inspectCatalog(files.get('catalog.0'),files);
 });

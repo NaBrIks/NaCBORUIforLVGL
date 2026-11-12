@@ -2,20 +2,17 @@
 // Copyright (c) 2026 Oleg Kozhevnikov
 import {spawn} from 'node:child_process';
 import {createInterface} from 'node:readline';
-import {createRequire} from 'node:module';
 import {mkdir,mkdtemp,readFile,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve,dirname} from 'node:path';
-import {fileURLToPath,pathToFileURL} from 'node:url';
+import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {createProject} from '../../packages/project-codec/index.js';
 import {createBlankScreen} from '../../frontend/src/screen-model.js';
 const here=dirname(fileURLToPath(import.meta.url)),root=resolve(here,'../..');
 const exe=resolve(process.argv[2]??join(root,'local/windows-player/Release/nacborui_player.exe'));
-const require=createRequire(new URL('../../integrations/mcp/package.json',import.meta.url));
-const {Client}=await import(pathToFileURL(require.resolve('@modelcontextprotocol/client')));
-const {StdioClientTransport}=await import(pathToFileURL(require.resolve('@modelcontextprotocol/client/stdio')));
+import {connectNativeApi} from './native-api.mjs';
 const temporary=await mkdtemp(join(tmpdir(),'nacborui-layout-debug-')),output=join(root,'local/windows-layout-debug');
 await mkdir(output,{recursive:true});
 const main=createBlankScreen('main','Layout depth');main.size={width:800,height:480};
@@ -35,7 +32,7 @@ nested.root.children=[node('label','nested_label',{text_color:'#222222'},[],{tex
  node('label','nested_inner',{text_color:'#ffffff'},[],{text:'Same native style path'})])];
 const fixture=join(temporary,'depth.json');await writeFile(fixture,JSON.stringify(createProject([main,nested],{id:'layout-debug',name:'Depth digits'})));
 const child=spawn(process.execPath,[join(here,'run.mjs'),fixture,'--profile','graphics','--exe',exe,'--api-port','0','--api-store',join(temporary,'project'),'--control','--hidden','--no-settings'],{cwd:root,windowsHide:true,stdio:['pipe','pipe','pipe']});
-let next=0,stderr='',apiUrl,loaded=false,closed=false,readyResolve,readyReject,mcp;
+let next=0,stderr='',apiUrl,loaded=false,closed=false,readyResolve,readyReject;
 const pending=new Map(),ready=new Promise((yes,no)=>{readyResolve=yes;readyReject=no;}),wait=ms=>new Promise(yes=>setTimeout(yes,ms));
 const startup=setTimeout(()=>readyReject(Error('Native viewer startup timeout '+stderr)),15000);
 child.stderr.on('data',chunk=>stderr+=chunk);
@@ -62,32 +59,25 @@ async function inspect(){
 const geometry=r=>r.nodes.map(n=>({id:n.id,bounds:n.bounds,scrollBottom:n.scrollBottom,scrollRight:n.scrollRight}));
 const magenta=bytes=>{let n=0;for(let i=54;i<bytes.length;i+=4)if(bytes[i]===255&&bytes[i+1]===0&&bytes[i+2]===255)n++;return n;};
 try{
- await ready;
+ await ready;const api=await connectNativeApi(apiUrl);
  const info=await(await fetch(new URL('/api/info',apiUrl))).json();assert.equal(info.server,'NaWServer');
- mcp=new Client({name:'layout-debug-test',version:'1'});
- await mcp.connect(new StdioClientTransport({command:process.execPath,args:[join(root,'integrations/mcp/index.js')],cwd:root,
- env:{PATH:process.env.PATH,LVGL_CBOR_DEVICE:apiUrl,LVGL_CBOR_ALLOW_DATA:'1',LVGL_CBOR_ALLOW_PREVIEW:'1'},stderr:'pipe'}));
- const call=async(name,args={})=>{const r=await mcp.callTool({name,arguments:args},undefined,{timeout:20000});assert.equal(r.isError,undefined,JSON.stringify(r.content));return JSON.parse(r.content[0].text);};
- const catalog=await call('get_data_catalog',{kind:'actions',name:'ui.layout_debug_options',detail:true});
+ const catalog=await api.catalog({kind:'actions',name:'ui.layout_debug_options',detail:true});
  assert.ok(JSON.stringify(catalog).includes('ui.layout_debug_options'));
- const before=await inspect(),status=await call('get_project_status'),original=await frame('normal');
+ const before=await inspect(),status=await api.status(),original=await frame('normal');
  const levels=Array.from({length:16},()=>({outline:true,digit:true,outlineColor:0xff00ff,digitColor:0xff00ff}));
  const options={opacity:255,outlineWidth:3,layoutType:false,levels};
- const configure=args=>call('invoke_action',{name:'ui.layout_debug_options',args:{...options,...args}});
+ const configure=args=>api.invoke({name:'ui.layout_debug_options',args:{...options,...args}});
  await configure({});
  const enabled=await inspect(),debug=await frame('depth-digits');assert.deepEqual(geometry(enabled),geometry(before));
  assert.ok(enabled.nodes.every(n=>n.outlineWidth===3&&n.outlinePad===-3));
  assert.ok(magenta(debug)>1000);assert.ok(magenta(debug)>magenta(original));
- const png=await mcp.callTool({name:'get_display_frame',arguments:{maxEdge:1024}},undefined,{timeout:20000});
- assert.equal(png.isError,undefined);const image=png.content.find(item=>item.type==='image');assert.ok(image);await writeFile(join(output,'depth-digits.png'),Buffer.from(image.data,'base64'));
-
- const values=await call('get_data',{name:'ui.layout_debug',detail:true,maxBytes:4096});
+ const values=await api.values({name:'ui.layout_debug',detail:true,maxBytes:4096});
  assert.ok(values.items[0].value.maxDepth>=3);
  const typeLevels=levels.map(l=>({...l,outline:false}));
  await configure({levels:typeLevels,layoutType:true});
  const typeFrame=await frame('layout-type');assert.notDeepEqual(typeFrame,debug);
  assert.deepEqual(geometry(await inspect()),geometry(before));
- const typeState=(await call('get_data',{name:'ui.layout_debug',detail:true,maxBytes:4096})).items[0].value;
+ const typeState=(await api.values({name:'ui.layout_debug',detail:true,maxBytes:4096})).items[0].value;
  assert.equal(typeState.layoutType,true);
  await configure({});
  const selectedLevels=levels.map((l,i)=>({...l,outline:false,digit:i===2,digitColor:0x00ffff,outlineColor:0x00ff00}));
@@ -100,15 +90,15 @@ try{
  await configure({levels:levels.map(l=>({...l,digit:false,outlineColor:0x00ff00})),outlineWidth:5});
  const outlines=await inspect();assert.ok(outlines.nodes.every(n=>n.outlineWidth===5&&n.outlineColor===0x00ff00));
  await configure({});
- assert.equal((await call('get_project_status')).project.revision,status.project.revision);
- await call('refresh_project_display');assert.equal((await inspect()).nodes[0].outlineWidth,3);
- await call('invoke_action',{name:'ui.layout_debug',args:false});
+ assert.equal((await api.status()).project.revision,status.project.revision);
+ await api.refresh();assert.equal((await inspect()).nodes[0].outlineWidth,3);
+ await api.invoke({name:'ui.layout_debug',args:false});
  const restored=await inspect(),after=await frame('restored');assert.deepEqual(geometry(restored),geometry(before));
- assert.deepEqual(after,original);assert.equal((await call('get_project_status')).project.revision,status.project.revision);
- await writeFile(join(output,'measurements.json'),JSON.stringify({server:info.server,geometryUnchanged:true,pixelsRestored:true,mcpAction:true,refreshPreservesDebug:true,maskBytes:320,tile:16,selectedDepths:true,independentModes:true,independentColors:true,outlineWidth:true,opacityZeroRestores:true,magentaPixels:magenta(debug),executableSha256:createHash('sha256').update(await readFile(exe)).digest('hex')},null,2));
- console.log('PASS: MCP discovery/action -> NaWServer -> native LVGL A1 16x16 depth digits, independent modes/opacity/depths, unchanged geometry/revision, refresh, exact pixel restoration');
+ assert.deepEqual(after,original);assert.equal((await api.status()).project.revision,status.project.revision);
+ await writeFile(join(output,'measurements.json'),JSON.stringify({server:info.server,geometryUnchanged:true,pixelsRestored:true,apiAction:true,refreshPreservesDebug:true,maskBytes:320,tile:16,selectedDepths:true,independentModes:true,independentColors:true,outlineWidth:true,opacityZeroRestores:true,magentaPixels:magenta(debug),executableSha256:createHash('sha256').update(await readFile(exe)).digest('hex')},null,2));
+ console.log('PASS: HTTP API discovery/action -> NaWServer -> native LVGL A1 16x16 depth digits, independent modes/opacity/depths, unchanged geometry/revision, refresh, exact pixel restoration');
 }finally{
- clearTimeout(startup);await mcp?.close().catch(()=>{});for(const job of pending.values())clearTimeout(job.timer);
+ clearTimeout(startup);for(const job of pending.values())clearTimeout(job.timer);
  if(!closed){child.stdin.end('{"op":"quit"}\n');await Promise.race([exit,wait(3000).then(()=>child.kill())]);}
  await rm(temporary,{recursive:true,force:true});
 }

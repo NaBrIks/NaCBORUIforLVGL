@@ -35,15 +35,21 @@ public sealed partial class DesignerSession : IAsyncDisposable
     private readonly object _logGate = new();
     private readonly List<DesignerLogEntry> _log = [];
     private readonly ProviderStateStore _providerState = new();
+    private readonly IDesignerDirectBridge? _directBridge;
     private McpServerSession? _mcp;
     private McpToolHostAdapter? _tools;
+    private DirectDesignerToolHost? _directTools;
+    private IDesignerToolHost? _activeToolHost;
     private CancellationTokenSource? _activeOperation;
     private string _chatId = Guid.NewGuid().ToString("N");
+    private string _targetInstructions = string.Empty;
     private bool _disposed;
 
-    public DesignerSession(DesignerOptions options, ILoggerFactory? loggerFactory = null, HttpClient? httpClient = null)
+    public DesignerSession(DesignerOptions options, ILoggerFactory? loggerFactory = null, HttpClient? httpClient = null,
+        IDesignerDirectBridge? directBridge = null)
     {
         Options = options ?? throw new ArgumentNullException(nameof(options));
+        _directBridge = directBridge;
         _loggers = loggerFactory ?? NullLoggerFactory.Instance;
         _http = httpClient ?? new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
         _ownsHttp = httpClient is null;
@@ -69,12 +75,18 @@ public sealed partial class DesignerSession : IAsyncDisposable
     public string Status { get; private set; } = "Не подключено";
     public string? LastError { get; private set; }
     public bool IsBusy { get; private set; }
-    public bool IsConnected => _mcp?.State == McpSessionState.Ready;
+    public bool IsConnected => _activeToolHost?.IsConnected == true;
     public string LiveText { get; private set; } = string.Empty;
     public string LiveReasoning { get; private set; } = string.Empty;
     public LlmTurnResult? LastTurn { get; private set; }
     public DesignerPreview? Preview { get; private set; }
-    public IReadOnlyList<ToolDefinition> Tools => _tools?.GetToolDefinitions().ToArray() ?? [];
+    public IReadOnlyList<ToolDefinition> Tools => _activeToolHost?.GetToolDefinitions().ToArray() ?? [];
+    public bool SupportsViewInput => _activeToolHost is { IsConnected: true } host &&
+        Tools.Any(tool => string.Equals(tool.Function.Name, host.NameFor("send_view_input"), StringComparison.Ordinal));
+    public bool SupportsProgressivePreview => _directTools is { IsConnected: true, SupportsNativeView: true };
+    public bool SupportsFramePackets => SupportsProgressivePreview && _directTools?.SupportsFramePackets == true;
+    public bool SupportsFrameWebSocket => SupportsFramePackets && _directTools?.SupportsFrameWebSocket == true;
+    public bool RequiresFrameWebSocket => SupportsFrameWebSocket && _directTools?.RequiresFrameWebSocket == true;
     /// <summary>Raised on the publishing thread. A UI must marshal rendering through its dispatcher.</summary>
     public event Action? Changed;
 
@@ -84,32 +96,49 @@ public sealed partial class DesignerSession : IAsyncDisposable
         await BeginOperationAsync(cancellationToken);
         try
         {
+            await DisconnectAsync();
+            if (Options.ConnectionMode is DesignerConnectionMode.DirectApi or DesignerConnectionMode.UsbPreview)
+            {
+                var usb = Options.ConnectionMode == DesignerConnectionMode.UsbPreview;
+                if (_directBridge is null) throw new InvalidOperationException("Direct API mode requires the initialized browser-tools bridge.");
+                if (!McpToolNaming.IsValidServerId(Options.McpServerId))
+                    throw new ArgumentException("Tool namespace must start with a lowercase letter and contain at most 16 lowercase letters, digits or underscores.");
+                var origin = usb ? Options.UsbPort : ValidateDeviceOrigin(Options.DeviceOrigin);
+                var label = usb ? "USB" : "Direct API";
+                _directTools = new DirectDesignerToolHost(_directBridge, Options.McpServerId, origin, text => AddLog(label, text), usb);
+                _activeToolHost = _directTools;
+                Status = usb ? "USB" : "Подключение прямого API";
+                Notify();
+                await _activeToolHost.ConnectAsync(_activeOperation!.Token);
+                var instructions = _directTools.Instructions;
+                var instructionsChanged = !string.Equals(_targetInstructions, instructions, StringComparison.Ordinal);
+                _targetInstructions = instructions;
+                if (instructionsChanged && !string.IsNullOrWhiteSpace(instructions))
+                    _conversation.Add(new ChatMessage { Role = ChatRole.System, Content = instructions });
+                Status = $"{label}: {_directTools.GetToolDefinitions().Count()} инструментов";
+                AddLog(label, $"Connected to {origin}; {_directTools.GetToolDefinitions().Count()} tools discovered by the shared JavaScript codecs.");
+                return;
+            }
+
             if (!McpToolNaming.IsValidServerId(Options.McpServerId))
                 throw new ArgumentException("MCP server id must start with a lowercase letter and contain at most 16 lowercase letters, digits or underscores.");
-            if (Options.McpTransport == McpTransportKind.Http) ValidateHttpUrl(Options.McpEndpoint, "MCP endpoint");
-            if (Options.McpTransport == McpTransportKind.Stdio && OperatingSystem.IsAndroid())
-                throw new PlatformNotSupportedException("Android requires an MCP Streamable HTTP endpoint; it cannot launch the desktop Node.js stdio adapter.");
-            await DisconnectAsync();
-            var spec = new McpServerSpec(Options.McpServerId, Options.McpTransport)
+            var endpoint = Options.ConnectionMode == DesignerConnectionMode.NativeMcp ? Options.McpEndpoint : Options.ProxyMcpEndpoint;
+            ValidateHttpUrl(endpoint, "MCP endpoint");
+            var spec = new McpServerSpec(Options.McpServerId, McpTransportKind.Http)
             {
-                Url = Options.McpEndpoint,
-                Command = Options.McpCommand,
-                Args = Options.McpArguments.ToArray(),
-                WorkingDirectory = Options.McpWorkingDirectory,
-                Env = new Dictionary<string, string>(Options.McpEnvironment),
+                Url = endpoint,
                 Headers = new Dictionary<string, string>(Options.McpHeaders),
                 Timeout = Options.McpTimeout
             };
             _mcp = new McpServerSession(spec,
-                transportFactory: value => value.Transport == McpTransportKind.Http
-                    ? new HttpTransport(value, _loggers.CreateLogger<HttpTransport>(), _http)
-                    : new StdioTransport(value, _loggers.CreateLogger<StdioTransport>()),
+                transportFactory: value => new HttpTransport(value, _loggers.CreateLogger<HttpTransport>(), _http),
                 logger: _loggers.CreateLogger<McpServerSession>());
             _mcp.StateChanged += McpStateChanged;
             _tools = new McpToolHostAdapter(_mcp, text => AddLog("MCP", text));
+            _activeToolHost = _tools;
             Status = "Подключение MCP";
             Notify();
-            await _mcp.ConnectAsync(_activeOperation!.Token);
+            await _activeToolHost.ConnectAsync(_activeOperation!.Token);
             Status = $"MCP: {_mcp.Tools.Count} инструментов";
             AddLog("MCP", $"Connected to {_mcp.ServerName ?? spec.Id}; {_mcp.Tools.Count} tools discovered by SPLA.");
         }
@@ -123,13 +152,13 @@ public sealed partial class DesignerSession : IAsyncDisposable
         var beforeTurn = _conversation.Count;
         try
         {
-            if (!IsConnected || _tools is null) throw new InvalidOperationException("Connect an MCP server before sending a designer request.");
+            if (!IsConnected || _activeToolHost is null) throw new InvalidOperationException("Connect a designer target before sending a request.");
             _conversation.Add(message);
             LiveText = LiveReasoning = string.Empty;
             Status = "Модель отвечает";
             Notify();
             // This is SPLA's existing, single engine. This application does not implement a loop.
-            var orchestrator = new ConversationOrchestrator(_gateway, _tools)
+            var orchestrator = new ConversationOrchestrator(_gateway, _activeToolHost)
             {
                 EnableLoopGuard = true,
                 ToolImages = ToolImagesMode.Last
@@ -140,12 +169,14 @@ public sealed partial class DesignerSession : IAsyncDisposable
                 OnDelta = chunk => { LiveText += chunk; Notify(); return Task.CompletedTask; },
                 OnReasoning = chunk => { LiveReasoning += chunk; Notify(); return Task.CompletedTask; },
                 OnAssistantMessage = _ => { PublishMessages(); LiveText = LiveReasoning = string.Empty; Notify(); return Task.CompletedTask; },
-                OnToolCallStarted = call => { Status = call.Function.Name; AddLog("tool", call.Function.Name); return Task.CompletedTask; },
+                OnToolCallStarted = call => { Status = call.Function.Name; AddLog("tool", $"{call.Function.Name}: {call.Function.Arguments}"); return Task.CompletedTask; },
                 OnToolResult = (call, result) =>
                 {
                     PublishMessages();
                     CapturePreview(result);
-                    AddLog("result", $"{call.Function.Name}: {result.Outcome}");
+                    AddLog("result", $"{call.Function.Name}: {result.Outcome} · {ResultSummary(result)}");
+                    if (ReportsDeviceRestart(result))
+                        throw new InvalidOperationException("Устройство перезапустилось. Старые номера команд недействительны; проверьте текущее состояние и переподключитесь.");
                     return Task.CompletedTask;
                 },
                 OnNotice = notice => { AddLog("notice", notice); return Task.CompletedTask; },
@@ -217,12 +248,46 @@ public sealed partial class DesignerSession : IAsyncDisposable
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        var tools = _tools;
-        if (!IsConnected || tools is null) throw new InvalidOperationException("MCP is not connected.");
+        var tools = _activeToolHost;
+        if (!IsConnected || tools is null) throw new InvalidOperationException("Designer target is not connected.");
         var result = await tools.ExecuteToolAsync(AgentMode.Edit, tools.NameFor(remoteName), argumentsJson, cancellationToken);
         CapturePreview(result);
         AddLog("tool", $"{remoteName}: {result.Outcome}");
         return result;
+    }
+
+    public async Task<ToolResult> SendViewInputAsync(int x, int y, bool pressed,
+        CancellationToken cancellationToken = default)
+    {
+        if (!SupportsViewInput) throw new InvalidOperationException("The connected target does not support preview input.");
+        var result = await InvokeToolAsync("send_view_input", JsonSerializer.Serialize(new { x, y, pressed }), cancellationToken);
+        if (result.IsError) throw new InvalidOperationException(result.TextContent);
+        return result;
+    }
+
+    public void ClearPreview()
+    {
+        if (Preview is null) return;
+        Preview = null;
+        Notify();
+    }
+
+    public async Task<(int Width, int Height)> GetPreviewDisplaySizeAsync(CancellationToken cancellationToken = default)
+    {
+        if (!SupportsViewInput) return default;
+        if (_activeToolHost is DirectDesignerToolHost direct) return direct.DisplaySize;
+        if (_activeToolHost is not { } host ||
+            !Tools.Any(tool => tool.Function.Name == host.NameFor("get_device")))
+            return default;
+
+        var result = await InvokeToolAsync("get_device", "{}", cancellationToken);
+        if (result.IsError || string.IsNullOrWhiteSpace(result.TextContent)) return default;
+        try
+        {
+            using var document = JsonDocument.Parse(result.TextContent);
+            return DirectDesignerToolHost.ReadDisplaySize(document.RootElement);
+        }
+        catch (JsonException) { return default; }
     }
 
     public async Task<DesignerPreview?> GetPreviewAsync(int maxEdge = 1024, CancellationToken cancellationToken = default)
@@ -269,18 +334,28 @@ public sealed partial class DesignerSession : IAsyncDisposable
             throw new ArgumentException($"{label} must be an absolute HTTP or HTTPS URL.");
     }
 
+    private static string ValidateDeviceOrigin(string value)
+    {
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) || uri.Scheme is not ("http" or "https") ||
+            !string.IsNullOrEmpty(uri.UserInfo) || uri.AbsolutePath != "/" || !string.IsNullOrEmpty(uri.Query) ||
+            !string.IsNullOrEmpty(uri.Fragment))
+            throw new ArgumentException("Device origin must be an HTTP(S) origin without credentials, path, query or fragment.");
+        return uri.GetLeftPart(UriPartial.Authority);
+    }
+
     private void SeedPrompt()
     {
         var prompt = string.IsNullOrWhiteSpace(Options.SystemPrompt) ? ReadOriginalPrompts() : Options.SystemPrompt;
         _conversation.Add(new ChatMessage { Role = ChatRole.System, Content = prompt });
+        if (!string.IsNullOrWhiteSpace(_targetInstructions))
+            _conversation.Add(new ChatMessage { Role = ChatRole.System, Content = _targetInstructions });
         PublishMessages();
     }
 
     private static string ReadOriginalPrompts()
     {
         var assembly = typeof(DesignerSession).Assembly;
-        return "Use exact tool names from the connected MCP catalog; SPLA prefixes them with the configured server id.\n\n" +
-            string.Join("\n\n", new[] { "System", "Layout", "Styles" }.Select(name =>
+        return string.Join("\n\n", new[] { "System", "Layout", "Styles" }.Select(name =>
             {
                 using var stream = assembly.GetManifestResourceStream($"NaCBORUI.Designer.Prompts.{name}.md")
                     ?? throw new InvalidOperationException($"Missing original assistant prompt: {name}.");
@@ -323,6 +398,24 @@ public sealed partial class DesignerSession : IAsyncDisposable
         Notify();
     }
 
+    private static bool ReportsDeviceRestart(ToolResult result)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(result.TextContent);
+            return document.RootElement.ValueKind == JsonValueKind.Object &&
+                document.RootElement.TryGetProperty("deviceRestarted", out var restart) &&
+                restart.ValueKind == JsonValueKind.True;
+        }
+        catch (JsonException) { return false; }
+    }
+
+    private static string ResultSummary(ToolResult result)
+    {
+        var text = result.TextContent;
+        return text.Length <= 512 ? text : text[..512] + "…";
+    }
+
     private void RecordError(Exception exception)
     {
         LastError = Redact(exception.Message);
@@ -354,6 +447,13 @@ public sealed partial class DesignerSession : IAsyncDisposable
 
     private async Task DisconnectAsync()
     {
+        _activeToolHost = null;
+        Preview = null;
+        if (_directTools is not null)
+        {
+            await _directTools.DisposeAsync();
+            _directTools = null;
+        }
         _tools?.Dispose();
         _tools = null;
         if (_mcp is null) return;

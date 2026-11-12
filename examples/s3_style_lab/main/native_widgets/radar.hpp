@@ -21,37 +21,47 @@ namespace lab_widgets::radar
 		auto *layer = lv_event_get_layer(event);
 		lv_area_t a; lv_obj_get_coords(obj, &a); int w = lv_area_get_width(&a), h = lv_area_get_height(&a);
 		const int r = std::max(20, std::min((w - 52) / 2, (h - 114) / 2)), cx = a.x1 + w / 2, cy = a.y1 + 46 + r;
-		drawing::text(layer, s.title, a.x1 + 12, a.y1 + 10, w - 24, muted);
-		drawing::circle(layer, cx, cy, r + 3, 0x081b21);
+		const auto foreground = lv_obj_get_style_text_color(obj, LV_PART_MAIN);
+		const auto secondary = lv_obj_get_style_text_color(obj, LV_PART_ITEMS);
+		const auto status_color = lv_obj_get_style_text_color(obj, LV_PART_INDICATOR);
+		const auto field = paint(obj, LV_PART_ITEMS, LV_STYLE_BG_COLOR, 0x081b21);
+		const auto rings = paint(obj, LV_PART_MAIN, LV_STYLE_ARC_COLOR, 0x2a5558);
+		const auto spokes = paint(obj, LV_PART_MAIN, LV_STYLE_LINE_COLOR, 0x23444b);
+		const auto beam = paint(obj, LV_PART_INDICATOR, LV_STYLE_LINE_COLOR, green);
+		const auto marker = paint(obj, LV_PART_INDICATOR, LV_STYLE_BG_COLOR, green);
+		const auto echo = paint(obj, LV_PART_INDICATOR, LV_STYLE_ARC_COLOR, green);
+		const auto center = paint(obj, LV_PART_KNOB, LV_STYLE_BG_COLOR, ink);
+		drawing::text(layer, s.title, a.x1 + 12, a.y1 + 10, w - 24, secondary);
+		drawing::circle(layer, cx, cy, r + 3, field);
 		for(int i = 1; i <= 4; ++i)
-			drawing::arc(layer, cx, cy, r * i / 4, 0, 360, 0x2a5558, i == 4 ? 2 : 1);
+			drawing::arc(layer, cx, cy, r * i / 4, 0, 360, rings, i == 4 ? 2 : 1);
 		for(int i = 0; i < 360; i += 30)
-			drawing::line(layer, {cx, cy}, drawing::polar(cx, cy, r, i), 0x23444b);
+			drawing::line(layer, {cx, cy}, drawing::polar(cx, cy, r, i), spokes);
 		const char *compass[]{"N", "E", "S", "W"};
 		for(int i = 0; i < 4; ++i)
 		{
 			auto p = drawing::polar(cx, cy, r + 15, float(i * 90 - 90));
-			drawing::text(layer, compass[i], p.x - 10, p.y - 8, 20, muted, LV_FONT_DEFAULT, LV_TEXT_ALIGN_CENTER);
+			drawing::text(layer, compass[i], p.x - 10, p.y - 8, 20, secondary, LV_FONT_DEFAULT, LV_TEXT_ALIGN_CENTER);
 		}
 		for(int i = 22; i >= 0; --i)
-			drawing::line(layer, {cx, cy}, drawing::polar(cx, cy, r, float(s.sweep - 90 - i * 2)), green, 3,
+			drawing::line(layer, {cx, cy}, drawing::polar(cx, cy, r, float(s.sweep - 90 - i * 2)), beam, 3,
 			    8 + (22 - i) * 4);
-		drawing::line(layer, {cx, cy}, drawing::polar(cx, cy, r, float(s.sweep - 90)), green, 2);
+		drawing::line(layer, {cx, cy}, drawing::polar(cx, cy, r, float(s.sweep - 90)), beam, 2);
 		for(size_t i = 0; i < s.count; ++i)
 		{
 			const auto &t = s.targets[i];
 			auto p = drawing::polar(cx, cy, r * t.distance / 100.0f, float(t.bearing - 90));
 			const int age = (s.sweep - t.bearing + 360) % 360, brightness = age < 80 ? 255 - age * 2 : 95;
-			drawing::circle(layer, p.x, p.y, 2 + t.strength / 25, green, brightness);
-			drawing::arc(layer, p.x, p.y, 8 + (age < 60 ? age / 15 : 0), 0, 360, green, 1, brightness);
+			drawing::circle(layer, p.x, p.y, 2 + t.strength / 25, marker, brightness);
+			drawing::arc(layer, p.x, p.y, 8 + (age < 60 ? age / 15 : 0), 0, 360, echo, 1, brightness);
 			drawing::text(layer, t.name, p.x + 10, p.y - 7, std::max<int32_t>(30, a.x2 - p.x - 10),
-			    age < 80 ? ink : muted);
+			    age < 80 ? foreground : secondary);
 		}
-		drawing::circle(layer, cx, cy, 3, ink);
+		drawing::circle(layer, cx, cy, 3, center);
 		char status[64];
 		std::snprintf(status, sizeof(status), "%s   %03ld deg   %u CONTACTS   %ld km", s.running ? "SCAN" : "HOLD",
 		    long(s.sweep), unsigned(s.count), long(s.range));
-		drawing::text(layer, status, a.x1 + 12, a.y2 - 24, w - 24, green);
+		drawing::text(layer, status, a.x1 + 12, a.y2 - 24, w - 24, status_color);
 	}
 
 	inline void title(lv_obj_t *obj, const char *value)
@@ -114,6 +124,9 @@ namespace lab_widgets::radar
 		auto *obj = frame(parent, 416, 412); auto *s = new(std::nothrow) State{}; if(!own(obj, s))
 			return nullptr;
 
+		default_text<muted>(obj, LV_PART_ITEMS);
+		default_text<green>(obj, LV_PART_INDICATOR);
+		attach_theme(obj);
 		s->obj = obj;
 		s->timer = lv_timer_create([](lv_timer_t *timer){
 			auto &data = *static_cast<State *>(lv_timer_get_user_data(timer)); if(data.running && data.owner_active)

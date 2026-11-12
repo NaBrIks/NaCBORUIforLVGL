@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 Oleg Kozhevnikov
-param([string]$CoreDir=$env:PLATFORMIO_CORE_DIR,[string]$LvglComponentSource='', [string]$CborComponentSource='')
+param([string]$CoreDir=$env:PLATFORMIO_CORE_DIR,[string]$LvglComponentSource='', [string]$CborComponentSource='', [switch]$WebSocket)
 $ErrorActionPreference='Stop'
 if(!$CoreDir){$CoreDir=Join-Path $env:USERPROFILE '.platformio'}
 $defaults=Join-Path $PSScriptRoot '../s3_style_lab/managed_components'
@@ -28,6 +28,7 @@ try {
  # Dependencies are the explicitly supplied, already pinned source components.
  $env:IDF_COMPONENT_MANAGER='0'
  $pio=Join-Path $CoreDir 'penv/Scripts/pio.exe'
- & $pio run -d $PSScriptRoot -e lilygo -j 8
+ $target = if($WebSocket){'lilygo-ws'}else{'lilygo'}
+ & $pio run -d $PSScriptRoot -e $target -j 8
  if($LASTEXITCODE){throw 'LilyGO firmware build failed'}
 } finally {$env:IDF_COMPONENT_MANAGER=$previousManager}

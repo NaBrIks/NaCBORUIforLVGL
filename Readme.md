@@ -5,8 +5,7 @@ English · [Русский](Readme.ru.md)
 **CBOR-based UI definitions for LVGL**
 
 Dynamic LVGL interfaces from editable JSON and compiled CBOR: screens, shared
-styles, typed data bindings, events and nested pages. The editor, MCP adapter
-and Windows launcher share codecs; devices and Windows execute the same C++
+styles, typed data bindings, events and nested pages. The editor and Windows launcher share codecs; devices and Windows execute the same C++
 runtime. The core is not tied to ESP32.
 
 Canonical repository: [NaBrIks/NaCBORUIforLVGL](https://github.com/NaBrIks/NaCBORUIforLVGL).
@@ -18,11 +17,12 @@ It is private; cloning requires authorized access.
 | --- | --- | --- |
 | `include/lvgl_cbor`, `src` | C++17 runtime, styles, DataRegistry, ProjectService/storage | MIT |
 | `packages` | JSON/CBOR screen/project/style and supported CSS codecs | MIT |
-| `integrations/mcp` | Optional host stdio MCP adapter over the existing device API | MIT |
-| `examples/common` | Shared Appearance, demo sources/actions and sample image | MIT |
+| `examples/common` | Shared appearance, demo data, layout diagnostics and display transport helpers | MIT |
 | `examples/windows_player` | Real Win32 LVGL player, schemes and CPU/RAM/GPU overview | MIT |
 | `examples/lilygo_t_display_s3` | Independent ST7789 T-Display-S3 example | MIT, including its upstream NOTICE |
-| `frontend`, `examples/s3_style_lab` | Owner-authored editor shell and RGB/touch example | MIT; third-party exceptions in [scope](LICENSES.md) |
+| `frontend`, `integrations/nawserver` | Web editor and native HTTP/WS adapters | MIT; third-party notices in [scope](LICENSES.md) |
+| `examples/s3_style_lab` | 7-inch RGB/touch demo with nested dashboard pages and display diagnostics | MIT with retained third-party notices |
+| `tools/designer` | Windows/Android Designer, distributed separately from the examples | MIT; external SPLA source dependency |
 
 Bluetooth implementations/examples belong to their own projects. They are not
 UI-runtime dependencies. OS font binaries, SDKs and build outputs are not bundled.
@@ -38,7 +38,7 @@ External libraries retain their own licenses and notices.
 - Pages own bindings/events and child instances with release/cache/retain policies.
   Inactive bindings can pause; sources retain latest values and bounded history.
 - `WidgetRegistry`: application-registered native components and compiler metadata.
-- Device capabilities and WebSocket updates; host MCP reuses device APIs/codecs.
+- Device capabilities and WebSocket updates over the native NaWServer API.
 - Real Windows LVGL, resizable Grid/Flex pages, four schemes and system telemetry
   through Windows SDK APIs, without vendor GPU SDKs.
 
@@ -61,8 +61,7 @@ npm run build
 ```
 
 GitHub CLI (or Git) needs repository access. Node.js must satisfy the pinned
-Vite requirement `^20.19.0 || >=22.12.0`. `npm run sim` builds the editor and starts the native NaWServer target;
-Windows also has `RunSimulator.cmd`. The browser preview uses CSS; the native player executes LVGL.
+Vite requirement `^20.19.0 || >=22.12.0`. The browser layout uses CSS; the native player executes LVGL.
 
 For native tests and the Windows player, install Visual Studio C++ Build Tools
 with Windows SDK, CMake 3.24+, Git and Node.js. Fetch dependencies explicitly;
@@ -73,12 +72,15 @@ git clone --depth 1 --branch v9.6.0 https://github.com/lvgl/lvgl.git local/deps/
 git clone --depth 1 --branch v0.6.1 https://github.com/intel/tinycbor.git local/deps/tinycbor
 git clone --depth 1 https://github.com/NaBrIks/NaWServer.git local/deps/NaWServer
 ./tools/test_native.ps1 -LvglSource "$PWD/local/deps/lvgl" -TinyCborSource "$PWD/local/deps/tinycbor"
-./examples/windows_player/build.ps1 -LvglSource "$PWD/local/deps/lvgl" -TinyCborSource "$PWD/local/deps/tinycbor"
+./examples/windows_player/build.ps1 -LvglSource "$PWD/local/deps/lvgl" -TinyCborSource "$PWD/local/deps/tinycbor" -NaWServerSource "$PWD/local/deps/NaWServer"
 npm run player
 npm run player:test
 npm run player:test-system
 npm run player:test-resize
 ```
+
+After building the native player, `npm run sim` or `RunSimulator.cmd` rebuilds
+and serves the editor through it.
 
 Upstream tag commits: LVGL `80ca777e37a2b176770726a02e07a6fb79ef0b39`,
 TinyCBOR `1e8296f94e40c6ac976d4c5a7b1db7f45978a83f`.
@@ -86,12 +88,22 @@ Open files with `npm run player -- interface.json` or `.cbor`; `--watch` reloads
 saved changes. GPU counters need a compatible Windows/WDDM driver; unavailable
 values remain unavailable. See [player setup/limits](examples/windows_player/README.md).
 
-The optional MCP adapter has its own lock file and tests:
+## Examples and Designer
 
-```sh
-npm --prefix integrations/mcp ci
-npm --prefix integrations/mcp test
-```
+| Example | What it demonstrates |
+| --- | --- |
+| [Windows player](examples/windows_player/README.md) | `npm run player` for system telemetry and themes; `npm run player:graphics` for raster/vector graphics, the remote-control UI and the authoring canvas. Both run real LVGL. |
+| [7-inch ESP32-S3 RGB](examples/s3_style_lab/README.md) | Nested dashboard pages, native instruments, the web editor and live display through HTTP/WS. |
+| [LilyGO T-Display-S3](examples/lilygo_t_display_s3/README.md) | Small ST7789 display, button input, and live USB diagnostics; optional Wi-Fi preview. |
+| [Native widget](examples/native_widget/README.md) | Portable registration of a C++ widget and its authoring metadata. |
+
+The [Windows/Android Designer](tools/designer/README.md) uses SPLA for
+conversation, provider access and MCP. Direct API is the default and uses the
+shared codecs inside the app. Designer can also connect to an explicitly
+configured MCP endpoint. On Windows, the native player has optional embedded
+MCP, and Designer can expose its current Direct API session to external agents
+on loopback. The 7-inch firmware uses the Direct API and does not expose
+`/mcp`. See the [connection modes and capabilities](docs/readme_mcp_ru.md).
 
 ## Hardware integrations
 
@@ -120,15 +132,15 @@ for size validation. Fixed-coordinate projects need authoring changes to become
 responsive. The player serves the built editor and HTTP/WS API through NaWServer.
 [Dated reviews](docs/reviews/README.md) distinguish measured host/hardware results.
 
-The Windows graphics gallery opens with `npm run player:graphics`: a separate
-page with native LVGL BIN/PNG/JPEG/BMP/GIF/SVG, pixel formats and curve comparisons.
+The Windows graphics profile includes native LVGL BIN/PNG/JPEG/BMP/GIF/SVG,
+pixel formats and curve comparisons.
 See [graphics guide](docs/readme_graphics_ru.md). The decoder/vector gallery can
 be excluded with `LVGL_CBOR_GRAPHICS_GALLERY=OFF`.
 
 ## Documentation, licensing and support
 
 Detailed guides are mainly Russian: [index](docs/README.md),
-[nested pages](docs/readme_page_composition_ru.md), [MCP](integrations/mcp/README.md),
+[nested pages](docs/readme_page_composition_ru.md), [MCP status](docs/readme_mcp_ru.md),
 [SeMaps](docs/readme_semaps_ru.md), [sources/notices](docs/readme_sources_ru.md).
 
 C/C++ contributions use [Uncrustify 0.83.0_f](agents/code_style.md) and the
@@ -147,25 +159,16 @@ Existing third-party copyright notices must stay intact.
 Contributions and voluntary donations are welcome. No payment link is configured;
 donations are optional and do not change license terms.
 
-Grouped data discovery includes descriptions, units and bounded MCP/HTTP pages.
+Grouped data discovery includes descriptions, units and bounded HTTP pages.
 An optional, application-owned `DataHistory` sampler publishes ordinary sources
 independently of page lifetime. See [the catalog guide](docs/readme_data_catalog_ru.md).
-Run `npm run player:test-catalog` for real Windows LVGL and MCP coverage.
+Run `npm run player:test-catalog` for real Windows LVGL and native API coverage.
 
-User-authored appearance via existing MCP project operations and ordered style stacks: [guide](docs/readme_appearance_ru.md).
+User-authored appearance via project documents and ordered style stacks: [guide](docs/readme_appearance_ru.md).
 
 `npm run player` also starts the persistent loopback API at `http://127.0.0.1:5300`.
-The project-scoped `nacborui_windows` MCP uses the same adapter as devices; preview,
-revision-checked save, styles, bindings and events execute in native shared services.
+Preview, revision-checked save, styles, bindings and events execute in native shared services.
 `npm run player:test-api` verifies the production path and restart persistence.
 See [Windows API](docs/readme_windows_api_ru.md).
 
 See [Windows demos and live native view](docs/readme_graphics_ru.md).
-
-### Designer application
-
-The shipped [Windows/Android designer](tools/designer/README.md) lives in
-`tools/designer`, independently of the examples. It uses SPLA for
-conversation, OpenAI-compatible/OpenRouter and MCP, with a Blazor Hybrid UI.
-The first phone target uses a native NaWServer HTTP MCP gateway to the Windows
-LVGL demo. Direct MCU HTTP MCP and voice input remain planned.

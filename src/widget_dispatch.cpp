@@ -235,7 +235,12 @@ namespace lvgl_cbor::detail
 			++ctx.plan.node_count;
 			lv_obj_add_event_cb(node.object, node_deleted, LV_EVENT_DELETE, &node);
 			if(!ctx.plan.theme)
-				lv_obj_remove_style_all(node.object);
+			{
+				if(node.extension && node.extension->keep_factory_styles)
+					lv_obj_remove_theme(node.object, LV_PART_ANY | LV_STATE_ANY);
+				else
+					lv_obj_remove_style_all(node.object);
+			}
 
 			return execute_body(fields, node, handler, depth, ctx);
 		}

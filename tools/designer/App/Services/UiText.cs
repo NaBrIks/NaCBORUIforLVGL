@@ -13,13 +13,16 @@ public sealed class UiText
     private CultureInfo Culture => CultureInfo.GetCultureInfo(Language == "en" ? "en" : "ru");
     public string this[string key] => Resources.GetString(key, Culture) ?? key;
     public string Format(string key, params object[] args) => string.Format(Culture, this[key], args);
-    public void Toggle()
+    public void SetLanguage(string language)
     {
-        Language = Language == "ru" ? "en" : "ru";
+        if (language is not ("en" or "ru") || Language == language) return;
+        Language = language;
         Preferences.Default.Set("nacborui.designer.language", Language);
     }
     public string Status(string value)
     {
+        var direct = Regex.Match(value, @"^Direct API: (\d+) инструментов$");
+        if (direct.Success) return Format("Прямой API: {0} инструментов", direct.Groups[1].Value);
         var match = Regex.Match(value, @"^MCP: (\d+) инструментов$");
         return match.Success ? Format("MCP: {0} инструментов", match.Groups[1].Value) : this[value];
     }

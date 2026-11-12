@@ -1,5 +1,9 @@
 # Приёмка: NaWServer, Windows LVGL, веб-редактор и MCP
 
+> Результаты MCP в этом отчёте относятся к прежней реализации.
+> Актуальные способы подключения описаны в [руководстве MCP](../readme_mcp_ru.md).
+
+
 Дата: 2026-11-07. Сетевой слой — штатный NaWServer Windows backend.
 Общие C++ ProjectService/DataRegistry/StyleService исполняют проекты и события.
 Постоянное хранение использует прежний FileProjectStore и UTF-8 пути.

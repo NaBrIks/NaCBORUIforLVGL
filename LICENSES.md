@@ -1,7 +1,7 @@
 # License scope and third-party exceptions
 
 The root [MIT License](LICENSE) applies to project-owned NaCBORUIforLVGL code:
-the C++ core, codecs, MCP/device adapters, frontend, shared modules, Windows player
+the C++ core, codecs, native HTTP/device adapters, frontend, shared modules, Windows player
 and both hardware examples. Copyright: **2026 Oleg Kozhevnikov**, as confirmed by
 the owner. The owner explicitly selected MIT for his code on 2026-10-30, including
 his earlier ESP32-yaidfws frontend/RGB adaptations previously offered under GPL.
@@ -22,7 +22,7 @@ transfer or history rewrite by itself is not a relicensing operation.
 | LVGL and TinyCBOR sources | External dependencies under their own MIT notices, not vendored here. |
 | Montserrat font data supplied by LVGL | Preserve the applicable font license from the selected LVGL dependency when distributing it; project headers do not replace font licenses. |
 | ESP-IDF and managed touch drivers | External dependencies with their own licenses/notices, including Apache-2.0; see [source register](docs/readme_sources_ru.md). |
-| Vue, cborg, Vite, MCP SDK and transitive npm dependencies | Their own package licenses; versions/integrities are recorded in lock files. |
+| Vue, cborg, Vite and transitive npm dependencies | Their own package licenses; versions/integrities are recorded in lock files. |
 | Installed Windows Segoe UI | OS font is read at runtime, never copied into this repository or bundled. Windows licensing is not replaced by MIT. |
 | NaWServer | Separate owner project/dependency; use the license of the selected revision. |
 

@@ -9,7 +9,7 @@ using SPLA.Mcp.Client;
 namespace NaCBORUI.Designer.Core;
 
 /// <summary>Only adapts SPLA's discovered proxy tools to SPLA's orchestrator contract.</summary>
-internal sealed class McpToolHostAdapter : IToolHost, IDisposable
+internal sealed class McpToolHostAdapter : IDesignerToolHost, IDisposable
 {
     private readonly McpServerSession _session;
     private readonly Action<string> _notice;
@@ -25,6 +25,10 @@ internal sealed class McpToolHostAdapter : IToolHost, IDisposable
 
     public IEnumerable<ToolDefinition> GetToolDefinitions() =>
         Volatile.Read(ref _tools).Values.Select(tool => tool.GetDefinition()).ToArray();
+
+    public bool IsConnected => _session.State == McpSessionState.Ready;
+
+    public Task ConnectAsync(CancellationToken cancellationToken) => _session.ConnectAsync(cancellationToken);
 
     public Task<ToolResult> ExecuteToolAsync(AgentMode mode, string name, string argumentsJson,
         CancellationToken cancellationToken = default, ToolCallContext? context = null)

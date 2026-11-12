@@ -1,5 +1,6 @@
 @page "/"
-@implements IDisposable
+@using NaCBORUI.Designer.Core
+@implements IAsyncDisposable
 @inject DesignerSessionAdapter Session
 @inject IJSRuntime JS
 @inject UiText T
@@ -10,14 +11,32 @@
 <div class="designer-shell">
     <header class="topbar">
         <div class="brand"><span class="brand-mark" aria-hidden="true">N</span><span>NaCBORUIforLVGL</span></div>
-        <div class="connection-status @(Session.IsConnected ? "connected" : "disconnected")" title="@Session.Status"><span class="status-dot"></span><span>@(Session.NeedsReconnect ? T["Переподключить"] : Session.IsConnected ? T["Подключено"] : T["Не подключено"])</span></div>
+        <div class="connection-controls">
+            <select class="active-connection-chooser" aria-label="@T["Подключение"]"
+                    title="@(Session.Settings.SelectedConnection is { } profile ? ActiveConnectionTitle(profile) : T["Подключение"])"
+                    disabled="@(ConnectionLocked || Session.Settings.Connections.Count == 0)"
+                    @bind:get="Session.Settings.SelectedConnectionId" @bind:set="SelectActiveConnection">
+                @foreach (var item in Session.Settings.Connections)
+                {
+                    <option @key="item.Id" value="@item.Id" title="@ActiveConnectionTitle(item)">@item.Name</option>
+                }
+            </select>
+            <button class="button secondary connection-button @(Session.IsConnected && !Connecting ? "connected" : null)"
+                    type="button" title="@ConnectionTooltip" aria-label="@ConnectionTooltip" aria-busy="@(Connecting ? "true" : "false")"
+                    disabled="@(ConnectionLocked || Session.Settings.Connections.Count == 0)" @onclick="Connect">
+                <span class="status-dot" aria-hidden="true"></span><span>@ConnectionLabel</span>
+            </button>
+        </div>
         <div class="top-actions">
-            <button class="button compact language-button" type="button" title="RU / EN" aria-label="RU / EN" @onclick="ToggleLanguage">@T.Language.ToUpperInvariant()</button>
-            <button class="button secondary" disabled="@(Session.IsBusy || Session.PendingCount > 0)" @onclick="Connect">@(Session.IsConnected ? T["Переподключить"] : T["Подключить"])</button>
-
-            <button class="button secondary" disabled="@(!Session.IsInitialized || Session.IsBusy)" @onclick="NewChat">@T["Новый чат"]</button>
-            <button class="icon-button theme-button" title="@T["Сменить тему"]" aria-label="@T["Сменить тему"]" @onclick="ToggleTheme">@(DarkTheme ? "☼" : "◐")</button>
-            <button class="button primary" disabled="@Session.IsBusy" @onclick="OpenSettings">@T["Настройки"]</button>
+            <button class="icon-button theme-button" type="button" title="@T["Сменить тему"]" aria-label="@T["Сменить тему"]" @onclick="ToggleTheme">@(DarkTheme ? "☼" : "◐")</button>
+            <button class="icon-button settings-button" type="button" title="@T["Настройки"]" aria-label="@T["Настройки"]"
+                    disabled="@Session.IsBusy" @onclick="OpenSettings">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M10 2h4l.5 2.5 1.8.8 2.2-1.4 2.8 2.8-1.4 2.2.8 1.8 2.3.5v4l-2.3.5-.8 1.8 1.4 2.2-2.8 2.8-2.2-1.4-1.8.8L14 24h-4l-.5-2.1-1.8-.8-2.2 1.4-2.8-2.8 1.4-2.2-.8-1.8L1 15.2v-4l2.3-.5.8-1.8-1.4-2.2 2.8-2.8 2.2 1.4 1.8-.8Z" transform="translate(1 0) scale(.92)"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </button>
         </div>
     </header>
 
@@ -25,9 +44,12 @@
         <section class="chat-pane" aria-label="@T["Чат конструктора"]">
             <div class="chat-heading">
                 <div><h1>@T["Конструктор интерфейса"]</h1><span class="subheading">@T["Чат и проверка через общий LVGL runtime"]</span></div>
-                <div class="mode-switch" role="group" aria-label="@T["Режим ответа"]">
-                    <button class="@(!Session.ShowReasoning ? "selected" : "")" @onclick="() => SetMode(false)">@T["Обычный"]</button>
-                    <button class="@(Session.ShowReasoning ? "selected" : "")" @onclick="() => SetMode(true)">@T["Подробный"]</button>
+                <div class="chat-actions">
+                    <div class="mode-switch" role="group" aria-label="@T["Режим ответа"]">
+                        <button class="@(!Session.ShowReasoning ? "selected" : "")" @onclick="() => SetMode(false)">@T["Обычный"]</button>
+                        <button class="@(Session.ShowReasoning ? "selected" : "")" @onclick="() => SetMode(true)">@T["Подробный"]</button>
+                    </div>
+                    <button class="button secondary new-chat-button" type="button" disabled="@(!Session.IsInitialized || Session.IsBusy)" @onclick="NewChat">@T["Новый чат"]</button>
                 </div>
             </div>
 
@@ -145,74 +167,107 @@
 
         <div class="pane-splitter" @ref="SplitterElement" role="separator" tabindex="0" aria-orientation="vertical" aria-label="@T["Ширина панелей"]" title="@T["Ширина панелей"]" aria-valuemin="25" aria-valuemax="75" aria-valuenow="@PaneRatio.ToString(System.Globalization.CultureInfo.InvariantCulture)"></div>
         <aside class="preview-pane @(PreviewExpanded ? "preview-expanded" : "")" aria-label="@T["Предпросмотр LVGL"]">
-            <header class="pane-heading">
-                <div><h2>@T["Предпросмотр LVGL"]</h2><span>@T["Настоящий дисплей · MCP"]</span></div>
-                <div class="preview-actions"><button class="icon-button" type="button" title="@T["Размер предпросмотра"]" aria-label="@T["Развернуть предпросмотр"]" @onclick="() => PreviewExpanded = !PreviewExpanded">@(PreviewExpanded ? "×" : "⛶")</button>
-                <button class="icon-button copy-frame-button" type="button" title="@T["Копировать экран в буфер"]" aria-label="@T["Копировать экран в буфер"]" disabled="@(string.IsNullOrWhiteSpace(Session.PreviewDataUrl))" @onclick="CopyPreview"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="1.5"/><path d="M16 8V3H3v13h5"/></svg></button>
-                <button class="icon-button refresh-button" type="button" title="@T["Обновить кадр"]" aria-label="@T["Обновить кадр"]" disabled="@(!Session.IsConnected || Session.IsBusy)" @onclick="RefreshPreview">↻</button></div>
+            <header class="pane-heading right-pane-heading">
+                <div class="right-pane-tabs" role="tablist" aria-label="@T["Предпросмотр LVGL"]">
+                    <button id="preview-tab" type="button" role="tab" aria-controls="preview-content" aria-selected="@(!ShowSessionLog ? "true" : "false")" @onclick="() => SelectRightTab(false)">@T["Предпросмотр LVGL"]</button>
+                    <button id="session-log-tab" type="button" role="tab" aria-controls="session-log" aria-selected="@(ShowSessionLog ? "true" : "false")" @onclick="() => SelectRightTab(true)">@T["События сессии"] <span class="activity-count">@Session.Logs.Count</span></button>
+                </div>
+                <div class="preview-actions"><button class="icon-button" type="button" title="@RightPaneExpandLabel" aria-label="@RightPaneExpandLabel" aria-pressed="@(PreviewExpanded ? "true" : "false")" @onclick="() => PreviewExpanded = !PreviewExpanded">@(PreviewExpanded ? "×" : "⛶")</button>
+                <button class="icon-button copy-frame-button" type="button" title="@T["Копировать экран в буфер"]" aria-label="@T["Копировать экран в буфер"]" disabled="@(ShowSessionLog || !Session.HasFreshPreview)" @onclick="CopyPreview"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="1.5"/><path d="M16 8V3H3v13h5"/></svg></button>
+                <button class="icon-button refresh-button" type="button" title="@T["Обновить кадр"]" aria-label="@T["Обновить кадр"]" disabled="@(ShowSessionLog || !Session.IsConnected)" @onclick="RefreshPreview">↻</button></div>
             </header>
 
-            <div class="layout-debug-inline" aria-label="@T["Настройки диагностики разметки"]">
-                <div class="debug-level-scroll">
-                    <table class="debug-level-table" aria-label="@T["Диагностика разметки"]">
-                        <thead><tr><th scope="col">@T["Слой"]</th>
-                        @for (var depth = 0; depth < (Session.LayoutDebug?.Levels.Length ?? 0); depth++)
-                        { <th scope="col">@depth</th> }
-                        </tr></thead>
-                        <tbody>
-                        @for (var rowIndex = 0; rowIndex < 4; rowIndex++)
-                        {
-                            var row = rowIndex;
-                            <tr><th scope="row">@T[DebugRowName(row)]</th>
-                            @for (var index = 0; index < (Session.LayoutDebug?.Levels.Length ?? 0); index++)
+            <div id="preview-content" class="preview-content" role="tabpanel" aria-labelledby="preview-tab" hidden="@ShowSessionLog">
+                <div class="layout-debug-inline" aria-label="@T["Настройки диагностики разметки"]">
+                    <div class="preview-options">
+                        <div class="preview-transfer-row">
+                            <label class="preview-input-toggle" title="@T["Управлять экраном"]"><input type="checkbox" checked="@Session.PreviewPointerEnabled" disabled="@(!Session.PreviewPointerOptionAvailable)" @onchange="TogglePreviewPointer" />@T["Управлять"]</label>
+                            @if (Session.PreviewWebSocketRequired)
                             {
-                                var depth = index;
-                                var level = Session.LayoutDebug!.Levels[depth];
-                                var fill = row >= 2;
-                                <td>
-                                @if (row == 0 || row == 3)
-                                {
-                                    <input type="checkbox" aria-label="@T.Format("{0}: слой {1}", T[DebugRowName(row)], depth)" @bind:get="@(fill ? level.Digit : level.Outline)" @bind:set="(bool enabled) => ChangeDebugLevel(depth, fill, enabled)" disabled="@DebugUnavailable" />
-                                }
-                                else
-                                {
-                                    <input class="debug-level-color" type="color" aria-label="@T.Format("{0}: слой {1}", T[DebugRowName(row)], depth)" title="@T.Format("{0}: слой {1}", T[DebugRowName(row)], depth)" value="@ColorHex(fill ? level.DigitColor : level.OutlineColor)" @onchange="(ChangeEventArgs e) => ChangeDebugColor(depth, fill, e.Value?.ToString())" disabled="@DebugUnavailable" />
-                                }
-                                </td>
+                                <span class="preview-active-transport">@T.Format("Используется {0}", "WS")</span>
                             }
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
+                            else if (Session.PreviewWebSocketAvailable)
+                            {
+                                <div class="preview-transport" role="group" aria-label="@T["Транспорт кадра"]">
+                                    <button type="button" aria-pressed="@(!Session.PreviewWebSocket ? "true" : "false")" @onclick="() => Session.SetPreviewWebSocket(false)">HTTP</button>
+                                    <button type="button" aria-pressed="@(Session.PreviewWebSocket ? "true" : "false")" @onclick="() => Session.SetPreviewWebSocket(true)">WS</button>
+                                </div>
+                                <span class="preview-active-transport">@T.Format("Используется {0}", Session.PreviewWebSocket ? "WS" : "HTTP")</span>
+                            }
+                        </div>
+                        <div class="preview-transfer-row">
+                            <label class="preview-progressive-toggle" title="@T["Показывать кадр по мере загрузки"]"><input type="checkbox" checked="@Session.ProgressivePreview" disabled="@(!Session.ProgressivePreviewAvailable)" @onchange="ToggleProgressivePreview" />@T["Постепенно"]</label>
+                            <div class="preview-transfer-progress" title="@T["Распакованные байты обновления"]">
+                                <span class="preview-byte-progress">@(Session.ProgressivePreviewTotal > 0 ? $"{Session.ProgressivePreviewTotal:N0}" : "—")</span>
+                                <span class="preview-byte-progress">@(Session.ProgressivePreviewTotal > 0 ? $"{Session.ProgressivePreviewReceived:N0}" : "—")</span>
+                                <progress aria-label="@T["Загрузка кадра"]" max="@Math.Max(1, Session.ProgressivePreviewTotal)" value="@Session.ProgressivePreviewReceived"></progress>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="debug-level-scroll">
+                        <table class="debug-level-table" aria-label="@T["Диагностика разметки"]">
+                            <thead><tr><th scope="col">@T["Слой"]</th>
+                            @for (var depth = 0; depth < (Session.LayoutDebug?.Levels.Length ?? 0); depth++)
+                            { <th scope="col">@depth</th> }
+                            </tr></thead>
+                            <tbody>
+                            @for (var rowIndex = 0; rowIndex < 4; rowIndex++)
+                            {
+                                var row = rowIndex;
+                                <tr><th scope="row">@T[DebugRowName(row)]</th>
+                                @for (var index = 0; index < (Session.LayoutDebug?.Levels.Length ?? 0); index++)
+                                {
+                                    var depth = index;
+                                    var level = Session.LayoutDebug!.Levels[depth];
+                                    var fill = row >= 2;
+                                    <td>
+                                    @if (row == 0 || row == 3)
+                                    {
+                                        <input type="checkbox" aria-label="@T.Format("{0}: слой {1}", T[DebugRowName(row)], depth)" @bind:get="@(fill ? level.Digit : level.Outline)" @bind:set="(bool enabled) => ChangeDebugLevel(depth, fill, enabled)" disabled="@DebugUnavailable" />
+                                    }
+                                    else
+                                    {
+                                        <input class="debug-level-color" type="color" aria-label="@T.Format("{0}: слой {1}", T[DebugRowName(row)], depth)" title="@T.Format("{0}: слой {1}", T[DebugRowName(row)], depth)" value="@ColorHex(fill ? level.DigitColor : level.OutlineColor)" @onchange="(ChangeEventArgs e) => ChangeDebugColor(depth, fill, e.Value?.ToString())" disabled="@DebugUnavailable" />
+                                    }
+                                    </td>
+                                }
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="debug-shared-options">
+                        <label class="debug-type" title="@T["G — Grid, F — Flex; выключено — номер слоя"]"><input type="checkbox" aria-label="G/F" @bind:get="@(Session.LayoutDebug?.LayoutType ?? false)" @bind:set="ChangeDebugType" disabled="@DebugUnavailable" />G/F</label>
+                        <label title="@T["Толщина рамки"]"><input type="number" aria-label="@T["Толщина рамки"]" min="1" max="16" @bind:get="@(Session.LayoutDebug?.OutlineWidth ?? 3)" @bind:set="ChangeOutlineWidth" disabled="@DebugUnavailable" />px</label>
+                        <label class="debug-opacity" title="@T["Непрозрачность фона"]">α<input type="range" aria-label="@T["Непрозрачность фона"]" min="0" max="255" @bind:get="@(Session.LayoutDebug?.Opacity ?? 192)" @bind:set="ChangeDebugOpacity" disabled="@DebugUnavailable" /><span>@((Session.LayoutDebug?.Opacity ?? 192) * 100 / 255)%</span></label>
+                    </div>
                 </div>
-                <div class="debug-shared-options">
-                    <label class="debug-type" title="@T["G — Grid, F — Flex; выключено — номер слоя"]"><input type="checkbox" aria-label="G/F" @bind:get="@(Session.LayoutDebug?.LayoutType ?? false)" @bind:set="ChangeDebugType" disabled="@DebugUnavailable" />G/F</label>
-                    <label title="@T["Толщина рамки"]"><input type="number" aria-label="@T["Толщина рамки"]" min="1" max="16" @bind:get="@(Session.LayoutDebug?.OutlineWidth ?? 3)" @bind:set="ChangeOutlineWidth" disabled="@DebugUnavailable" />px</label>
-                    <label class="debug-opacity" title="@T["Непрозрачность фона"]">α<input type="range" aria-label="@T["Непрозрачность фона"]" min="0" max="255" @bind:get="@(Session.LayoutDebug?.Opacity ?? 192)" @bind:set="ChangeDebugOpacity" disabled="@DebugUnavailable" /><span>@((Session.LayoutDebug?.Opacity ?? 192) * 100 / 255)%</span></label>
+                <div @ref="PreviewStageElement" class="preview-stage @(Session.CanSendPreviewPointer ? "preview-pointer-enabled" : null)">
+                    @if (Session.ProgressivePreviewAvailable) { <canvas @ref="PreviewImageElement" class="preview-image" aria-label="@T["Последний фактический кадр LVGL"]"></canvas> }
+                    else if (!string.IsNullOrWhiteSpace(Session.PreviewDataUrl)) { <img class="preview-image" src="@Session.PreviewDataUrl" alt="@T["Последний фактический кадр LVGL"]" draggable="false" /> }
+                    else { <div class="preview-empty"><span class="preview-glyph" aria-hidden="true">▦</span><span>@T["Кадр ещё не получен"]</span></div> }
                 </div>
+                @if (!string.IsNullOrWhiteSpace(Session.PreviewDescription)) { <p class="preview-meta">@Session.PreviewDescription</p> }
             </div>
-            <div class="preview-stage">
-                @if (!string.IsNullOrWhiteSpace(Session.PreviewDataUrl)) { <img class="preview-image" src="@Session.PreviewDataUrl" alt="@T["Последний фактический кадр LVGL"]" /> }
-                else { <div class="preview-empty"><span class="preview-glyph" aria-hidden="true">▦</span><span>@T["Кадр ещё не получен"]</span></div> }
-            </div>
-            @if (!string.IsNullOrWhiteSpace(Session.PreviewDescription)) { <p class="preview-meta">@Session.PreviewDescription</p> }
-            <details class="activity-details" open="@Session.ShowReasoning">
-                <summary>@T["События сессии"] <span>@Session.Logs.Count</span></summary>
-                <div class="activity-list">
-                    @foreach (var entry in Session.Logs.TakeLast(80).Reverse())
+            <div id="session-log" class="activity-list" role="tabpanel" aria-labelledby="session-log-tab" tabindex="0" hidden="@(!ShowSessionLog)">
+                @if (ShowSessionLog)
+                {
+                    @foreach (var entry in Session.Logs.Reverse())
                     {
                         <div class="activity-row"><time>@entry.At.ToLocalTime().ToString("HH:mm:ss")</time><span class="activity-kind">@entry.Kind</span><span>@entry.Text</span></div>
                     }
-                </div>
-            </details>
-
-
+                    @if (Session.Logs.Count == 0)
+                    {
+                        <p class="activity-empty">@T["Журнал пока пуст"]</p>
+                    }
+                }
+            </div>
         </aside>
     </main>
 </div>
 @if (SettingsOpen)
 {
-    <SettingsPanel Settings="Session.Settings" OnSave="SaveSettings" OnClose="CloseSettings" OnLoadModels="LoadModels" Models="Models" LoadingModels="LoadingModels" Error="@SettingsError" />
+    <SettingsPanel Settings="Session.Settings" OnSaveModel="SaveModelSettings" OnSaveConnections="SaveConnectionSettings" OnTabChanged="ClearSettingsNotice" OnLanguageChanged="SetLanguage" SavedNotice="@SettingsNotice" OnClose="CloseSettings" OnLoadModels="LoadModels" Models="Models" LoadingModels="LoadingModels" Error="@SettingsError" />
 }
 </div>
 
@@ -221,7 +276,7 @@
     private double PaneRatio = Preferences.Default.Get("nacborui.designer.chat-width", 62.0);
     private string PaneStyle => $"--chat-track:{PaneRatio.ToString(System.Globalization.CultureInfo.InvariantCulture)}fr;--preview-track:{(100 - PaneRatio).ToString(System.Globalization.CultureInfo.InvariantCulture)}fr";
     private static string DebugRowName(int row) => row switch { 0 => "Рамка", 1 => "RGB рамки", 2 => "RGB фона", _ => "Фон" };
-    private void ToggleLanguage() => T.Toggle();
+    private void SetLanguage(string language) => T.SetLanguage(language);
     [JSInvokable]
     public Task SavePaneRatio(double ratio) => InvokeAsync(() =>
     {
@@ -235,31 +290,141 @@
     private string DraftText { get; set; } = string.Empty;
     private List<DraftFile> DraftAttachments { get; } = new();
     private bool PreviewExpanded;
+    private bool ShowSessionLog;
+    private string RightPaneExpandLabel => PreviewExpanded ? T["Свернуть панель"] : T["Развернуть панель"];
+
+    private async Task SelectRightTab(bool showLog)
+    {
+        if (ShowSessionLog == showLog) return;
+        if (showLog) await UnbindPreviewPointerAsync();
+        ShowSessionLog = showLog;
+    }
     private bool SettingsOpen { get; set; }
     private bool DarkTheme { get; set; }
     private bool LoadingModels { get; set; }
     private string? SettingsError { get; set; }
+    private string? SettingsNotice { get; set; }
     private IReadOnlyList<string> Models { get; set; } = Array.Empty<string>();
 
     protected override async Task OnInitializedAsync()
     {
         Session.Changed += HandleSessionChanged;
+        Session.ProgressivePreviewRequested += HandleProgressivePreviewRequested;
         Clock = new System.Threading.Timer(_ => { if (Session.IsBusy) _ = InvokeAsync(StateHasChanged); }, null, 1000, 1000);
         DarkTheme = Preferences.Default.Get("nacborui.designer.dark-theme", false);
         await Session.InitializeAsync();
     }
 
     private DotNetObjectReference<Home>? PasteReference;
+    private ElementReference PreviewImageElement;
+    private ElementReference PreviewStageElement;
+    private ElementReference BoundProgressiveCanvasElement;
+    private bool PreviewPointerBound;
+    private bool ProgressiveRefreshPending;
+    private int LastProgressiveResetVersion = -1;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            await Session.InitializeBrowserToolsAsync(action => InvokeAsync(action));
             PasteReference = DotNetObjectReference.Create(this);
             await JS.InvokeVoidAsync("designerUi.bindPaste", PasteReference);
             await JS.InvokeVoidAsync("designerUi.bindSplitter", WorkAreaElement, SplitterElement, PasteReference);
         }
+        await UpdatePreviewPointerBindingAsync();
+        if (LastProgressiveResetVersion != Session.ProgressivePreviewResetVersion)
+        {
+            LastProgressiveResetVersion = Session.ProgressivePreviewResetVersion;
+            try { await JS.InvokeVoidAsync("designerUi.clearProgressiveFrame", BoundProgressiveCanvasElement); }
+            catch (Exception ex) when (ex is JSDisconnectedException or JSException or TaskCanceledException) { }
+            try { await JS.InvokeVoidAsync("designerUi.clearProgressiveFrame", PreviewImageElement); }
+            catch (Exception ex) when (ex is JSDisconnectedException or JSException or TaskCanceledException) { }
+            BoundProgressiveCanvasElement = default;
+        }
+        if (ProgressiveRefreshPending && Session.ProgressivePreviewAvailable && PasteReference is not null)
+        {
+            ProgressiveRefreshPending = false;
+            _ = JS.InvokeVoidAsync("designerUi.requestProgressiveFrame", PreviewImageElement, PasteReference,
+                Session.ProgressivePreview, Session.ProgressivePreviewResetVersion, Session.PreviewPointerConnectionId, Session.PreviewWebSocket);
+            BoundProgressiveCanvasElement = PreviewImageElement;
+        }
         await JS.InvokeVoidAsync("designerUi.followChat", false);
     }
+
+    private async Task UpdatePreviewPointerBindingAsync()
+    {
+        var canBind = !ShowSessionLog && Session.PreviewPointerOptionAvailable && PasteReference is not null;
+        if (!canBind)
+        {
+            await UnbindPreviewPointerAsync();
+            return;
+        }
+
+        var connectionId = Session.PreviewPointerConnectionId;
+        try
+        {
+            await JS.InvokeVoidAsync("designerUi.bindPreviewPointer", PreviewStageElement, PasteReference,
+                Session.PreviewOriginalWidth, Session.PreviewOriginalHeight, Session.CanSendPreviewPointer, connectionId);
+            PreviewPointerBound = true;
+        }
+        catch (Exception ex) when (ex is JSDisconnectedException or JSException or TaskCanceledException) { }
+    }
+
+    private async Task UnbindPreviewPointerAsync()
+    {
+        if (!PreviewPointerBound) return;
+        try { await JS.InvokeVoidAsync("designerUi.unbindPreviewPointer", PreviewStageElement); }
+        catch (Exception ex) when (ex is JSDisconnectedException or JSException or TaskCanceledException) { }
+        PreviewPointerBound = false;
+    }
+
+    private void TogglePreviewPointer(ChangeEventArgs args) =>
+        Session.SetPreviewPointerEnabled(args.Value is bool enabled && enabled);
+
+    private void ToggleProgressivePreview(ChangeEventArgs args) =>
+        Session.SetProgressivePreviewEnabled(args.Value is bool enabled && enabled);
+
+    private void HandleProgressivePreviewRequested()
+    {
+        ProgressiveRefreshPending = true;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ClearProgressiveFrameAsync()
+    {
+        try { await JS.InvokeVoidAsync("designerUi.clearProgressiveFrame", BoundProgressiveCanvasElement); }
+        catch (Exception ex) when (ex is JSDisconnectedException or JSException or TaskCanceledException) { }
+        BoundProgressiveCanvasElement = default;
+    }
+
+    [JSInvokable]
+    public Task UpdateProgressiveFrame(int width, int height, long received, long total, string revision, string connectionId) => InvokeAsync(() =>
+    {
+        Session.ReportProgressiveFrame(width, height, received, total, revision, connectionId, ready: false);
+    });
+
+    [JSInvokable]
+    public Task ProgressiveFrameCompleted(int width, int height, string revision, string connectionId) => InvokeAsync(() =>
+    {
+        Session.ReportProgressiveFrame(width, height, 0, 0, revision, connectionId, ready: true);
+    });
+
+    [JSInvokable]
+    public Task ProgressiveFrameError(string message, string connectionId) => InvokeAsync(() =>
+    {
+        Session.ReportProgressiveFrameError(message, connectionId);
+    });
+
+    [JSInvokable]
+    public Task SendPreviewPointer(int x, int y, bool pressed, string connectionId) =>
+        Session.SendPreviewPointerAsync(x, y, pressed, connectionId);
+
+    [JSInvokable]
+    public Task PreviewPointerError(string message) => InvokeAsync(() =>
+    {
+        Session.ReportPreviewPointerError(message);
+        StateHasChanged();
+    });
 
     [JSInvokable]
     public Task PasteImage(string name, string mime, string dataUrl) => InvokeAsync(() =>
@@ -294,26 +459,73 @@
     private void ChangeReasoningMode(ChangeEventArgs args) => Session.SetReasoningLevel(args.Value?.ToString() ?? "");
     private void ChangeReasoningEffort(ChangeEventArgs args) => Session.SetReasoningLevel(string.IsNullOrEmpty(args.Value?.ToString()) ? "on" : args.Value!.ToString()!);
     private void SetMode(bool detailed) => Session.SetDetailedMode(detailed);
+    private string ActiveConnectionTitle(DesignerConnectionProfile profile)
+    {
+        var address = profile.ConnectionMode switch
+        {
+            DesignerConnectionMode.DirectApi => profile.DeviceOrigin,
+            DesignerConnectionMode.NativeMcp => profile.McpEndpoint,
+            DesignerConnectionMode.UsbPreview => profile.UsbPort,
+            _ => profile.ProxyMcpEndpoint
+        };
+        return string.IsNullOrWhiteSpace(address) ? profile.Name : $"{profile.Name} · {address}";
+    }
+    private async Task SelectActiveConnection(string id)
+    {
+        if (id == Session.Settings.SelectedConnectionId) return;
+        try
+        {
+            await UnbindPreviewPointerAsync();
+            await ClearProgressiveFrameAsync();
+            await Session.SelectConnectionAsync(id);
+        }
+        catch (Exception ex) { LocalError = ex.Message; }
+    }
+    private bool Connecting;
+    private bool ConnectionLocked => Connecting || Session.IsBusy || Session.PendingCount > 0;
+    private string ConnectionLabel => Connecting ? T["Подключение…"] :
+        Session.IsConnected ? T["Подключено"] : Session.NeedsReconnect ? T["Переподключить"] : T["Подключить"];
+    private string ConnectionTooltip => Connecting ? ConnectionLabel :
+        $"{(Session.IsConnected || Session.NeedsReconnect ? T["Переподключить"] : T["Подключить"])} · {Session.Status}";
+
     private async Task Connect()
     {
-        await Session.ConnectAsync();
-        if (Session.IsConnected) await Session.RefreshPreviewAsync();
+        if (ConnectionLocked) return;
+        Connecting = true;
+        try
+        {
+            // Release the pointer before the adapter invalidates the old target ID.
+            await UnbindPreviewPointerAsync();
+            await ClearProgressiveFrameAsync();
+            await Session.ConnectAsync();
+            if (Session.IsConnected) await Session.RefreshPreviewAsync();
+        }
+        finally { Connecting = false; }
     }
-    private void OpenSettings() => SettingsOpen = true;
+    private void OpenSettings() { ClearSettingsNotice(); SettingsOpen = true; }
     private void ToggleTheme()
     {
         DarkTheme = !DarkTheme;
         Preferences.Default.Set("nacborui.designer.dark-theme", DarkTheme);
     }
-    private void CloseSettings() { SettingsOpen = false; SettingsError = null; }
+    private void CloseSettings() { SettingsOpen = false; ClearSettingsNotice(); }
+    private void ClearSettingsNotice() { SettingsError = null; SettingsNotice = null; }
     private void NewChat() { Session.NewChat(); DraftText = string.Empty; DraftAttachments.Clear(); }
     private void PromptSettings() => DraftText = "Create a compact LVGL settings screen with a title, two labeled fields, and Apply and Cancel actions.";
     private void PromptReview() => DraftText = "Review the attached LVGL project JSON and suggest a focused correction.";
     private void RemoveAttachment(DraftFile file) => DraftAttachments.Remove(file);
 
-    private async Task SaveSettings(DesignerSettings settings)
+    private async Task SaveModelSettings(DesignerSettings settings)
     {
-        try { await Session.SaveSettingsAsync(settings); CloseSettings(); }
+        ClearSettingsNotice();
+        try { await Session.SaveModelSettingsAsync(settings); SettingsNotice = T["Сохранено"]; }
+        catch (Exception ex) { SettingsError = ex.Message; }
+    }
+
+    private async Task SaveConnectionSettings(DesignerSettings settings)
+    {
+        ClearSettingsNotice();
+        try { await Session.SaveConnectionSettingsAsync(settings); SettingsNotice = T["Сохранено"]; }
         catch (Exception ex) { SettingsError = ex.Message; }
     }
 
@@ -325,9 +537,21 @@
         finally { LoadingModels = false; }
     }
 
-    private async Task CopyPreview() => await Session.CopyPreviewAsync();
+    private async Task CopyPreview()
+    {
+        if (Session.ProgressivePreviewAvailable)
+        {
+            try
+            {
+                var image = await JS.InvokeAsync<string>("designerUi.copyProgressiveFrame", PreviewImageElement);
+                await Session.CopyPreviewDataUrlAsync(image);
+            }
+            catch (Exception ex) when (ex is JSDisconnectedException or JSException or TaskCanceledException) { }
+        }
+        else await Session.CopyPreviewAsync();
+    }
     private async Task RefreshPreview() => await Session.RefreshPreviewAsync();
-    private bool DebugUnavailable => !Session.IsConnected || Session.IsBusy || Session.UpdatingLayoutDebug || Session.LayoutDebug is null;
+    private bool DebugUnavailable => !Session.IsConnected || Session.UpdatingLayoutDebug || Session.LayoutDebug is null;
     private static string ColorHex(int rgb) => $"#{rgb:X6}";
     private async Task ChangeDebugLevel(int depth, bool digits, bool enabled)
     {
@@ -358,7 +582,7 @@
         LocalError = null;
         if (!Session.IsConnected || string.IsNullOrWhiteSpace(Session.Settings.Model))
         {
-            LocalError = T["Подключите MCP и выберите модель в настройках. Введённый запрос сохранён."];
+            LocalError = T["Подключите устройство и выберите модель в настройках. Введённый запрос сохранён."];
             return;
         }
         if (Session.IsBusy && Session.QueuePaused) { LocalError = T["Дождитесь завершения остановки. Запрос сохранён."]; return; }
@@ -444,12 +668,17 @@
         if (args.Key == "Enter" && !args.ShiftKey) await Send();
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        _ = JS.InvokeVoidAsync("designerUi.unbindSplitter", SplitterElement);
+        await UnbindPreviewPointerAsync();
+        try { await JS.InvokeVoidAsync("designerUi.clearProgressiveFrame", BoundProgressiveCanvasElement); }
+        catch (Exception ex) when (ex is JSDisconnectedException or JSException or TaskCanceledException) { }
+        try { await JS.InvokeVoidAsync("designerUi.unbindSplitter", SplitterElement); }
+        catch (Exception ex) when (ex is JSDisconnectedException or JSException or TaskCanceledException) { }
         PasteReference?.Dispose();
         Clock?.Dispose();
         Session.Changed -= HandleSessionChanged;
+        Session.ProgressivePreviewRequested -= HandleProgressivePreviewRequested;
         foreach (var file in DraftAttachments) file.Dispose();
     }
 

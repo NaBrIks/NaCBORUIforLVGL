@@ -66,11 +66,19 @@ namespace
 
 }
 Application::Application(bool graphics)
-  : resources_(appearance.resources()), graphics_(graphics)
+  : resources_(appearance.resources()), graphics_(graphics), layout_debug_(data.registry, [this]{
+	return project_.get();
+})
 {
+	std::string error;
+	if(!data.begin(error)) throw std::runtime_error(error);
 	if(!graphics_) metrics = std::make_unique<SystemMetrics>(data.registry);
 
-	if(lv_display_get_default()) view_pointer_ = std::make_unique<native_view::Pointer>(lv_display_get_default());
+	if(auto *display = lv_display_get_default())
+	{
+		view_pointer_ = std::make_unique<native_view::Pointer>(display);
+		if(!view_pointer_->ready()) view_pointer_.reset();
+	}
 
 	if(!history_plot::register_widget(widgets_)) throw std::runtime_error("Cannot register history plot");
 
@@ -91,17 +99,17 @@ Application::Application(bool graphics)
 	resources_.push_back({"ui_28", "const lv_font_t *", fonts_.large()});
 	resources_.push_back({"ui_sample_image", "const void *", &sample_image});
 	resources_.push_back({"ui_sample_image_small", "const void *", &demo_small_image::image});
-	std::string error;
 	if(!data.registry.add_group({"host", "Application host", "Actual endpoints of this application", ""}, error) ||
 	    !data.registry.add_source({"host.connection",
 	                               DataSchema::object({{"site", DataSchema::text(256)},
 									   {"editor", DataSchema::text(256)}, {"mcp", DataSchema::text(128)}}), {},
-	                               "Host connection", "MCP uses stdio over the same application API", "host"}, error))
+	                               "Host connection", "MCP is hosted inside this application by NaWServer", "host"},
+	    error))
 		throw std::runtime_error(error);
 
 	data.registry.publish("host.connection",
 	    DataValue::Object{{"site", "API disabled"}, {"editor", "API disabled"},
-			{"mcp", graphics_ ? "nacborui_graphics (stdio)" : "nacborui_windows (stdio)"}}, error);
+			{"mcp", LVGL_CBOR_NATIVE_MCP ? "API disabled" : "Not compiled"}}, error);
 	if(!data.registry.add_group({"ui", "Interface", "Appearance choices and UI commands", ""}, error) ||
 	    !data.registry.add_source({"ui.scheme", DataSchema::object({{"id", DataSchema::text(12)},
 									   {"title", DataSchema::text(256)}}), {}, "Current scheme",
@@ -109,120 +117,31 @@ Application::Application(bool graphics)
 	    !data.registry.add_action({"ui.select_scheme", DataSchema::text(12),
 	                               [this](const DataValue &value, std::string &e){
 									   return select_scheme(std::get<std::string>(value.value), e);
-								   }, "Select scheme", "Apply one registered palette", "ui"}, error))
+								   }, "Select scheme", Appearance::project_action_description, "ui"}, error))
 		throw std::runtime_error(error);
 
-	if(!data.registry.add_action({"ui.layout_debug", DataSchema::boolean(),
-	                              [this](const DataValue &value, std::string &e) {
-									  layout_debug_ = std::get<bool>(value.value);
-									  bool any = false;
-									  for(const auto &level : layout_options_.levels)
-										  any = any || level.outline || level.digit;
-									  if(layout_debug_ && !any)
-									  {
-										  const auto count = std::min(size_t(256),
-										  (project_ ? project_->layout_debug_max_depth() : 0) + 1);
-										  while(layout_options_.levels.size() < count)
-											  layout_options_.levels.emplace_back(layout_options_.levels.size());
-										  for(auto &level : layout_options_.levels)
-											  level.outline = true;
-									  }
-
-									  if(project_)
-									  {
-										  project_->set_layout_debug_options(layout_options_);
-										  project_->set_layout_debug(layout_debug_);
-									  }
-
-									  return publish_layout_debug(e);
-								  }, "Layout diagnostics", "Master switch; level settings use ui.layout_debug_options",
-	                              "ui"}, error))
-		throw std::runtime_error(error);
-
-	const auto level_schema = DataSchema::object({{"outline", DataSchema::boolean()}, {"digit", DataSchema::boolean()},
-				{"outlineColor", DataSchema::integer(0, 0xffffff)}, {"digitColor", DataSchema::integer(0, 0xffffff)}});
-	const auto options_schema = DataSchema::object({{"opacity", DataSchema::integer(0, 255)},
-				{"layoutType", DataSchema::boolean()},
-				{"outlineWidth", DataSchema::integer(1, 16)}, {"levels", DataSchema::array(level_schema, 256)}});
-	auto state_schema = options_schema;
-	state_schema.fields["maxDepth"] = DataSchema::integer(0, 255);
-	if(!data.registry.add_source({"ui.layout_debug", state_schema, {}, "Layout diagnostics options",
-	                              "Independent outline/digit switches and colors for each tree depth", "ui"}, error) ||
-	    !data.registry.add_action({"ui.layout_debug_options", options_schema,
-	                               [this](const DataValue &value, std::string &e) {
-									   LayoutDebugOptions next;
-									   next.opacity = uint8_t(std::get<int64_t>(field(value, "opacity").value));
-									   next.outline_width = uint8_t(std::get<int64_t>(field(value,
-									   "outlineWidth").value));
-									   const auto &fields = std::get<DataValue::Object>(value.value);
-									   const auto type = fields.find("layoutType");
-									   next.layout_type = type != fields.end() && std::get<bool>(type->second.value);
-									   bool any = false;
-									   for(const auto &item : std::get<DataValue::Array>(field(value, "levels").value))
-									   {
-										   LayoutDebugLevel level(next.levels.size());
-										   level.outline = std::get<bool>(field(item, "outline").value);
-										   level.digit = std::get<bool>(field(item, "digit").value);
-
-										   level.outline_color = uint32_t(std::get<int64_t>(field(item,
-										   "outlineColor").value));
-										   level.digit_color = uint32_t(std::get<int64_t>(field(item,
-										   "digitColor").value));
-										   any = any || level.outline || level.digit;
-										   next.levels.push_back(level);
-									   }
-									   layout_options_ = std::move(next); layout_debug_ = any;
-									   if(project_)
-									   {
-										   project_->set_layout_debug_options(layout_options_);
-										   project_->set_layout_debug(layout_debug_);
-									   }
-
-									   return publish_layout_debug(e);
-								   }, "Configure layout diagnostics",
-	                               "Per-depth flags/colors, opacity and outline width; transient native styles", "ui"},
-	    error) ||
-	    !publish_layout_debug(error)) throw std::runtime_error(error);
+	if(!layout_debug_.install(error))throw std::runtime_error(error);
 }
 
 bool Application::publish_layout_debug(std::string &error)
 {
-	DataValue::Array levels;
-	const auto count = std::min(size_t(256), (project_ ? project_->layout_debug_max_depth() : 0) + 1);
-	for(size_t depth = 0; depth < count; ++depth)
-	{
-		LayoutDebugLevel level(depth);
-		if(depth < layout_options_.levels.size()) level = layout_options_.levels[depth];
-		else if(layout_options_.levels.empty()) level.outline = true;
-
-		levels.emplace_back(DataValue::Object{{"outline", layout_debug_ && level.outline},
-				{"digit", layout_debug_ && level.digit},
-				{"outlineColor", int64_t(level.outline_color)},
-				{"digitColor", int64_t(level.digit_color)}});
-	}
-	return data.registry.publish("ui.layout_debug", DataValue::Object{{"opacity", int(layout_options_.opacity)},
-				   {"outlineWidth", int(layout_options_.outline_width)}, {"layoutType", layout_options_.layout_type},
-				   {"levels", std::move(levels)},
-				   {"maxDepth", int64_t(count - 1)}}, error);
+	return layout_debug_.publish(error);
 }
 
 bool Application::select_scheme(const std::string &id, std::string &error)
 {
-	try {
-		appearance.select(id);
-		for(const auto &choice:appearance.choices())
-			if(choice.id == id)
-				return data.registry.publish("ui.scheme", DataValue::Object{{"id", id}, {"title", choice.title}},
-				           error);
-
-		error = "Unknown scheme"; return false;
-	}catch(const std::exception &e){error = e.what(); return false;}
+	if(!appearance.select(id, error, [this](const std::string &name){
+	    return project_ ? project_->display_style(name) : StyleHandle{};
+	})) return false;
+	return data.registry.publish("ui.scheme", DataValue::Object{{"id", id},
+	    {"title", appearance.selected_title()}}, error);
 }
 
 void Application::load_schemes(const std::filesystem::path &path, const std::string &initial)
 {
 	load_appearance_file(appearance, path, initial, resources_.data(), resources_.size());
-	appearance.install_popup_theme(lv_display_get_default(), fonts_.small());
+	if(!appearance.install_popup_theme(lv_display_get_default(), fonts_.small()))
+		throw std::runtime_error("Cannot create appearance theme");
 	std::string error; if(!select_scheme(initial, error)) throw std::runtime_error(error);
 
 	data.registry.flush();
@@ -249,7 +168,8 @@ void Application::tick()
 
 	if(view_pointer_)view_pointer_->tick();
 
-	data.tick();
+	std::string error;
+	if(!data.tick(error)) throw std::runtime_error(error);
 }
 
 void Application::configure_store(const std::filesystem::path &prefix)
@@ -292,8 +212,7 @@ bool Application::load(const std::filesystem::path &path, const std::string &ent
 	        std::vector<ProjectStorageInfo>{}, &data.registry, ScreenViewport::Display);
 	if(!project->begin(error)) return false;
 
-	project->set_layout_debug_options(layout_options_);
-	project->set_layout_debug(layout_debug_);
+	layout_debug_.apply(*project);
 
 	ScreenReply reply{};
 	if(!project->load_screen(entry.empty() ? project->status().entry : entry, reply))
@@ -576,7 +495,7 @@ void Application::connection(const std::string &url)
 	if(!data.registry.publish("host.connection",
 	    DataValue::Object{{"site", url + "/viewer"},
 			{"editor", url + "/editor/"},
-			{"mcp", graphics_ ? "nacborui_graphics (stdio)" : "nacborui_windows (stdio)"}}, e))
+			{"mcp", LVGL_CBOR_NATIVE_MCP ? url + "/mcp" : "Not compiled"}}, e))
 		throw std::runtime_error(e);
 
 	data.registry.flush();
@@ -595,5 +514,5 @@ void Application::view_input(int32_t x, int32_t y, bool pressed)
 	if(!view_pointer_)
 		throw std::runtime_error("Pointer unavailable");
 
-	view_pointer_->input(x, y, pressed);
+	if(!view_pointer_->input(x, y, pressed)) throw std::runtime_error("view_input_bounds");
 }

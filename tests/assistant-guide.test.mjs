@@ -10,7 +10,7 @@ import {contract} from '../packages/style-codec/contract.js';
 import {normalizeProperties} from '../packages/style-codec/index.js';
 import {encodeWidgetMethod} from '../packages/screen-codec/widget-methods.js';
 import {offlineCapabilities} from '../packages/screen-codec/index.js';
-import {readUiReference} from '../integrations/mcp/ui-reference.js';
+import {readUiReference} from '../tools/designer/prompts/ui-reference.mjs';
 
 test('Agent grid example has four real controls, attached/local color and validated reverse bindings',async()=>{
  const docs=[...assistantInstructions.matchAll(/```json\s*([\s\S]*?)```/g)].map(m=>JSON.parse(m[1])),document=docs.find(d=>d.format),style=docs.find(d=>d.scope);

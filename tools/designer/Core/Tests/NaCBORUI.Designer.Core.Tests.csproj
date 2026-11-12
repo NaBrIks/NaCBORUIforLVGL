@@ -9,5 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Markdig" Version="1.2.0" />
     <Compile Include="..\..\App\Services\MarkdownRenderer.cs" Link="Presentation\MarkdownRenderer.cs" />
+    <Compile Include="..\..\App\Services\DesignerConnectionProfiles.cs" Link="Presentation\DesignerConnectionProfiles.cs" />
+    <Compile Include="..\..\App\Services\LatestOnlyAsyncWorker.cs" Link="Presentation\LatestOnlyAsyncWorker.cs" />
   </ItemGroup>
 </Project>

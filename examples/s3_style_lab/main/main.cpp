@@ -1,6 +1,12 @@
+#include "response_payload.hpp"
+#include <NaWServer/backends/esp_idf_memory.h>
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Oleg Kozhevnikov
 #include "board.hpp"
+#include "frame_api.hpp"
+#include "display_config_api.hpp"
+#include "appearance.hpp"
+#include "appearance.generated.hpp"
 #include "lvgl_cbor/capabilities.hpp"
 #include "screen_endpoint.hpp"
 #include "native_widgets/registry.hpp"
@@ -16,6 +22,7 @@
 #endif
 #if LVGL_CBOR_HAS_PROJECT_SERVICE
 #include "project_config.hpp"
+#include "layout_diagnostics.hpp"
 #if LVGL_CBOR_PROJECT_API
 #include "project_api.hpp"
 #endif
@@ -67,16 +74,27 @@ namespace
 	unsigned received{}, applied{};
 	char boot_id[24]{};
 	WebSocketEndpoint websocket("/ws");
-	const lvgl_cbor::Resource resources[]{{"default", "const lv_font_t *", LV_FONT_DEFAULT},
-		{"montserrat_20", "const lv_font_t *", &lv_font_montserrat_20},
-		{"montserrat_28", "const lv_font_t *", &lv_font_montserrat_28}};
-	lvgl_cbor::StyleService style_service(resources, 3);
+	Appearance appearance{"inst_main", "inst_items", "inst_value", "inst_warn", "inst_fault"};
+	FrameApi frame_api;
+	DisplayConfigApi display_config_api;
+	const std::vector<lvgl_cbor::Resource> resources = []{
+			auto result = appearance.resources();
+			result.push_back({"default", "const lv_font_t *", LV_FONT_DEFAULT});
+			result.push_back({"montserrat_20", "const lv_font_t *", &lv_font_montserrat_20});
+			result.push_back({"montserrat_28", "const lv_font_t *", &lv_font_montserrat_28});
+			return result;
+		}();
+	lvgl_cbor::StyleService style_service(resources.data(), resources.size());
 	lvgl_cbor::WidgetRegistry widget_registry;
 	lvgl_cbor::DataRegistry data_registry;
-	ScreenEndpoint screen_endpoint(resources, 3, &style_service, &widget_registry, &data_registry);
+	ScreenEndpoint screen_endpoint(resources.data(), resources.size(), &style_service, &widget_registry,
+	    &data_registry);
 #if LVGL_CBOR_HAS_PROJECT_SERVICE
 	lvgl_cbor::ProjectService project_service(lab_project::base, &lab_project::changes, lab_project::policy,
-	    lab_project::limits, resources, 3, &widget_registry, lab_project::media, &data_registry);
+	    lab_project::limits, resources.data(), resources.size(), &widget_registry, lab_project::media, &data_registry);
+	example_ui::LayoutDiagnostics layout_diagnostics(data_registry, []{
+	    return &project_service;
+		});
 #if LVGL_CBOR_PROJECT_API
 	ProjectApi project_api(project_service);
 #endif
@@ -105,7 +123,8 @@ namespace
 	{
 		lvgl_cbor::CapabilityLimits limits; limits.style_packet_bytes = max_style_packet;
 		limits.screen_websocket_packet_bytes = ScreenEndpoint::max_packet;
-		auto body = lvgl_cbor::runtime_capabilities_json(resources, 3, limits, &widget_registry, &data_registry);
+		auto body = lvgl_cbor::runtime_capabilities_json(resources.data(), resources.size(), limits, &widget_registry,
+		        &data_registry);
 		body.pop_back();
 		body += ",\"display\":{\"width\":" +
 		    std::to_string(lv_display_get_horizontal_resolution(lv_display_get_default())) + ",\"height\":" +
@@ -138,7 +157,7 @@ namespace
 // the HTTP task's small stack with the send path.
 	__attribute__((noinline)) std::string info_json()
 	{
-		static TaskStatus_t tasks[64]; uint32_t runtime; const auto count = uxTaskGetSystemState(tasks, 64, &runtime);
+		static TaskStatus_t tasks[64]; uint32_t runtime{}; const auto count = uxTaskGetSystemState(tasks, 64, &runtime);
 		auto *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"); esp_netif_ip_info_t address{}; if(netif)
 			esp_netif_get_ip_info(netif, &address);
 
@@ -155,6 +174,8 @@ namespace
 		body += ",\"touch_available\":" + std::string(display_touch_available() ? "true" : "false") +
 		    ",\"touch_errors\":" + std::to_string(display_touch_errors());
 		body += ",\"component_preview\":true,\"component_type\":" + std::to_string(screen_endpoint.component_type());
+		body += ",\"runtime_clock_ticks\":" + std::to_string(runtime);
+		body += ",\"native_view\":true,\"native_view_delta\":true,\"native_view_packets\":true,\"native_view_ws\":true,\"native_view_packet_version\":" + std::to_string(frame_api.packet_version()) + ",\"display_config\":true,\"native_view_input\":" + std::string(frame_api.input_ready() ? "true" : "false") + ",\"native_view_interval_ms\":1000";
 		body += ",\"embedded_editor\":" + std::string(LVGL_CBOR_EMBED_EDITOR ? "true" : "false");
 		body += ",\"boot_id\":" + quote(boot_id) + ",\"reset_reason\":" + std::to_string(esp_reset_reason());
 		body += ",\"uptime_ms\":" + std::to_string(esp_timer_get_time() / 1000) + ",\"heap_free\":" +
@@ -184,7 +205,8 @@ namespace
 			    static_cast<unsigned>(task.xTaskNumber), static_cast<int>(task.xCoreID),
 			    static_cast<unsigned>(task.uxCurrentPriority), states[std::min<unsigned>(task.eCurrentState, 5)],
 			    static_cast<unsigned>(task.usStackHighWaterMark));
-			body += "{\"name\":" + quote(task.pcTaskName) + record;
+			body += "{\"name\":" + quote(task.pcTaskName) + ",\"runtime_ticks\":" +
+			    std::to_string(task.ulRunTimeCounter) + record;
 		}
 		body += "]}"; return body;
 	}
@@ -202,8 +224,7 @@ namespace
 	{
 		(void)response.header("Access-Control-Allow-Origin", "*");
 		const auto snapshot = std::atomic_load(&capabilities_snapshot);
-		return response.send(200, "application/json",
-		           {reinterpret_cast<const uint8_t *>(snapshot->data()), snapshot->size()});
+		return lvgl_cbor::http_payload::send(response,200,"application/json",snapshot, reinterpret_cast<const uint8_t *>(snapshot->data()),snapshot->size());
 	}
 
 	Route capability_route("/api/capabilities", NaWServer::HttpMethod::Get, capabilities);
@@ -237,7 +258,7 @@ namespace
 
 	} asset_handler;
 #endif
-	HandlerBase *const routes[]{&information, &capability_route, &websocket, &screen_endpoint.endpoint(),
+	HandlerBase *const routes[]{&frame_api, &frame_api.socket(), &display_config_api, &information, &capability_route, &websocket, &screen_endpoint.endpoint(),
 		                        &screen_endpoint.component_endpoint()
 #if LVGL_CBOR_HAS_PROJECT_SERVICE && LVGL_CBOR_PROJECT_API
 		                        , &project_api
@@ -254,13 +275,24 @@ namespace
 	tcp::IdfTransport tcp_transport;
 	TcpOptions transport_options()
 	{
-		TcpOptions value; value.bind_address = "0.0.0.0"; value.port = 80; return value;
+		TcpOptions value; value.bind_address = "0.0.0.0"; value.port = 80;
+#if CONFIG_NAWSERVER_TCP_MANAGED
+        value.http_memory.enabled=true;value.http_memory.initial_requests=2;value.http_memory.maximum_requests=3;
+        value.managed.ingress_slots=2;value.managed.header_bytes=4096;
+        // The LVF2 response exposes its geometry and progress to cross-origin viewers.
+        value.managed.response_header_bytes=768;
+        value.managed.response_body_bytes=4096;value.managed.io_slice_bytes=4096;
+        value.keep_alive.enabled=false;
+        value.buffer_memory.allocator=espIdfBufferAllocator(EspIdfMemoryPolicy::PreferPsram);
+        value.buffer_memory.max_bytes=256*1024;
+#endif
+        return value;
 	}
 
 	TcpHttpBackend http_backend(tcp_transport, transport_options());
 	HttpLimits http_limits()
 	{
-		HttpLimits value; value.max_connections = 12; value.max_header_bytes = 4096; return value;
+		HttpLimits value; value.max_connections = 12; value.max_header_bytes = 4096; value.exchange_timeout_ms = 15000; return value;
 	}
 
 	HttpServer server(http_backend, routes, http_limits(), {},
@@ -352,9 +384,11 @@ extern "C" void app_main()
 	std::snprintf(boot_id, sizeof(boot_id), "s3-%08lx", static_cast<unsigned long>(esp_random()));
 	ESP_ERROR_CHECK(nvs_flash_init());
 	packets = xQueueCreateStatic(4, sizeof(Packet), queue_bytes, &queue_storage); ESP_ERROR_CHECK(initialize_display());
+	if(!frame_api.begin(800,480))abort();
 	auto *screen = lv_screen_active(); lv_obj_set_style_bg_color(screen, lv_color_hex(0x101820), 0);
 	auto *label = lv_label_create(screen); lv_obj_remove_style_all(label); lv_label_set_text(label, "NaCBORUIforLVGL");
-	lvgl_cbor::StyleRuntime styles(label, resources, 3, &style_service); lvgl_cbor::Reply initial_reply;
+	lvgl_cbor::StyleRuntime styles(label, resources.data(), resources.size(), &style_service);
+	lvgl_cbor::Reply initial_reply;
 	if(!styles.apply(initial_style_packet, sizeof(initial_style_packet), initial_reply))
 	{
 		ESP_LOGE("style_lab", "Initial style rejected: %s", initial_reply.error); abort();
@@ -371,7 +405,7 @@ extern "C" void app_main()
 
 		__atomic_fetch_add(&received, 1u, __ATOMIC_RELAXED);
 	});
-	if(!lab_widgets::register_examples(widget_registry))
+	if(!lab_widgets::register_examples(widget_registry, appearance))
 	{
 		ESP_LOGE("style_lab", "Native widget registration failed"); abort();
 	}
@@ -387,6 +421,44 @@ extern "C" void app_main()
 		ESP_LOGE("style_lab", "Demo catalog rejected: %s", data_error.c_str()); abort();
 	}
 
+	if(!appearance.load({appearance_packet, sizeof(appearance_packet), {}}, "cream", resources.data(),
+	        resources.size(), data_error))
+	{
+		ESP_LOGE("style_lab", "Appearance load failed: %s", data_error.c_str());
+		return;
+	}
+	if(!data_registry.add_source({"ui.scheme", lvgl_cbor::DataSchema::object({
+			{"id", lvgl_cbor::DataSchema::text(12)}, {"title", lvgl_cbor::DataSchema::text(256)}})}, data_error) ||
+	    !data_registry.add_action({"ui.select_scheme", lvgl_cbor::DataSchema::text(12),
+	        [](const lvgl_cbor::DataValue &value, std::string &error){
+		        const auto &id = std::get<std::string>(value.value);
+#if LVGL_CBOR_HAS_PROJECT_SERVICE
+		        if(!appearance.select(id, error, [](const std::string &name){
+		            return project_service.display_style(name);
+		        })) return false;
+#else
+		        if(!appearance.select(id, error)) return false;
+#endif
+		        return data_registry.publish("ui.scheme",
+		            lvgl_cbor::DataValue::Object{{"id", id}, {"title", appearance.selected_title()}}, error);
+		        }, "Select scheme",
+#if LVGL_CBOR_HAS_PROJECT_SERVICE
+		        Appearance::project_action_description
+#else
+		        "Select a compiled palette by plain text id."
+#endif
+		    }, data_error) || !data_registry.invoke("ui.select_scheme", "cream", data_error))
+	{ESP_LOGE("style_lab", "Appearance catalog rejected: %s", data_error.c_str()); abort();}
+
+#if LVGL_CBOR_HAS_PROJECT_SERVICE
+	if(!data_registry.add_group({"ui", "Interface", "Appearance and layout diagnostics", ""}, data_error) ||
+	    !display_config_api.install(data_registry, data_error) ||
+	    !layout_diagnostics.install(data_error))
+	{
+		ESP_LOGE("style_lab", "Layout diagnostics rejected: %s", data_error.c_str()); abort();
+	}
+
+#endif
 	data_registry.flush();
 	screen_endpoint.begin(screen, &styles);
 #if LVGL_CBOR_HAS_PROJECT_SERVICE
@@ -446,13 +518,17 @@ extern "C" void app_main()
 	}
 
 	ESP_LOGI("style_lab", "TCP HTTP ready; style frame limit %u", unsigned(max_style_packet));
-	lab_data::Events data_events(data_registry, {"demo.speed", "system.clock", "system.network"},
+	std::vector<std::string> live_sources{"demo.speed", "system.clock", "system.network", "ui.scheme", "ui.display_config"};
+#if LVGL_CBOR_HAS_PROJECT_SERVICE
+	live_sources.push_back("ui.layout_debug");
+#endif
+	lab_data::Events data_events(data_registry, std::move(live_sources),
 	    [](const uint8_t *bytes, size_t size){
 	    return websocket.send_binary(bytes, size).rejected == 0;
 		});
 	if(!data_events.begin(data_error)){ESP_LOGE("style_lab", "Data events failed: %s", data_error.c_str()); abort();}
 
-	int64_t previous = esp_timer_get_time(); static Packet packet;
+	int64_t previous = esp_timer_get_time(), next_layout_status = 0; static Packet packet;
 	for(;;)
 	{
 		if(capabilities_revision != widget_registry.revision() ||
@@ -485,10 +561,25 @@ extern "C" void app_main()
 #if LVGL_CBOR_DATA_API
 		data_api.process();
 #endif
+#if LVGL_CBOR_HAS_PROJECT_SERVICE
+		if(esp_timer_get_time()>=next_layout_status)
+		{
+			next_layout_status=esp_timer_get_time()+250000;
+			if(!layout_diagnostics.publish(data_error))
+				ESP_LOGW("style_lab","Layout diagnostics: %s",data_error.c_str());
+		}
+
+#endif
+		frame_api.process();
 		data_registry.flush();
+#if LVGL_CBOR_HAS_PROJECT_SERVICE
+		frame_api.set_scene(project_service.display_generation());
+#endif
 		data_events.process(esp_timer_get_time());
 		const auto now = esp_timer_get_time(); lv_tick_inc(static_cast<uint32_t>((now - previous) / 1000));
 		previous += ((now - previous) / 1000) * 1000;
-		lv_timer_handler(); vTaskDelay(pdMS_TO_TICKS(5));
+		lv_timer_handler();
+		frame_api.process_socket(uint32_t(now/1000));
+		display_config_api.process(); vTaskDelay(pdMS_TO_TICKS(5));
 	}
 }

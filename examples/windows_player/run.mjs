@@ -10,13 +10,13 @@ import {fileURLToPath} from 'node:url';
 import {createInterface} from 'node:readline';
 import {encode} from 'cborg';
 import {loadProject} from './loader.mjs';
-import {compileSchemes} from './schemes.mjs';
+import {compileSchemes} from '../common/appearance/schemes.mjs';
 import {adaptSystemPage} from './system-page.mjs';
 import {createHash} from 'node:crypto';
 
 const here=dirname(fileURLToPath(import.meta.url)),root=resolve(here,'../..');
 let path=join(here,'demo.json'),exe=join(root,'local/windows-player/Release/nacborui_player.exe');
-let entry,watchEnabled=false,control=false,hidden=false,selectedScheme,schemesPath=new URL('./schemes.json',import.meta.url);
+let entry,watchEnabled=false,control=false,hidden=false,selectedScheme,schemesPath=new URL('../common/appearance/schemes.json',import.meta.url);
 let baseRecovery,baseRecoveryFile;
 let profile='system',explicitPath=false,enableApi=false,apiPort,apiStore,webRoot=join(root,'frontend/dist');
 let settings=join(process.env.LOCALAPPDATA??join(homedir(),'.config'),'NaCBORUIforLVGL','player.json');

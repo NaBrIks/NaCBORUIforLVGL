@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Oleg Kozhevnikov
 #include "project_internal.hpp"
+#include <atomic>
 #include "cbor_reader.hpp"
 #include <algorithm>
 #include <cstdio>
@@ -75,6 +76,7 @@ namespace lvgl_cbor
 		ProjectBundle base, effective; std::string base_revision, revision; bool ready{}, changed{};
 		std::string displayed_screen, displayed_revision; bool displaying_preview{};
 		uint32_t displayed_instance{};
+		std::atomic<uint32_t> display_generation{};
 		bool presenting{}, layout_debug{};
 		LayoutDebugOptions layout_options;
 		std::vector<ScreenViewStatus> displayed_views;
@@ -239,11 +241,13 @@ namespace lvgl_cbor
 			presentation->changed = [this]() {
 					auto views = presentation->runtime.view_status();
 					std::lock_guard<std::mutex> lock(mutex); displayed_views = std::move(views);
+					++display_generation;
 				};
 			auto views = presentation->runtime.view_status();
 			{ std::lock_guard<std::mutex> lock(mutex); displayed_screen = screen_name;
 			  displayed_revision = shown_revision; displaying_preview = preview;
-			  displayed_instance = presentation->runtime.instance_id(); displayed_views = std::move(views); }
+			  displayed_instance = presentation->runtime.instance_id(); displayed_views = std::move(views);
+			  ++display_generation; }
 			return true;
 		}
 
@@ -276,6 +280,11 @@ namespace lvgl_cbor
 
 		p.revision = fingerprint(encode_project(p.effective)); p.changed = p.revision != p.base_revision;
 		p.ready = true; return true;
+	}
+
+	uint32_t ProjectService::display_generation() const
+	{
+		return impl_->display_generation.load();
 	}
 
 	ProjectStatus ProjectService::status() const
@@ -476,6 +485,11 @@ namespace lvgl_cbor
 	lv_obj_t *ProjectService::root() const
 	{
 		return impl_->presentation ? impl_->presentation->runtime.root() : nullptr;
+	}
+
+	StyleHandle ProjectService::display_style(const std::string &name) const
+	{
+		return impl_->presentation ? impl_->presentation->styles.resolve("global-dynamic:" + name) : StyleHandle{};
 	}
 
 } // namespace lvgl_cbor

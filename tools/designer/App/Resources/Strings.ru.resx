@@ -90,10 +90,7 @@
   <data name="Диагностика разметки" xml:space="preserve">
     <value>Диагностика разметки</value>
   </data>
-  <data name="Для телефона по USB: adb reverse tcp:5302 tcp:5302, затем MCP URL http://127.0.0.1:5302/mcp. Для эмулятора: http://10.0.2.2:5302/mcp." xml:space="preserve">
-    <value>Для телефона по USB: adb reverse tcp:5302 tcp:5302, затем MCP URL http://127.0.0.1:5302/mcp. Для эмулятора: http://10.0.2.2:5302/mcp.</value>
-  </data>
-  <data name="Добавить изображение" xml:space="preserve">
+<data name="Добавить изображение" xml:space="preserve">
     <value>Добавить изображение</value>
   </data>
   <data name="Дождитесь завершения остановки. Запрос сохранён." xml:space="preserve">
@@ -150,8 +147,8 @@
   <data name="Настройки" xml:space="preserve">
     <value>Настройки</value>
   </data>
-  <data name="Настройки MCP изменены — переподключитесь" xml:space="preserve">
-    <value>Настройки MCP изменены — переподключитесь</value>
+  <data name="Настройки подключения изменены — переподключитесь" xml:space="preserve">
+    <value>Настройки подключения изменены — переподключитесь</value>
   </data>
   <data name="Настройки диагностики разметки" xml:space="preserve">
     <value>Настройки диагностики разметки</value>
@@ -227,6 +224,12 @@
   </data>
   <data name="Поддерживаются только изображения и JSON." xml:space="preserve">
     <value>Поддерживаются только изображения и JSON.</value>
+  </data>
+  <data name="Язык" xml:space="preserve">
+    <value>Язык</value>
+  </data>
+  <data name="Подключение…" xml:space="preserve">
+    <value>Подключение…</value>
   </data>
   <data name="Подключение" xml:space="preserve">
     <value>Подключение</value>
@@ -374,5 +377,45 @@
   </data>
   <data name="с" xml:space="preserve">
     <value>с</value>
+  </data>
+  <data name="Устройство и параметры модели" xml:space="preserve"><value>Устройство и параметры модели</value></data>
+  <data name="Адрес устройства" xml:space="preserve"><value>Адрес устройства</value></data>
+  <data name="Прямой API" xml:space="preserve"><value>Прямой API</value></data>
+  <data name="MCP устройства" xml:space="preserve"><value>MCP устройства</value></data>
+  <data name="MCP-прокси" xml:space="preserve"><value>MCP-прокси</value></data>
+  <data name="Настоящий дисплей" xml:space="preserve"><value>Настоящий дисплей</value></data>
+  <data name="Подключите устройство и выберите модель в настройках. Введённый запрос сохранён." xml:space="preserve"><value>Подключите устройство и выберите модель в настройках. Введённый запрос сохранён.</value></data>
+  <data name="Прямой API: {0} инструментов" xml:space="preserve"><value>Прямой API: {0} инструментов</value></data>
+  <data name="Подключения" xml:space="preserve"><value>Подключения</value></data>
+  <data name="Добавить подключение" xml:space="preserve"><value>Добавить подключение</value></data>
+  <data name="Копировать подключение" xml:space="preserve"><value>Копировать подключение</value></data>
+  <data name="Удалить подключение" xml:space="preserve"><value>Удалить подключение</value></data>
+  <data name="Имя" xml:space="preserve"><value>Имя</value></data>
+  <data name="Режим" xml:space="preserve"><value>Режим</value></data>
+  <data name="Адрес" xml:space="preserve"><value>Адрес</value></data>
+  <data name="Имя подключения" xml:space="preserve"><value>Имя подключения</value></data>
+  <data name="копия" xml:space="preserve"><value>копия</value></data>
+  <data name="Устройства" xml:space="preserve"><value>Устройства</value></data>
+  <data name="Сохранить модель" xml:space="preserve"><value>Сохранить модель</value></data>
+  <data name="Сохранить подключения" xml:space="preserve"><value>Сохранить подключения</value></data>
+  <data name="Сохранено" xml:space="preserve"><value>Сохранено</value></data>
+  <data name="Управлять" xml:space="preserve"><value>Управлять</value></data>
+  <data name="Управлять экраном" xml:space="preserve"><value>Управлять экраном с предпросмотра</value></data>
+  <data name="Устройство" xml:space="preserve"><value>Устройство</value></data>
+  <data name="Постепенно" xml:space="preserve"><value>Постепенно</value></data>
+  <data name="Показывать кадр по мере загрузки" xml:space="preserve"><value>Показывать строки по мере загрузки</value></data>
+  <data name="Загрузка кадра" xml:space="preserve"><value>Загрузка кадра</value></data>
+  <data name="Транспорт кадра" xml:space="preserve"><value>Транспорт кадра</value></data>
+  <data name="Распакованные байты обновления" xml:space="preserve"><value>Распакованные байты обновления (всего, принято)</value></data>
+  <data name="Используется {0}" xml:space="preserve"><value>Используется {0}</value></data>
+  <data name="USB-порт" xml:space="preserve"><value>USB-порт</value></data>
+  <data name="Журнал пока пуст" xml:space="preserve">
+    <value>Журнал пока пуст</value>
+  </data>
+  <data name="Развернуть панель" xml:space="preserve">
+    <value>Развернуть панель</value>
+  </data>
+  <data name="Свернуть панель" xml:space="preserve">
+    <value>Свернуть панель</value>
   </data>
 </root>

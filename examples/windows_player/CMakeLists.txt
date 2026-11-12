@@ -41,7 +41,7 @@ target_include_directories(player_runtime PUBLIC "${ROOT}/include")
 target_compile_features(player_runtime PUBLIC cxx_std_17)
 target_link_libraries(player_runtime PUBLIC lvgl::lvgl player_cbor)
 add_executable(nacborui_player src/main.cpp src/application.cpp src/appearance.cpp src/host_fonts.cpp
-  src/system_metrics.cpp src/history_plot.cpp src/project_api.cpp src/web_server.cpp src/native_view.cpp src/base_migration.cpp
+  src/system_metrics.cpp src/history_plot.cpp src/project_api.cpp src/web_server.cpp src/native_view.cpp ../common/native_view/pointer.cpp src/base_migration.cpp
   ../common/appearance/appearance.cpp ../common/demo_data/demo_data.cpp)
 if(LVGL_CBOR_GRAPHICS_GALLERY)
   target_sources(nacborui_player PRIVATE src/graphics_gallery.cpp ../common/polygon_button/polygon_button.cpp)
@@ -80,3 +80,41 @@ endif()
 include("${NAWSERVER_SOURCE_DIR}/cmake/NaWServer.cmake")
 nawserver_add_library(player_webserver PLATFORM windows MANAGED NO_SSE NO_AUTH NO_CLIENT_QUOTAS NO_API_KEYS)
 target_link_libraries(nacborui_player PRIVATE player_webserver)
+
+# Optional proof of concept. Ordinary builds contain no MCP/JSON parser workspace.
+option(LVGL_CBOR_NATIVE_MCP "Compile the optional native NaWServer MCP proof of concept" OFF)
+target_compile_definitions(nacborui_player PRIVATE LVGL_CBOR_NATIVE_MCP=$<BOOL:${LVGL_CBOR_NATIVE_MCP}>)
+if(LVGL_CBOR_NATIVE_MCP)
+  include("${NAWSERVER_SOURCE_DIR}/cmake/NaWServerJson.cmake")
+  nawserver_attach_json(player_webserver bounded)
+  target_sources(player_webserver PRIVATE "${NAWSERVER_SOURCE_DIR}/src/mcp/mcp.cpp")
+  target_compile_definitions(player_webserver PUBLIC NAWSERVER_MCP=1
+    NAWSERVER_JSON_INPUT_BYTES=65535 NAWSERVER_JSON_STRING_BYTES=65535
+    NAWSERVER_JSON_CONTAINER_ITEMS=4096 NAWSERVER_JSON_DEPTH=32
+    NAWSERVER_JSON_VALUE_CAPACITY=8192 NAWSERVER_JSON_WORKSPACE_BYTES=65536
+    NAWSERVER_MCP_OUTPUT_BYTES=65535)
+  target_sources(nacborui_player PRIVATE "${ROOT}/integrations/nawserver/native_mcp.cpp")
+  target_include_directories(nacborui_player PRIVATE "${ROOT}/integrations/nawserver")
+endif()
+
+target_sources(nacborui_player PRIVATE ../common/layout_debug/layout_diagnostics.cpp)
+target_include_directories(nacborui_player PRIVATE "${ROOT}/examples/common/layout_debug")
+
+# Verify owned large-response lifetime independently of device hardware.
+add_executable(nacborui_http_payload_tests "${ROOT}/tests/http_payload_test.cpp")
+target_include_directories(nacborui_http_payload_tests PRIVATE "${ROOT}/integrations/nawserver")
+target_link_libraries(nacborui_http_payload_tests PRIVATE player_webserver)
+target_compile_definitions(nacborui_http_payload_tests PRIVATE CONFIG_NAWSERVER_TCP_MANAGED=1)
+if(MSVC)
+  target_compile_options(nacborui_http_payload_tests PRIVATE /UNDEBUG)
+else()
+  target_compile_options(nacborui_http_payload_tests PRIVATE -UNDEBUG)
+endif()
+
+add_executable(nacborui_input_queue_tests "${ROOT}/tests/native_input_queue_test.cpp")
+target_include_directories(nacborui_input_queue_tests PRIVATE "${ROOT}/examples/common/native_view")
+if(MSVC)
+ target_compile_options(nacborui_input_queue_tests PRIVATE /UNDEBUG)
+else()
+ target_compile_options(nacborui_input_queue_tests PRIVATE -UNDEBUG)
+endif()

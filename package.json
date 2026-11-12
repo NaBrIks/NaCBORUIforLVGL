@@ -28,7 +28,9 @@
     "player:test-graphics": "node examples/windows_player/test-graphics.mjs",
     "player:test-editor-preview": "node examples/windows_player/test-editor-preview.mjs",
     "player:test-native-view": "node examples/windows_player/test-native-view.mjs",
-    "player:test-base-migration": "node examples/windows_player/test-base-migration.mjs"
+    "player:test-base-migration": "node examples/windows_player/test-base-migration.mjs",
+    "designer:tools": "node tools/designer/browser-tools/build.mjs",
+    "player:test-designer-direct": "node examples/windows_player/test-designer-direct.mjs"
   },
   "license": "MIT",
   "description": "CBOR-based UI definitions for LVGL"

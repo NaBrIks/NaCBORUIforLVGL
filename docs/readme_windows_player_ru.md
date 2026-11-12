@@ -27,8 +27,8 @@ JSON остаётся редактируемым исходником. На ПК
 
 Нужны CMake 3.24+, Visual Studio C++ Build Tools с Windows SDK, Node.js и `npm ci`
 в корне. Используются исходники LVGL 9.6.0 и TinyCBOR 0.6.1. Уже загруженные
-managed dependencies демки можно переиспользовать как библиотеки исходников;
-ESP-IDF, драйверы платы, NaWServer и сборка прошивки не нужны.
+managed dependencies демки можно переиспользовать как библиотеки исходников.
+Для Windows также нужен checkout NaWServer. ESP-IDF и драйверы платы не нужны.
 
 ```powershell
 npm ci
@@ -41,7 +41,7 @@ npm run player -- '<projects>/interface.cbor'
 Если зависимости хранятся отдельно:
 
 ```powershell
-./examples/windows_player/build.ps1 -LvglSource '<deps>/lvgl' -TinyCborSource '<deps>/tinycbor'
+./examples/windows_player/build.ps1 -LvglSource '<deps>/lvgl' -TinyCborSource '<deps>/tinycbor' -NaWServerSource '<deps>/NaWServer'
 ```
 
 Структура папок, источники зависимостей, запуск отдельной страницы и все
@@ -143,7 +143,7 @@ TinyTTF читает установленный Segoe UI Windows. Файл шр�
 оформление ОС; схема применяется к содержимому LVGL.
 
 Основные цвета взяты из токенов UI.TechnicalShell и записаны как данные в
-`examples/windows_player/schemes.json`. Скопированного CSS или кода оболочки нет.
+`examples/common/appearance/schemes.json`. Скопированного CSS или кода оболочки нет.
 Текст кнопки выбирается контрастным к обычному и нажатому фону. Проверка порога
 4.5:1 включена в тесты; размер шрифта при переключении не меняется.
 
@@ -291,14 +291,15 @@ node examples/windows_player/test-catalog.mjs local/windows-no-history/Release/n
 историю и не зависит от этого флага. Полное registry-demo требует ON; базовая демка
 с событиями/полями остаётся работоспособной без DataHistory.
 
-`test-catalog.mjs` запускает скрытый настоящий LVGL и stdio MCP. Штатный NaWServer передаёт запросы нативной реализации, без повторной логики выборки.
+`test-catalog.mjs` проверяет скрытый LVGL через HTTP API NaWServer.
+[Встроенный MCP проигрывателя](readme_windows_native_mcp_ru.md) имеет отдельный
+набор проверок.
 Проверяются JSON/CBOR, группы/поля/байтовые бюджеты, динамическая регистрация и конфликт
 catalogRevision, запись контрола, mean, разрывы и освобождение истории, а также реальные
 пиксели графика. Это сквозная host-проверка, не аппаратная приёмка.
 Описание API: [реестр данных](readme_data_catalog_ru.md).
 
 Три новых варианта, авторский каталог и изменение дизайна через MCP описаны в [руководстве схем и стека стилей](readme_appearance_ru.md). Для registry-demo используйте `--schemes examples/windows_player/registry-schemes.json`; без этого параметра загружается старый стандартный каталог.
-
 
 ## Обнаружение CPU/GPU в системной демке, 2026-11-08
 

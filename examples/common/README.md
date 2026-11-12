@@ -9,10 +9,11 @@ These are optional application modules, outside the portable UI engine:
 - `demo_data`: bounded demonstration sources/actions and an autonomous 25 Hz
   speed producer. Data enters the ordinary registry through CBOR. Local clock
   conversion uses the platform's libc; this module does not configure NTP.
+- `layout_debug`: optional diagnostics for object outlines and tree depth.
+- `native_view`: shared display transport metadata, frame helpers and bounded pointer queue.
 - `sample_image.hpp`: a generated 18×18 alpha checker for component tests.
 
-Windows and T-Display-S3 link these exact sources. Windows owns file loading,
-Segoe UI and its menus; the MCU owns LCD/buttons and its USB diagnostic transport.
-These examples do not introduce another renderer, binding interpreter or theme
-engine. The shared color catalog remains in `../windows_player/schemes.json` and
-is compiled by the same `schemes.mjs` for both targets.
+The Windows, 7-inch RGB S3 and T-Display-S3 examples reuse these modules where
+applicable. Each example owns its display, input, storage and network adapters.
+The shared color catalog lives in `appearance/schemes.json` and uses
+the shared project codec.

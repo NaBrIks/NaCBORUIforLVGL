@@ -69,3 +69,8 @@ examples/lilygo_t_display_s3/sdkconfig.lilygo*
 *.aab
 *.keystore
 *.jks
+
+examples/s3_style_lab/main/appearance.generated.hpp
+
+# Bundled browser codecs for Designer (rebuild from shared sources).
+tools/designer/App/wwwroot/js/browser-tools.js

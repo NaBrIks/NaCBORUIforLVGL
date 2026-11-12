@@ -42,7 +42,7 @@ try{
  call=(method,params={})=>new Promise((yes,no)=>{const id=++next,timer=setTimeout(()=>{jobs.delete(id);no(Error('CDP timeout '+method));},10000);jobs.set(id,{yes,no,timer});socket.send(JSON.stringify({id,method,params}));});
  const evaluate=async expression=>{const response=await call('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(response.exceptionDetails)throw Error(JSON.stringify(response.exceptionDetails));return response.result.value;};
  const click=selector=>evaluate(`document.querySelector(${JSON.stringify(selector)}).click()`);
- const frameReady=()=>evaluate(`(()=>{const e=document.querySelector('.preview-panel .native-viewer-frame');return !!(e&&e.complete&&e.naturalWidth);})()`);
+ const frameReady=()=>evaluate(`(()=>{const e=document.querySelector('.preview-panel .native-viewer-frame');return !!(e&&e.dataset.ready==='true'&&e.width);})()`);
  const screenshot=async name=>{const result=await call('Page.captureScreenshot',{format:'png'});await writeFile(join(output,name+'.png'),Buffer.from(result.data,'base64'));};
  await call('Network.enable');await call('Runtime.enable');await call('Page.enable');
  await call('Page.navigate',{url:primary.api+'/editor/'});
@@ -57,8 +57,18 @@ try{
  const start=requests.length,wsStart=wsSends.length;
  await click('.preview-tabs [role=tab]:nth-child(2)');await until(frameReady,'No native frame');
  await screenshot('lvgl');
- const native=await evaluate(`(()=>{const e=document.querySelector('.preview-panel .native-viewer-frame'),p=e.getBoundingClientRect(),s=e.closest('.native-viewer-stage').getBoundingClientRect();return {width:e.naturalWidth,height:e.naturalHeight,origin:document.querySelector('.native-viewer-origin').textContent,contained:p.left>=s.left&&p.right<=s.right+1&&p.top>=s.top&&p.bottom<=s.bottom+1,readonly:e.classList.contains('readonly')};})()`);
+ const native=await evaluate(`(()=>{const e=document.querySelector('.preview-panel .native-viewer-frame'),p=e.getBoundingClientRect(),s=e.closest('.native-viewer-stage').getBoundingClientRect();return {width:e.width,height:e.height,origin:document.querySelector('.native-viewer-origin').textContent,contained:p.left>=s.left&&p.right<=s.right+1&&p.top>=s.top&&p.bottom<=s.bottom+1,readonly:e.classList.contains('readonly')};})()`);
  assert.equal(native.origin,primary.api);assert.ok(native.contained&&native.readonly);assert.ok(native.width>0&&native.height>0);
+ const progressiveToggle='[aria-label="Показывать по мере загрузки"]';
+ const hasCompletedProgress=()=>evaluate(`(()=>{const p=document.querySelector('.native-viewer-progress');return p.max>1&&p.value===p.max;})()`);
+ assert.equal(await evaluate(`document.querySelector(${JSON.stringify(progressiveToggle)}).getAttribute('aria-pressed')`),'false');
+ await until(hasCompletedProgress,'Atomic frame progress missing');
+ await click(progressiveToggle);
+ assert.equal(await evaluate(`document.querySelector(${JSON.stringify(progressiveToggle)}).getAttribute('aria-pressed')`),'true');
+ await until(hasCompletedProgress,'Progressive frame progress missing');
+ assert.equal(await evaluate(`document.querySelector('.native-viewer-frame').getContext('2d').getImageData(0,0,1,1).data[3]`),255);
+ await screenshot('lvgl-progressive');
+ await click(progressiveToggle);await until(hasCompletedProgress,'Atomic frame did not resume');
  // Clicking the embedded image must be passive, even though /viewer supports input.
  await evaluate(`document.querySelector('.preview-panel .native-viewer-frame').dispatchEvent(new PointerEvent('pointerdown',{button:0,pointerId:1,bubbles:true,clientX:100,clientY:200}))`);
  for(let i=1;i<5;i++){
@@ -68,9 +78,9 @@ try{
  }
  await until(frameReady,'Frame did not recover after quick tab/page changes');
  // Pause is a local frame-delivery control and does not pause the target.
- await click('.preview-panel .native-viewer-head button');await wait(300);const pausedFrames=requests.filter(r=>new URL(r.url).pathname==='/api/view/frame').length;
+ await click('[aria-label="Приостановить просмотр"]');await wait(300);const pausedFrames=requests.filter(r=>new URL(r.url).pathname==='/api/view/frame').length;
  await wait(600);assert.equal(requests.filter(r=>new URL(r.url).pathname==='/api/view/frame').length,pausedFrames);
- await click('.preview-panel .native-viewer-head button');await until(()=>requests.filter(r=>new URL(r.url).pathname==='/api/view/frame').length>pausedFrames,'Resume did not fetch frames');
+ await click('[aria-label="Продолжить просмотр"]');await until(()=>requests.filter(r=>new URL(r.url).pathname==='/api/view/frame').length>pausedFrames,'Resume did not fetch frames');
  const keyboard=await evaluate(`(async()=>{const tabs=document.querySelector('.preview-tabs');tabs.dispatchEvent(new KeyboardEvent('keydown',{key:'Home',bubbles:true}));await new Promise(r=>setTimeout(r,10));return {selected:tabs.querySelector('[aria-selected=true]').textContent,focus:document.activeElement.getAttribute('role')};})()`);
  assert.deepEqual(keyboard,{selected:'Макет',focus:'tab'});
  await click('.preview-tabs [role=tab]:nth-child(2)');await until(frameReady,'Native tab did not resume');
@@ -97,7 +107,7 @@ try{
  const mutations=requests.slice(start).filter(r=>r.method!=='GET'&&new URL(r.url).pathname.startsWith('/api/'));
  assert.deepEqual(mutations,[],'Passive viewing sent an API write');
  assert.deepEqual(wsSends.slice(wsStart).filter(item=>/\/(screen|component)-ws/.test(item.url)),[],'Passive viewing sent a render command');assert.deepEqual(errors,[]);
- await writeFile(join(output,'measurements.json'),JSON.stringify({native,selectedDevice:other.api,frames:requests.filter(r=>new URL(r.url).pathname==='/api/view/frame').length,passiveRuntimeUnchanged:true,apiWrites:mutations.length,keyboard,errorRecovery:true,viewport:[1100,800],crossOrigin:'Windows origin gate intentionally rejects other origins; no frame fallback',errors},null,2));
+ await writeFile(join(output,'measurements.json'),JSON.stringify({native,selectedDevice:other.api,frames:requests.filter(r=>new URL(r.url).pathname==='/api/view/frame').length,atomicAndProgressive:true,passiveRuntimeUnchanged:true,apiWrites:mutations.length,keyboard,errorRecovery:true,viewport:[1100,800],crossOrigin:'Windows origin gate intentionally rejects other origins; no frame fallback',errors},null,2));
  console.log('PASS: real Chromium /editor through native NaWServer; Layout/LVGL, real bounded LVGL frame, passive page/tab/image, pause/resume, keyboard, stable errors/recovery, selected URL/reconnect, EN, 1100px layout; both runtime/project states unchanged, no API writes or render WS commands');
 }finally{
  if(call)await call('Browser.close').catch(()=>{});socket?.close();

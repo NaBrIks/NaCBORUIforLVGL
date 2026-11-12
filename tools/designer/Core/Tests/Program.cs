@@ -5,11 +5,12 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using NaCBORUI.Designer.Core;
+using NaCBORUI.Designer.App.Services;
 using SPLA.Domain.Models;
 
 if (args is ["--live", var endpoint])
 {
-    await using var live = new DesignerSession(new DesignerOptions { McpEndpoint = endpoint });
+    await using var live = new DesignerSession(new DesignerOptions { ConnectionMode = DesignerConnectionMode.NativeMcp, McpEndpoint = endpoint });
     await live.ConnectAsync();
     Console.WriteLine($"LIVE connected: {live.Tools.Count} tools");
     foreach (var tool in live.Tools) Console.WriteLine(tool.Function.Name);
@@ -30,6 +31,7 @@ using var handler = new TranscriptHandler();
 using var http = new HttpClient(handler);
 var options = new DesignerOptions
 {
+    ConnectionMode = DesignerConnectionMode.NativeMcp,
     ModelEndpoint = "https://models.example.test/v1",
     Model = "fixture-vision",
     ApiKey = "fixture-not-a-secret",
@@ -41,6 +43,7 @@ var updates = 0;
 session.Changed += () => updates++;
 await session.ConnectAsync();
 Check(session.IsConnected && session.Tools.Count == 2, "SPLA discovers the complete configured catalog");
+Check(!session.SupportsViewInput, "Targets without the optional preview-input tool cannot accept pointer input");
 Check(handler.SessionHeaders >= 2, "SPLA carries MCP session and negotiated version headers");
 Check((await session.GetModelsAsync()).SequenceEqual(["fixture-vision"]), "SPLA model discovery");
 await session.SendAsync("Inspect this reference", [new ImageAttachment("data:image/png;base64," + TranscriptHandler.Png, "reference.png")]);
@@ -73,6 +76,11 @@ Check(session.Messages.Count == 1 && session.Messages[0].Role == ChatRole.System
 Check(updates > 10, "State and stream updates are observable by the UI");
 await CheckQueuedPromptsAsync();
 await CheckReportedUsageAsync();
+await CheckDirectTargetAsync();
+await CheckLatestOnlyPreviewWorkerAsync();
+await CheckLayoutDebugAckDuringBlockedPreviewAsync();
+await CheckDeviceRestartStopsTurnAsync();
+CheckConnectionProfiles();
 var rendered = NaCBORUI.Designer.App.Services.MarkdownRenderer.ToSafeHtml("**Ready**\n\n`code`");
 Check(rendered.Contains("<strong>Ready</strong>") && rendered.Contains("<code>code</code>"), "Chat renders normal Markdown");
 var unsafeMarkup = NaCBORUI.Designer.App.Services.MarkdownRenderer.ToSafeHtml("<svg onload=alert(1)>\n\n[link](javascript:alert(1))\n\n[link](https://example.test){onclick=alert(1)}");
@@ -88,6 +96,7 @@ static async Task CheckQueuedPromptsAsync()
     using var http = new HttpClient(handler);
     var options = new DesignerOptions
     {
+        ConnectionMode = DesignerConnectionMode.NativeMcp,
         ModelEndpoint = "https://models.example.test/v1", Model = "fixture-vision",
         McpEndpoint = "http://mcp.example.test:5301/mcp", SystemPrompt = "Queue fixture.",
         ReasoningLevel = "low",
@@ -249,6 +258,7 @@ static async Task CheckReportedUsageAsync()
     using var http = new HttpClient(handler);
     var options = new DesignerOptions
     {
+        ConnectionMode = DesignerConnectionMode.NativeMcp,
         ModelEndpoint = "https://models.example.test/v1", Model = "fixture-vision",
         McpEndpoint = "http://mcp.example.test:5301/mcp", SystemPrompt = "Usage fixture."
     };
@@ -282,6 +292,219 @@ static async Task CheckReportedUsageAsync()
         "Changing model invalidates catalog limit and missing models stay unknown");
     session.NewChat();
     Check(session.Usage.ContextUsedTokens is null && session.Usage.InputTokens is null, "NewChat clears last-context display");
+}
+
+static async Task CheckDirectTargetAsync()
+{
+    var bridge = new FixtureDirectBridge();
+    var options = new DesignerOptions
+    {
+        ConnectionMode = DesignerConnectionMode.DirectApi,
+        DeviceOrigin = "http://127.0.0.1:5301",
+        SystemPrompt = "Direct target fixture."
+    };
+    await using var session = new DesignerSession(options, directBridge: bridge);
+    await session.ConnectAsync();
+    Check(session.IsConnected && session.Tools.Count == 6 && bridge.Origin == "http://127.0.0.1:5301",
+        "Direct API discovers its complete browser-codec catalog through the injected bridge");
+    Check(session.SupportsViewInput, "Direct target exposes preview input only when its tool is advertised");
+    Check(session.SupportsProgressivePreview && session.SupportsFramePackets,
+        "Direct API exposes progressive preview only when native frame capabilities are advertised");
+    var read = await session.InvokeToolAsync("read_project", "{}");
+    Check(!read.IsError && read.TextContent.Contains("format") && bridge.Calls.Last().Name == "read_project",
+        "Direct API forwards a tool call through the same SPLA IToolHost adapter");
+    var frame = await session.GetPreviewAsync(256);
+    Check(frame?.MimeType == "image/png" && frame.DataUrl.Contains(TranscriptHandler.Png, StringComparison.Ordinal) &&
+        bridge.Calls.Last().Name == "get_display_frame",
+        "Direct API tool image blocks reach the existing preview path");
+    var debug = await session.GetLayoutDebugAsync();
+    Check(debug is { Levels.Length: 1, MaxDepth: 1 } && bridge.Calls.TakeLast(2).Select(call => call.Name)
+        .SequenceEqual(["get_data_catalog", "get_data"]),
+        "Direct API retains the optional layout-debug data tools");
+    await session.SetLayoutDebugAsync(debug!);
+    Check(bridge.Calls.Last().Name == "invoke_action", "Direct API sends layout-debug settings through the advertised action");
+    await session.SendViewInputAsync(37, 24, true);
+    using (var input = JsonDocument.Parse(bridge.Calls.Last().Arguments))
+        Check(bridge.Calls.Last().Name == "send_view_input" && input.RootElement.GetProperty("x").GetInt32() == 37 &&
+            input.RootElement.GetProperty("y").GetInt32() == 24 && input.RootElement.GetProperty("pressed").GetBoolean(),
+            "Core forwards preview input through the same advertised target tool");
+}
+
+static void CheckConnectionProfiles()
+{
+    var legacy = new DesignerConnectionProfile
+    {
+        Name = "Legacy target", ConnectionMode = DesignerConnectionMode.NativeMcp,
+        DeviceOrigin = "http://device.test", McpEndpoint = "http://device.test/mcp",
+        ProxyMcpEndpoint = "http://proxy.test/mcp", McpServerId = "board_a"
+    };
+    var settings = new DesignerSettings();
+    settings.InitializeLegacyConnection(legacy);
+    Check(settings.SelectedConnectionId == legacy.Id && settings.DeviceOrigin == legacy.DeviceOrigin &&
+        settings.McpEndpoint == legacy.McpEndpoint && settings.ProxyMcpEndpoint == legacy.ProxyMcpEndpoint,
+        "Legacy flat endpoints migrate intact into the first connection profile");
+
+    var proxy = new DesignerConnectionProfile
+    {
+        Name = "Proxy", ConnectionMode = DesignerConnectionMode.ProxyMcp,
+        ProxyMcpEndpoint = "http://proxy2.test/mcp", McpServerId = "proxy_a"
+    };
+    settings.DeviceOrigin = "http://edited-device.test";
+    settings.Connections.Add(proxy);
+    Check(settings.SelectConnection(proxy.Id) && legacy.DeviceOrigin == "http://edited-device.test" &&
+        settings.ConnectionMode == DesignerConnectionMode.ProxyMcp && settings.ProxyMcpEndpoint == proxy.ProxyMcpEndpoint,
+        "Selecting a profile captures edits on the old profile and projects the new target");
+
+    var draft = settings.Clone();
+    draft.SelectedConnection!.ProxyMcpEndpoint = "http://draft-only.test/mcp";
+    Check(!ReferenceEquals(settings.Connections, draft.Connections) &&
+        !ReferenceEquals(settings.Connections[1], draft.Connections[1]) &&
+        proxy.ProxyMcpEndpoint != draft.SelectedConnection.ProxyMcpEndpoint,
+        "Settings drafts deep-clone profiles without changing live settings");
+
+    var devicesDraft = settings.Clone();
+    devicesDraft.SelectedConnection!.Name = "Edited proxy profile";
+    var preservedActive = devicesDraft.WithCatalogEditsPreservingActive(legacy.Id);
+    Check(preservedActive.SelectedConnectionId == legacy.Id && preservedActive.Connections.Single(profile => profile.Id == proxy.Id).Name == "Edited proxy profile",
+        "Saving catalog edits to another row preserves the active target while retaining the edit");
+    var deleteActiveDraft = devicesDraft.Clone();
+    deleteActiveDraft.Connections.RemoveAll(profile => profile.Id == legacy.Id);
+    var fallback = deleteActiveDraft.WithCatalogEditsPreservingActive(legacy.Id);
+    Check(fallback.SelectedConnectionId == proxy.Id, "Deleting the active target chooses the remaining catalog profile");
+
+    var deletedId = draft.SelectedConnectionId;
+    Check(draft.RemoveConnection(deletedId) && draft.Connections.Count == 1 &&
+        draft.SelectedConnectionId == legacy.Id && draft.SelectedConnection?.ProxyMcpEndpoint != "http://draft-only.test/mcp",
+        "Deleting the selected profile chooses a remaining profile without resurrecting the deleted one");
+    Check(!draft.RemoveConnection(legacy.Id) && draft.Connections.Count == 1,
+        "The final connection profile cannot be deleted");
+}
+
+static async Task CheckLatestOnlyPreviewWorkerAsync()
+{
+    using (var worker = new LatestOnlyAsyncWorker())
+    {
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var runs = 0;
+        var active = 0;
+        var maximumActive = 0;
+        var skippedIntermediate = false;
+        var latestRan = false;
+        var latestVersionCurrent = false;
+        worker.Request(async (_, _, token) =>
+        {
+            Interlocked.Increment(ref runs);
+            var nowActive = Interlocked.Increment(ref active);
+            maximumActive = Math.Max(maximumActive, nowActive);
+            started.TrySetResult();
+            try { await release.Task.WaitAsync(token); }
+            finally { Interlocked.Decrement(ref active); }
+        });
+        await started.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        worker.Request((_, _, _) => { skippedIntermediate = true; return Task.CompletedTask; });
+        worker.Request((_, requestVersion, _) =>
+        {
+            latestRan = true;
+            latestVersionCurrent = requestVersion == worker.RequestVersion;
+            Interlocked.Increment(ref runs);
+            var nowActive = Interlocked.Increment(ref active);
+            maximumActive = Math.Max(maximumActive, nowActive);
+            Interlocked.Decrement(ref active);
+            completed.TrySetResult();
+            return Task.CompletedTask;
+        });
+        Check(worker.IsPending, "Rapid preview refresh requests coalesce to one pending job behind the current frame");
+        release.TrySetResult();
+        await completed.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        Check(runs == 2 && latestRan && latestVersionCurrent && !skippedIntermediate && maximumActive == 1,
+            "Latest-only frame worker runs no overlapping requests and skips superseded refresh work");
+    }
+
+    using (var worker = new LatestOnlyAsyncWorker())
+    {
+        var oldStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var newDone = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var oldCanceled = false;
+        var active = 0;
+        var maximumActive = 0;
+        worker.Request(async (_, _, token) =>
+        {
+            Interlocked.Increment(ref active);
+            oldStarted.TrySetResult();
+            try { await Task.Delay(Timeout.InfiniteTimeSpan, token); }
+            catch (OperationCanceledException) when (token.IsCancellationRequested) { oldCanceled = true; }
+            finally { Interlocked.Decrement(ref active); }
+        });
+        await oldStarted.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        var oldGeneration = worker.Generation;
+        worker.Invalidate();
+        worker.Request((generation, _, _) =>
+        {
+            var nowActive = Interlocked.Increment(ref active);
+            maximumActive = Math.Max(maximumActive, nowActive);
+            Check(generation > oldGeneration, "A new connection receives a fresh preview generation");
+            Interlocked.Decrement(ref active);
+            newDone.TrySetResult();
+            return Task.CompletedTask;
+        });
+        await newDone.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        Check(oldCanceled && maximumActive == 1, "Invalidation cancels stale-host frame work before starting the new generation");
+    }
+}
+
+static async Task CheckDeviceRestartStopsTurnAsync()
+{
+    using var handler = new TranscriptHandler();
+    using var http = new HttpClient(handler);
+    var bridge = new FixtureDirectBridge { RestartedReceipt = true };
+    await using var session = new DesignerSession(new DesignerOptions
+    {
+        ConnectionMode = DesignerConnectionMode.DirectApi, DeviceOrigin = "http://127.0.0.1:5301",
+        ModelEndpoint = "https://models.example.test/v1", Model = "fixture-vision",
+        SystemPrompt = "Restart fixture."
+    }, httpClient: http, directBridge: bridge);
+    await session.ConnectAsync();
+    try { await session.SendAsync("Read a receipt"); throw new Exception("Restart was ignored"); }
+    catch (InvalidOperationException ex) when (ex.Message.Contains("перезапустилось")) { }
+    Check(handler.ModelCalls == 1 && !session.IsBusy && session.LastError?.Contains("перезапустилось") == true,
+        "Explicit target restart stops the SPLA turn before another provider call");
+    Check(session.Log.Any(entry => entry.Text.Contains("deviceRestarted")), "Detailed tool log retains the actual receipt state");
+}
+
+static async Task CheckLayoutDebugAckDuringBlockedPreviewAsync()
+{
+    using var handler = new TranscriptHandler { DelayModel = true };
+    using var http = new HttpClient(handler);
+    var bridge = new FixtureDirectBridge();
+    bridge.BlockFrames();
+    var options = new DesignerOptions
+    {
+        ConnectionMode = DesignerConnectionMode.DirectApi,
+        DeviceOrigin = "http://127.0.0.1:5301",
+        ModelEndpoint = "https://models.example.test/v1", Model = "fixture-vision",
+        SystemPrompt = "Concurrent controls fixture."
+    };
+    await using var session = new DesignerSession(options, httpClient: http, directBridge: bridge);
+    await session.ConnectAsync();
+    var modelTask = session.SendAsync("Keep this turn waiting");
+    await handler.ModelEntered.Task.WaitAsync(TimeSpan.FromSeconds(2));
+    Check(session.IsBusy, "Fixture has a real in-flight model request");
+    var frameTask = session.GetPreviewAsync();
+    await bridge.FrameStarted.Task.WaitAsync(TimeSpan.FromSeconds(2));
+    var layout = await session.GetLayoutDebugAsync();
+    var firstAck = session.SetLayoutDebugAsync(layout!);
+    await firstAck.WaitAsync(TimeSpan.FromSeconds(2));
+    var secondAck = session.SetLayoutDebugAsync(layout! with { Opacity = 159 });
+    await secondAck.WaitAsync(TimeSpan.FromSeconds(2));
+    Check(!frameTask.IsCompleted && bridge.Calls.Count(call => call.Name == "invoke_action") >= 2,
+        "Layout-debug ACKs remain independently usable while a frame request is blocked");
+    bridge.ReleaseFrames();
+    await frameTask.WaitAsync(TimeSpan.FromSeconds(2));
+    Check(session.IsBusy, "Preview and diagnostic controls complete before the model turn ends");
+    session.Cancel();
+    try { await modelTask; } catch (OperationCanceledException) { }
 }
 
 static void Check(bool condition, string name)
@@ -401,4 +624,50 @@ sealed class TranscriptHandler : HttpMessageHandler
     {
         Content = new StringContent(value.ToJsonString(), Encoding.UTF8, "application/json")
     };
+}
+
+sealed class FixtureDirectBridge : IDesignerDirectBridge
+{
+    public bool RestartedReceipt { get; set; }
+    public string? Origin { get; private set; }
+    public List<(string Name, string Arguments)> Calls { get; } = [];
+    public TaskCompletionSource FrameStarted { get; private set; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private TaskCompletionSource? FrameRelease { get; set; }
+    public void BlockFrames()
+    {
+        FrameStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        FrameRelease = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    }
+    public void ReleaseFrames() => FrameRelease?.TrySetResult();
+    public Task InitializeAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task<string> ConnectAsync(string requestJson, CancellationToken cancellationToken)
+    {
+        using var request = JsonDocument.Parse(requestJson);
+        Origin = request.RootElement.GetProperty("origin").GetString();
+        return Task.FromResult("""{"tools":[{"name":"read_project","description":"Read project","inputSchema":{"type":"object","properties":{},"additionalProperties":false},"annotations":{"readOnlyHint":true}},{"name":"get_display_frame","description":"Capture frame","inputSchema":{"type":"object","properties":{"maxEdge":{"type":"integer"}}},"annotations":{"readOnlyHint":true}},{"name":"get_data_catalog","description":"Read catalog","inputSchema":{"type":"object","properties":{}},"annotations":{"readOnlyHint":true}},{"name":"get_data","description":"Read values","inputSchema":{"type":"object","properties":{}},"annotations":{"readOnlyHint":true}},{"name":"invoke_action","description":"Invoke target action","inputSchema":{"type":"object","properties":{}},"annotations":{"readOnlyHint":false,"destructiveHint":true}},{"name":"send_view_input","description":"Send preview pointer input","inputSchema":{"type":"object","properties":{"x":{"type":"integer"},"y":{"type":"integer"},"pressed":{"type":"boolean"}},"required":["x","y","pressed"],"additionalProperties":false},"annotations":{"readOnlyHint":false}}],"device":{"native_view":true,"native_view_packets":true},"instructions":"Use target schemas."}""");
+    }
+    public async Task<string> ExecuteAsync(string operationId, string name, string argumentsJson, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (name == "get_display_frame" && FrameRelease is { } frameRelease)
+        {
+            FrameStarted.TrySetResult();
+            await frameRelease.Task.WaitAsync(cancellationToken);
+            FrameRelease = null;
+        }
+        Calls.Add((name, argumentsJson));
+        if (RestartedReceipt)
+            return """{"content":[{"type":"text","text":"{\"state\":\"interrupted\",\"deviceRestarted\":true}"}]}""";
+        return name switch
+        {
+            "get_display_frame" => """{"content":[{"type":"text","text":"{\"width\":1,\"height\":1}"},{"type":"image","mimeType":"image/png","data":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/a9kAAAAASUVORK5CYII="}]}""",
+            "get_data_catalog" => """{"content":[{"type":"text","text":"{\"items\":[{\"name\":\"ui.layout_debug_options\"}]}"}]}""",
+            "get_data" => """{"content":[{"type":"text","text":"{\"items\":[{\"value\":{\"opacity\":160,\"outlineWidth\":1,\"levels\":[{\"outline\":true,\"digit\":false,\"outlineColor\":16711935,\"digitColor\":16777215}],\"maxDepth\":1}}]}"}]}""",
+            "invoke_action" => """{"content":[{"type":"text","text":"{\"state\":\"completed\"}"}]}""",
+            "send_view_input" => """{"content":[{"type":"text","text":"{\"ok\":true}"}]}""",
+            _ => """{"content":[{"type":"text","text":"{\"format\":\"lvgl-project-1\"}"}]}"""
+        };
+    }
+    public ValueTask DisconnectAsync() => ValueTask.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

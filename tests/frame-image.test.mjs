@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {inflateSync} from 'node:zlib';
-import {encodeFrameImage,encodeRawFrame,FRAME_IMAGE_LIMITS} from '../integrations/mcp/frame-image.js';
+import {encodeFrameImage,encodeRawFrame,FRAME_IMAGE_LIMITS} from '../packages/document-io/frame-image.js';
 
 function bitmap(width,height,{bits=32,topDown=true,offset=54,pixel=(x,y)=>[x*11,y*17,123,0]}={}){
  const channels=bits/8,stride=Math.ceil(width*channels/4)*4,bytes=Buffer.alloc(offset+stride*height,0x7c);

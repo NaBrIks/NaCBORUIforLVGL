@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Oleg Kozhevnikov
 #include "project_api.hpp"
+#include "response_payload.hpp"
 #include "cbor.h"
 #include "esp_timer.h"
 #include <freertos/semphr.h>
@@ -68,9 +69,9 @@ namespace
 		auto value = request->query(key); return value ? std::string(*value) : std::string();
 	}
 
-	void json(NaWServer::Response &response, int status, const std::string &data)
+	void json(NaWServer::Response &response, int status, std::string data)
 	{
-		(void)response.send(status, "application/json", {reinterpret_cast<const uint8_t *>(data.data()), data.size()});
+		(void)lvgl_cbor::http_payload::json(response, status, std::move(data));
 	}
 
 	void error(NaWServer::Response &response, const std::string &message)
@@ -249,7 +250,8 @@ void ProjectApi::handle_get(NaWServer::Request *request, NaWServer::Response &re
 		}
 		char revision[17]; std::snprintf(revision, sizeof(revision), "%016llx", static_cast<unsigned long long>(hash));
 		(void)response.header("X-Project-Revision", revision);
-		(void)response.send(200, "application/cbor", {bytes.data(), bytes.size()}); return;
+		auto owner = std::make_shared<const std::vector<uint8_t>>(std::move(bytes));
+		(void)lvgl_cbor::http_payload::send(response, 200, "application/cbor", owner, owner->data(), owner->size()); return;
 	}
 
 	if(action == "screen" || action == "style")
@@ -261,7 +263,7 @@ void ProjectApi::handle_get(NaWServer::Request *request, NaWServer::Response &re
 			error(response, message); return;
 		}
 
-		(void)response.send(200, "application/cbor", {bytes.data, bytes.size}); return;
+		(void)lvgl_cbor::http_payload::send(response, 200, "application/cbor", bytes.owner, bytes.data, bytes.size); return;
 	}
 
 	if(action != "info" && !action.empty()){error(response, "project_action"); return;}

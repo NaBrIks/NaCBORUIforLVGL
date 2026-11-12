@@ -45,9 +45,9 @@
             "style": {
               "x": 6,
               "y": 1,
-              "width": 310,
+              "width": 164,
               "height": 16,
-              "text_font": "montserrat_14"
+              "text_font": "montserrat_12"
             },
             "props": {
               "text": "LVGL 9.6 | T-Display-S3"
@@ -57,6 +57,38 @@
                 "ref": "global-static:ui.text",
                 "part": "MAIN",
                 "state": []
+              }
+            ],
+            "children": []
+          },
+          {
+            "id": "ip_address",
+            "type": "label",
+            "style": {
+              "x": 174,
+              "y": 1,
+              "width": 140,
+              "height": 16,
+              "text_align": "LV_TEXT_ALIGN_RIGHT",
+              "text_font": "montserrat_14"
+            },
+            "props": {
+              "text": "—"
+            },
+            "styles": [
+              {
+                "ref": "global-static:ui.text",
+                "part": "MAIN",
+                "state": []
+              }
+            ],
+            "bindings": [
+              {
+                "method": "text",
+                "value": {
+                  "source": "system.network",
+                  "path": ["ip"]
+                }
               }
             ],
             "children": []

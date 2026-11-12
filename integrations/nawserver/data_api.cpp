@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Oleg Kozhevnikov
 #include "data_api.hpp"
+#include "response_payload.hpp"
 #include "esp_timer.h"
 #include <algorithm>
 #include <initializer_list>
@@ -16,10 +17,9 @@ namespace
 		return lvgl_cbor::data_value_json(Value(text));
 	}
 
-	void json(NaWServer::Response &response, int status, const std::string &body)
+	void json(NaWServer::Response &response, int status, std::string body)
 	{
-		(void)response.send(status, "application/json",
-		    {reinterpret_cast<const uint8_t *>(body.data()), body.size()});
+		(void)lvgl_cbor::http_payload::json(response, status, std::move(body));
 	}
 
 	const Value *field(const Object &object, const char *key)

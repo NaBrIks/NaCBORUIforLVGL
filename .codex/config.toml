@@ -2,38 +2,3 @@
 [mcp_servers.semaps]
 command = "semaps"
 args = ["mcp"]
-
-# Offline by default. Configure LVGL_CBOR_DEVICE privately to enable reads.
-[mcp_servers.nacborui]
-command = "node"
-args = ["integrations/mcp/index.js"]
-
-[mcp_servers.nacborui.env]
-LVGL_CBOR_ALLOW_PREVIEW = "0"
-LVGL_CBOR_ALLOW_SAVE = "0"
-LVGL_CBOR_ALLOW_DATA = "0"
-
-# Windows player: local loopback API; the generic MCU connection above stays separate.
-[mcp_servers.nacborui_windows]
-command = "node"
-args = ["integrations/mcp/index.js"]
-startup_timeout_sec = 15
-tool_timeout_sec = 60
-
-[mcp_servers.nacborui_windows.env]
-LVGL_CBOR_DEVICE = "http://127.0.0.1:5300"
-LVGL_CBOR_ALLOW_PREVIEW = "1"
-LVGL_CBOR_ALLOW_SAVE = "1"
-LVGL_CBOR_ALLOW_DATA = "1"
-
-# Graphics-only Windows application, same stdio adapter and API contract.
-[mcp_servers.nacborui_graphics]
-command = "node"
-args = ["integrations/mcp/index.js"]
-startup_timeout_sec = 15
-tool_timeout_sec = 60
-[mcp_servers.nacborui_graphics.env]
-LVGL_CBOR_DEVICE = "http://127.0.0.1:5301"
-LVGL_CBOR_ALLOW_PREVIEW = "1"
-LVGL_CBOR_ALLOW_SAVE = "1"
-LVGL_CBOR_ALLOW_DATA = "1"

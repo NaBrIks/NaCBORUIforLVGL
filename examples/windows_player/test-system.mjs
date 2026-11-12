@@ -101,7 +101,7 @@ try {
       if(y2>d)assert.ok(parent.scrollBottom>0,expected.parent+' owns vertical overflow of '+n.id);
     } else assert.ok(y2<=d,n.id+' fits its non-scrolling parent');
   }
-  const palettes=JSON.parse(await readFile(join(here,'schemes.json'),'utf8')).schemes;
+  const palettes=JSON.parse(await readFile(join(here,'../common/appearance/schemes.json'),'utf8')).schemes;
   const output=join(root,'local/windows-system');await mkdir(output,{recursive:true});
   for(const [id,palette] of Object.entries(palettes)) {
     await command({op:'scheme',scheme:id});r=await inspect();healthy(r);

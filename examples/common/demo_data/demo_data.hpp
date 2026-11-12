@@ -14,7 +14,8 @@ public:
 	lvgl_cbor::DataHistory history;
 #endif
 	DemoData();
-	void tick();
+	bool begin(std::string &error);
+	bool tick(std::string &error);
 private:
 	std::chrono::steady_clock::time_point start_ = std::chrono::steady_clock::now(), next_{};
 	bool running_ = true;

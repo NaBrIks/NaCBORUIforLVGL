@@ -30,7 +30,18 @@
     <PackageReference Include="Markdig" Version="1.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
   </ItemGroup>
+  <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+    <PackageReference Include="System.IO.Ports" Version="10.0.12" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\NaCBORUI.Designer.Core.csproj" />
   </ItemGroup>
+  <ItemGroup Condition="!Exists('$(MSBuildProjectDirectory)\wwwroot\js\browser-tools.js')">
+    <Content Include="wwwroot\js\browser-tools.js" />
+  </ItemGroup>
+  <Target Name="BuildDesignerBrowserTools" BeforeTargets="PrepareForBuild">
+    <Error Condition="!Exists('$(MSBuildProjectDirectory)\..\browser-tools\build.mjs')" Text="Designer browser-tools sources are missing." />
+    <Exec Command="node ..\browser-tools\build.mjs" WorkingDirectory="$(MSBuildProjectDirectory)" />
+    <Error Condition="!Exists('$(MSBuildProjectDirectory)\wwwroot\js\browser-tools.js')" Text="Designer browser-tools bundle was not generated." />
+  </Target>
 </Project>

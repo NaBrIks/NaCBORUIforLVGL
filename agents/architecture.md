@@ -4,11 +4,11 @@ Owner decision 2026-10-23: a page instance owns its objects, bindings/events and
 
 Owner storage addition 2026-10-22: the S3 example keeps a ROM TPMS/GPS base and one CatalogProjectStore on the last 4 MiB of its 16 MiB flash. The portable lvgl-project-catalog-1 index discovers independent compiled screen/style packets by name and exposes origin/location/size through ProjectService status. Mounting, provisioning and media paths belong to the application. Two banks publish their catalog last; ordinary app updates preserve storage. Demo values are labelled; actual TPMS/GNSS bindings remain deferred. Read docs/readme_project_storage_ru.md and ADR_20261022_project-catalog.md.
 
-Owner decision 2026-10-22: ProjectService is the high-level firmware entry point for named screen loading and project storage. Base source plus one optional changes store; media, paths and replacement/addition/removal policy are configured by the application. Whole JSON/CBOR project files use common PC codecs. Optional HTTP and host MCP adapters share the project contract. Preview never saves, explicit save never switches the LCD. Connecting is passive. Project settings are shown only on the Project overview. Read docs/readme_projects_ru.md and ADR_20261022_project-service.md.
+Owner decision 2026-10-22: ProjectService is the high-level firmware entry point for named screen loading and project storage. Base source plus one optional changes store; media, paths and replacement/addition/removal policy are configured by the application. Whole JSON/CBOR project files use common PC codecs. Optional HTTP adapters share the project contract. Preview never saves, explicit save never switches the LCD. Connecting is passive. Project settings are shown only on the Project overview. Read docs/readme_projects_ru.md and ADR_20261022_project-service.md.
 
 Owner requirement 2026-10-22: the editor is general-purpose. Native demo components must not shape its UI or introduce special cases. Discover native types and construct their method controls from device catalog metadata using shared parameter schemas and forms. Names and IDs identify registrations, not editor branches. Keep example implementations and fixtures in optional demo modules; adding a native component with supported parameter shapes must not require editor changes. Improvements to insertion, selection, layout and method editing must apply to components generally, without privileged placement or dedicated controls for a named demo.
 
-Owner request 2026-10-22: keep editor extensions modular. File IO and CSS are independent browser/Node packages with shared codec validation; their UI modules can be excluded at build time. MCP is an optional host-side stdio adapter using the same codecs and the device HTTP/CBOR API, with no SDK dependency in firmware or browser builds. The S3 demo can exclude embedded editor assets entirely. Read docs/readme_modules_files_css_mcp_ru.md for switches, actual capabilities and limits.
+Owner request 2026-10-22: keep editor extensions modular. File IO and CSS are independent browser/Node packages with shared codec validation; their UI modules can be excluded at build time. Desktop MCP bridges were removed on 2026-11-10. Optional Windows player MCP and the opt-in Windows Designer endpoint reuse the existing services and NaWServer. The S3 demo can exclude embedded editor assets entirely. Read docs/readme_modules_files_css_mcp_ru.md for switches, actual capabilities and limits.
 
 Latest owner decision 2026-10-22 supersedes the earlier widget pointer-array design: screen ABI v3 uses opcode 0 creation, common commands 1..255 and component-local methods 256..65535. Creation selects the handler; nested arrays execute by cursor in wire order without a decoded command tree. Styles retain v2 pointer arrays and an independent executor. Native components still register at runtime. Read docs/readme_fast_executor_ru.md and ADR_20261022_cursor-component-executor-v3.md. Earlier ADRs remain historical.
 
@@ -36,13 +36,13 @@ The core has no ESP dependencies beyond its example integration and uses LVGL/Ti
 
 Owner decision 2026-11-07: extend the existing DataRegistry with groups, descriptive
 field/source/action metadata and bounded selective queries. One registry owns typed
-snapshots; immutable DataView records cross to HTTP. MCP wraps the existing data and
+snapshots; immutable DataView records cross to HTTP. HTTP wraps the existing data and
 project API, with compact discovery by default. DataHistory is an optional manually
 ticked module; it owns bounded rings and publishes ordinary readonly sources. Page
 pause does not pause data acquisition. Reverse events remain normal, with per-source
 writability and no new global event-disable flag. Styling discovery and ordered
 multiple style references must support full project redesign, including user schemes
-through MCP. See docs/readme_data_catalog_ru.md and ADR_20261107_data-catalog-history.md.
+through the existing project API. See docs/readme_data_catalog_ru.md and ADR_20261107_data-catalog-history.md.
 Owner request 2026-11-08: the first MAUI Windows/Android designer now composes SPLA Agent, OpenAI-compatible/OpenRouter and MCP client libraries through ProjectReference. SPLA remains unchanged. Presentation is Blazor Hybrid; local chat history is in-memory. Voice input and direct MCU HTTP MCP remain plans. See docs/readme_maui_designer_ru.md.
 
 Owner decision 2026-11-07: all product and acceptance-test networking uses
@@ -50,8 +50,7 @@ NaWServer, including Windows. The native player links the Windows backend and
 serves built frontend assets plus HTTP/WS API from one origin. Short callbacks
 serialize LVGL using lv_lock; bounded data commands run in the UI polling cycle.
 ProjectService/DataRegistry/StyleService/FileProjectStore retain their responsibilities.
-Host tools compile JSON/CBOR, build frontend and expose stdio MCP. The MAUI development target also has a separate native NaWServer Streamable HTTP MCP gateway reusing the same SDK handlers over private pipes. It forwards to the independently running player API; it does not add a second project/codec implementation. See
-AGENTS.md and docs/readme_windows_api_ru.md. No parallel HTTP listener is permitted.
+Host tools compile JSON/CBOR and build frontend. Designer uses Direct API by default and the SPLA HTTP MCP client for explicitly configured endpoints. Windows player MCP is optional. Windows Designer can opt in to exposing its active Direct API session on loopback. See docs/readme_mcp_ru.md.
 
 Owner refinement 2026-11-09: diagnostic controls stay visible in two aligned rows,
 with independent per-depth outline/digit flags and RGB colors (rainbow defaults).
@@ -59,8 +58,8 @@ Outline width defaults to 3px, configurable. A lazy composition-owned style per
 active depth uses shared 16x16 A1 masks (ten masks = 320 bytes of mask data), with
 opacity for digits. No overlay/custom draw callbacks or project/schema mutation.
 ScreenRuntime/ProjectService preserve transient options across page load/refresh.
-One ui.layout_debug registry object and ui.layout_debug_options action feed MAUI
-through SPLA MCP. No extra API/codec/registry capacity. Dynamic depth metadata is
+One ui.layout_debug registry object and ui.layout_debug_options action remain in the target.
+Designer invokes these through Direct API or a compatible MCP target using the same registry. Dynamic depth metadata is
 read on frame capture/configuration, not display draw. Normal style priorities and
 custom-widget drawing apply. polygon_button uses outline but not background images.
 An isolated repro confirms LVGL software A8 tiled-image clipping overrun; no vendor
@@ -80,7 +79,7 @@ conversation/tool execution and target project/runtime contracts are unchanged.
 
 Owner decision 2026-11-09: remove the independent Node/native LLM assistant from
 the LVGL demo, including assistant registry, provider settings and key storage.
-The demo retains NaWServer, project/data APIs, MCP, native frames/pointer input
+The demo retains NaWServer, project/data APIs, native frames/pointer input
 and its graphics/binding pages. `/viewer` is native viewing, `/editor/` the common
 editor. SPLA Designer owns agent execution and SecureStorage; shared bilingual
-prompts/references now live in tools/designer/prompts and still feed generic MCP.
+prompts/references now live in tools/designer/prompts and feed the SPLA-backed Designer. The opt-in Windows Designer endpoint serves the same English guide to external agents.

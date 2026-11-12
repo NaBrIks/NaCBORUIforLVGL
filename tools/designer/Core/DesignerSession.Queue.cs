@@ -65,8 +65,8 @@ public sealed partial class DesignerSession
         var prompt = new PendingPrompt(message, CreateLlmSettings(), cancellationToken);
         lock (_queueGate)
         {
-            if (!IsConnected || _tools is null)
-                throw new InvalidOperationException("Connect an MCP server before sending a designer request.");
+            if (!IsConnected || _activeToolHost is null)
+                throw new InvalidOperationException("Connect a designer target before sending a request.");
             if (_chatPumpRunning && QueuePaused)
                 throw new InvalidOperationException("Wait for the current stop to complete before sending another request.");
             ValidateEnqueue(message.Images);
@@ -86,7 +86,7 @@ public sealed partial class DesignerSession
         lock (_queueGate)
         {
             if (_chatPumpRunning || _pendingPrompts.Count == 0) return;
-            if (!IsConnected || _tools is null) throw new InvalidOperationException("MCP is not connected.");
+            if (!IsConnected || _activeToolHost is null) throw new InvalidOperationException("Designer target is not connected.");
             StartPromptPump();
         }
         Notify();

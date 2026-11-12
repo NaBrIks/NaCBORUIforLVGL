@@ -13,42 +13,56 @@ namespace lab_widgets
 		return lv_color_hex(value);
 	}
 
+	struct ThemePart { const char *role; lv_part_t part; const lv_style_t *style{}; };
+	inline ThemePart theme_parts[]{
+		{"inst_main", LV_PART_MAIN}, {"inst_items", LV_PART_ITEMS}, {"inst_value", LV_PART_INDICATOR},
+		{"inst_warn", LV_PART_SELECTED}, {"inst_fault", LV_PART_KNOB}
+	};
+
+	template<uint32_t Tint> inline void default_text(lv_obj_t *obj, lv_part_t part)
+	{
+		static lv_style_t style = []{
+			lv_style_t style;
+			lv_style_init(&style);
+			lv_style_set_text_color(&style, color(Tint));
+			return style;
+		}();
+		lv_obj_add_style(obj, &style, part);
+	}
+
+	inline void attach_theme(lv_obj_t *obj)
+	{
+		for(const auto &part : theme_parts)
+			if(part.style) lv_obj_add_style(obj, part.style, part.part);
+	}
+
+	inline lv_color_t paint(lv_obj_t *obj, lv_part_t part, lv_style_prop_t property, uint32_t fallback)
+	{
+		if(lv_obj_has_style_prop(obj, part | lv_obj_get_state(obj), property))
+			return lv_obj_get_style_prop(obj, part, property).color;
+		return color(fallback);
+	}
+
 	inline lv_obj_t *frame(lv_obj_t *parent, int width, int height)
 	{
 		auto *obj = lv_obj_create(parent);
 		lv_obj_remove_style_all(obj);
 		lv_obj_set_scrollable(obj, false);
 		lv_obj_set_size(obj, width, height);
-		lv_obj_set_style_bg_color(obj, color(background), 0);
-		lv_obj_set_style_bg_opa(obj, LV_OPA_COVER, 0);
-		lv_obj_set_style_border_color(obj, color(0x375363), 0);
-		lv_obj_set_style_border_width(obj, 1, 0);
-		lv_obj_set_style_radius(obj, 6, 0);
-		lv_obj_set_style_pad_all(obj, 12, 0);
-		lv_obj_set_style_text_font(obj, &lv_font_montserrat_20, 0);
-		lv_obj_set_style_text_color(obj, color(ink), 0);
-		return obj;
-	}
-
-	inline lv_obj_t *label(lv_obj_t *parent, const char *text, int x, int y,
-	    uint32_t tint = ink)
-	{
-		auto *obj = lv_label_create(parent);
-		lv_label_set_text(obj, text);
-		lv_obj_set_pos(obj, x, y);
-		lv_obj_set_style_text_color(obj, color(tint), 0);
-		return obj;
-	}
-
-	inline lv_obj_t *bar(lv_obj_t *parent, int x, int y, int width, int height)
-	{
-		auto *obj = lv_bar_create(parent);
-		lv_obj_set_pos(obj, x, y);
-		lv_obj_set_size(obj, width, height);
-		lv_obj_set_style_bg_color(obj, color(0x304956), LV_PART_MAIN);
-		lv_obj_set_style_bg_color(obj, color(green), LV_PART_INDICATOR);
-		lv_obj_set_style_radius(obj, 2, LV_PART_MAIN);
-		lv_obj_set_style_radius(obj, 2, LV_PART_INDICATOR);
+		static lv_style_t style = []{
+			lv_style_t style;
+			lv_style_init(&style);
+			lv_style_set_bg_color(&style, color(background));
+			lv_style_set_bg_opa(&style, LV_OPA_COVER);
+			lv_style_set_border_color(&style, color(0x375363));
+			lv_style_set_border_width(&style, 1);
+			lv_style_set_radius(&style, 6);
+			lv_style_set_pad_all(&style, 12);
+			lv_style_set_text_font(&style, &lv_font_montserrat_20);
+			lv_style_set_text_color(&style, color(ink));
+			return style;
+		}();
+		lv_obj_add_style(obj, &style, LV_PART_MAIN);
 		return obj;
 	}
 

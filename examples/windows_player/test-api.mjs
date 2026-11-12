@@ -2,13 +2,12 @@
 // Copyright (c) 2026 Oleg Kozhevnikov
 import {spawn} from 'node:child_process';
 import {createInterface} from 'node:readline';
-import {createRequire} from 'node:module';
 import {createConnection} from 'node:net';
 import {createHash} from 'node:crypto';
 import {mkdir,mkdtemp,readFile,readdir,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve,dirname} from 'node:path';
-import {fileURLToPath,pathToFileURL} from 'node:url';
+import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {encode,decode} from 'cborg';
 import {screenContract} from '../../packages/screen-codec/index.js';
@@ -16,9 +15,7 @@ import {screenContract} from '../../packages/screen-codec/index.js';
 const here=dirname(fileURLToPath(import.meta.url)),root=resolve(here,'../..');
 const exe=resolve(process.argv[2]??join(root,'local/windows-player/Release/nacborui_player.exe'));
 const executableSha256=createHash('sha256').update(await readFile(exe)).digest('hex');
-const require=createRequire(new URL('../../integrations/mcp/package.json',import.meta.url));
-const {Client}=await import(pathToFileURL(require.resolve('@modelcontextprotocol/client')));
-const {StdioClientTransport}=await import(pathToFileURL(require.resolve('@modelcontextprotocol/client/stdio')));
+import {connectNativeApi} from './native-api.mjs';
 const temporary=await mkdtemp(join(tmpdir(),'nacborui-production-api-')),store=join(temporary,'кириллица папка','сохранённый проект'),output=join(root,'local/windows-api');
 const wait=ms=>new Promise(yes=>setTimeout(yes,ms)),rgb=hex=>parseInt(hex.slice(1),16);
 const roots=[{id:'root'},{id:'choose_pony'},{id:'choose_space'},{id:'mean'},{id:'level'},{id:'api_counter'}];
@@ -40,14 +37,11 @@ async function launch(){
  });
  const exit=new Promise(yes=>child.once('close',code=>{closed=true;clearTimeout(startup);readyReject(Error('Player closed '+code+' '+stderr));for(const p of pending.values()){clearTimeout(p.timer);p.no(Error('Player closed '+code));}pending.clear();yes(code);}));
  const command=request=>new Promise((yes,no)=>{const id=++next,timer=setTimeout(()=>{pending.delete(id);no(Error('Player command timeout '+JSON.stringify(request)+' '+stderr));},8000);pending.set(id,{yes,no,timer});child.stdin.write(JSON.stringify({...request,id})+'\n');});
- let mcp;const sockets=[];
- const session={child,command,sockets,get url(){return api;},get mcp(){return mcp;},get stderr(){return stderr;},async stop(){for(const socket of sockets)socket.close();await mcp?.close().catch(()=>{});mcp=null;if(!closed){child.stdin.end('{"op":"quit"}\n');await Promise.race([exit,wait(3000).then(()=>child.kill())]);}clearTimeout(startup);for(const p of pending.values())clearTimeout(p.timer);return exit;}};
+ const sockets=[];
+ const session={child,command,sockets,get url(){return api;},get stderr(){return stderr;},async stop(){for(const socket of sockets)socket.close();if(!closed){child.stdin.end('{"op":"quit"}\n');await Promise.race([exit,wait(3000).then(()=>child.kill())]);}clearTimeout(startup);for(const p of pending.values())clearTimeout(p.timer);return exit;}};
  active=session;
  const url=new URL(await ready);assert.equal(url.protocol,'http:');assert.equal(url.hostname,'127.0.0.1');assert.notEqual(url.port,'443');assert.notEqual(url.port,'0');
- mcp=new Client({name:'windows-production-api-test',version:'1.0.0'});
- await mcp.connect(new StdioClientTransport({command:process.execPath,args:[join(root,'integrations/mcp/index.js')],cwd:root,env:{PATH:process.env.PATH,LVGL_CBOR_DEVICE:url.origin,LVGL_CBOR_ALLOW_PREVIEW:'1',LVGL_CBOR_ALLOW_SAVE:'1',LVGL_CBOR_ALLOW_DATA:'1'},stderr:'pipe'}));
- session.call=(name,args={})=>mcp.callTool({name,arguments:args},undefined,{timeout:20000});
- session.result=async(name,args={})=>{const r=await session.call(name,args);assert.equal(r.isError,undefined,JSON.stringify(r.content));return JSON.parse(r.content[0].text);};
+ session.api=await connectNativeApi(url.origin);
  return session;
 }
 function healthy(r){assert.equal(r.ok,true,r.error);assert.equal(r.windowVisible,false);assert.equal(r.foreground,false);const d=JSON.parse(r.dataJson).diagnostics;assert.equal(d.bindingErrors,0);assert.equal(d.queueDropped,0);}
@@ -77,15 +71,14 @@ async function rejectedDataCommand(session,args){
  const response=await fetch(new URL('/api/data',session.url),{method:'POST',headers:{'Content-Type':'application/cbor'},body:encode({kind:'action',name:'demo.step',args}),signal:AbortSignal.timeout(5000)});
  assert.equal(response.status,202);const queued=await response.json();assert.equal(queued.queued,true);assert.ok(Number.isSafeInteger(queued.id)&&queued.id>0);
  const end=Date.now()+5000;let receipt;
- do{receipt=await session.result('get_data_command',{id:queued.id});if(receipt.state==='completed')break;await wait(30);}while(Date.now()<end);
+ do{receipt=await session.api.data.receipt(queued.id);if(receipt.state==='completed')break;await wait(30);}while(Date.now()<end);
  assert.equal(receipt.state,'completed');assert.equal(receipt.result.ok,false);assert.ok(receipt.result.error);
- assert.equal((await session.result('get_device')).section,'summary');
- assert.equal((await session.result('get_data',{name:'demo.clicks'})).items[0].value,5);
+ assert.equal((await session.api.values({name:'demo.clicks'})).items[0].value,5);
  assert.equal(source(await inspect(session),'demo.clicks').value,5,'a rejected CBOR argument must not execute the action');
  return {id:queued.id,error:receipt.result.error};
 }
 function draftProject(base){
- const draft=structuredClone(base);draft.manifest.name='Authored through production MCP';
+ const draft=structuredClone(base);draft.manifest.name='Authored through production HTTP API';
  const screen=draft.screens[draft.manifest.entry];
  draft.styles['agent.api.canvas']={scope:'global',name:'agent.api.canvas',attach:false,props:{bg_color:'#eee9f4'}};
  draft.styles['agent.api.button']={scope:'global',name:'agent.api.button',attach:false,props:{bg_color:'#4b357d',text_color:'#ffffff',radius:11,border_width:2,border_color:'#987bbb'}};
@@ -109,17 +102,15 @@ try{
  const script=html.match(/<script[^>]+src="([^"]+)"/);assert.ok(script,'native NaWServer must serve the built editor');const asset=await fetch(new URL(script[1],session.url));assert.equal(asset.status,200);assert.ok((await asset.arrayBuffer()).byteLength>100);
  const upgrade=await httpProbe(session.url,{path:'/ws',headers:{Connection:'Upgrade',Upgrade:'websocket','Sec-WebSocket-Version':'13','Sec-WebSocket-Key':'AAECAwQFBgcICQoLDA0ODw=='}});assert.equal(upgrade.status,101,upgrade.response);
  let styleSocket=await connectSocket(session,'/ws'),screenSocket=await connectSocket(session,'/screen-ws');const webSocketRejections=[];
- const tools=(await session.mcp.listTools()).tools.map(t=>t.name);for(const name of ['get_device','get_data_catalog','read_project','preview_project','save_project','show_project_screen','reset_project_changes','invoke_action','write_source','send_event'])assert.ok(tools.includes(name),name);
- const summary=await session.result('get_device');assert.equal(summary.section,'summary');assert.equal(summary.capabilities,undefined);
- const groups=await session.result('get_data_catalog');assert.ok(groups.items.some(group=>group.name==='demo'));
+ const groups=await session.api.catalog();assert.ok(groups.items.some(group=>group.name==='demo'));
  assert.equal((await session.command({op:'add_demo_sensor',name:'demo.api_temperature'})).ok,true);
- const catalogPage=await session.result('get_data_catalog',{kind:'sources',name:'demo.api_temperature'});
+ const catalogPage=await session.api.catalog({kind:'sources',name:'demo.api_temperature'});
  const catalogEvent=await styleSocket.until(frame=>frame.event==='data_catalog_changed'&&frame.catalogRevision===catalogPage.catalogRevision);assert.equal(catalogEvent.v,1);
- const original=await session.result('read_project'),status=await session.result('get_project_status');assert.equal(status.storage.persistent,true);assert.equal(status.storage.writable,true);
+ const original=await session.api.read(),status=await session.api.status();assert.equal(status.storage.persistent,true);assert.equal(status.storage.writable,true);
  let r=await inspect(session);const originalGeometry=pick(r);assert.equal(r.historyAvailable,true);
  const draft=draftProject(original.project),entry= draft.manifest.entry;
  const invalid=structuredClone(draft);invalid.styles['agent.api.button'].props.unknown_style_property=1;
- assert.equal((await session.call('preview_project',{project:invalid,screen:entry})).isError,true);
+ await assert.rejects(()=>session.api.preview({project:invalid,screen:entry}));
  assert.deepEqual(pick(await inspect(session)),originalGeometry,'rejected style preserves the real native UI');
  for(let attempt=0;attempt<6;attempt++){
   const styleId='api-style-invalid-'+attempt,screenId='api-screen-invalid-'+attempt;
@@ -135,25 +126,25 @@ try{
  styleSocket=webSocketPressure.some(result=>result.outcome==='close')||pressureSocket.socket.readyState!==WebSocket.OPEN?await connectSocket(session,'/ws'):pressureSocket;
  assert.equal((await styleSocket.until(frame=>frame.event==='data_catalog_changed'&&frame.catalogRevision===catalogPage.catalogRevision)).v,1);
  assert.deepEqual(pick(await inspect(session)),originalGeometry,'rejected CBOR WS packets preserve the native UI');
- const preview=await session.result('preview_project',{project:draft,screen:entry});assert.equal(preview.saved,false);
+ const preview=await session.api.preview({project:draft,screen:entry});assert.equal(preview.saved,false);
  r=await inspect(session);assert.equal(r.nodes.find(n=>n.id==='root').background,rgb('#eee9f4'));assert.equal(r.nodes.find(n=>n.id==='choose_pony').radius,11);assert.equal(r.nodes.find(n=>n.id==='choose_space').outlineWidth,3);assert.equal(r.nodes.find(n=>n.id==='choose_space').outlinePad,2);
- const afterPreview=await session.result('read_project');assert.equal(afterPreview.revision,original.revision);assert.equal(afterPreview.project.styles['agent.api.button'],undefined,'native preview leaves the store unchanged');
+ const afterPreview=await session.api.read();assert.equal(afterPreview.revision,original.revision);assert.equal(afterPreview.project.styles['agent.api.button'],undefined,'native preview leaves the store unchanged');
  assert.equal((await session.command({op:'snapshot',path:join(output,'preview.bmp')})).ok,true);
  const saved=structuredClone(draft);saved.manifest.name='Persisted API design';saved.styles['agent.api.canvas'].props.bg_color='#e2f1e9';saved.styles['agent.api.button'].props.bg_color='#235c52';saved.styles['agent.api.button'].props.radius=15;
- const beforeSave=pick(await inspect(session));const save=await session.result('save_project',{project:saved,revision:afterPreview.revision});assert.equal(save.persistent,true);assert.equal(save.saved,true);
+ const beforeSave=pick(await inspect(session));const save=await session.api.save({project:saved,revision:afterPreview.revision});assert.equal(save.persistent,true);assert.equal(save.saved,true);
  const cacheName='сохранённый проект.base.'+status.project.baseRevision+'.0';
  assert.deepEqual((await readdir(dirname(store))).sort(),['сохранённый проект.0',cacheName].sort(),'native storage and immutable base cache preserve exact Unicode filenames');
  assert.deepEqual(pick(await inspect(session)),beforeSave,'saving project B keeps preview A displayed');
- const afterSave=await session.result('read_project');assert.equal(afterSave.project.styles['agent.api.button'].props.radius,15);assert.notEqual(afterSave.revision,original.revision);
+ const afterSave=await session.api.read();assert.equal(afterSave.project.styles['agent.api.button'].props.radius,15);assert.notEqual(afterSave.revision,original.revision);
  const projectEvent=await styleSocket.until(frame=>frame.event==='project_changed'&&frame.revision===afterSave.revision);assert.equal(projectEvent.v,1);
- const conflict=await session.call('save_project',{project:draft,revision:original.revision});assert.equal(conflict.isError,true);assert.match(conflict.content[0].text,/revision|409/i);assert.deepEqual(pick(await inspect(session)),beforeSave);
- assert.equal((await session.result('show_project_screen',{screen:entry})).ok,true);
+ await assert.rejects(()=>session.api.save({project:draft,revision:original.revision}),/revision|409/i);assert.deepEqual(pick(await inspect(session)),beforeSave);
+ assert.equal((await session.api.show({screen:entry})).ok,true);
  r=await inspect(session);assert.equal(r.nodes.find(n=>n.id==='root').background,rgb('#e2f1e9'));assert.equal(r.nodes.find(n=>n.id==='choose_pony').radius,15);
- const write=await session.result('write_source',{source:'demo.level',value:27});assert.equal(write.state,'completed');assert.equal(write.result.ok,true);
+ const write=await session.api.write({source:'demo.level',value:27});assert.equal(write.state,'completed');assert.equal(write.result.ok,true);
  assert.equal((await styleSocket.until(frame=>frame.event==='data_changed'&&frame.source==='demo.level'&&frame.value===27)).v,1);
- const action=await session.result('invoke_action',{name:'demo.step',args:3});assert.equal(action.state,'completed');assert.equal(action.result.ok,true);
- const event=await session.result('send_event',{node:'api_step',event:'clicked'});assert.equal(event.state,'completed');assert.equal(event.result.ok,true);
- assert.equal((await session.result('get_data_command',{id:event.id})).result.ok,true);
+ const action=await session.api.invoke({name:'demo.step',args:3});assert.equal(action.state,'completed');assert.equal(action.result.ok,true);
+ const event=await session.api.event({node:'api_step',event:'clicked'});assert.equal(event.state,'completed');assert.equal(event.result.ok,true);
+ assert.equal((await session.api.data.receipt(event.id)).result.ok,true);
  r=await settle(session,r=>r.nodes.find(n=>n.id==='level').value===27&&r.nodes.find(n=>n.id==='api_counter').text==='Actions: 5','real bindings did not reflect action/write/event');assert.equal(source(r,'demo.clicks').value,5);
  const byteArgument=await rejectedDataCommand(session,new Uint8Array([1]));
  let deepArgument=1;for(let depth=0;depth<32;depth++)deepArgument=[deepArgument];
@@ -161,14 +152,14 @@ try{
  for(const n of r.nodes.filter(n=>n.found)){if(n.parentBounds){const [x,y,x2,y2]=n.bounds,[a,b,c,d]=n.parentBounds;assert.ok(x>=a&&y>=b&&x2<=c&&y2<=d,n.id+' stays inside its parent');}}
  assert.equal((await session.command({op:'snapshot',path:join(output,'saved-shown.bmp')})).ok,true);
  const firstUrl=session.url;assert.equal(await session.stop(),0);active=null;
- session=await launch();const restored=await session.result('read_project');assert.equal(restored.project.styles['agent.api.button'].props.radius,15);
- r=await inspect(session);assert.equal(r.nodes.find(n=>n.id==='root').background,rgb('#e2f1e9'));assert.equal(r.nodes.find(n=>n.id==='choose_pony').radius,15);assert.equal((await session.result('get_project_status')).storage.persistent,true);
+ session=await launch();const restored=await session.api.read();assert.equal(restored.project.styles['agent.api.button'].props.radius,15);
+ r=await inspect(session);assert.equal(r.nodes.find(n=>n.id==='root').background,rgb('#e2f1e9'));assert.equal(r.nodes.find(n=>n.id==='choose_pony').radius,15);assert.equal((await session.api.status()).storage.persistent,true);
  assert.equal((await session.command({op:'snapshot',path:join(output,'restored.bmp')})).ok,true);
- await session.result('reset_project_changes',{revision:restored.revision});const reset=await session.result('read_project');assert.equal(reset.project.styles['agent.api.button'],undefined);
+ await session.api.reset({revision:restored.revision});const reset=await session.api.read();assert.equal(reset.project.styles['agent.api.button'],undefined);
  assert.deepEqual((await readdir(dirname(store))).sort(),['сохранённый проект.0','сохранённый проект.1',cacheName].sort(),'both owner slots and the immutable base cache preserve exact Unicode filenames');
  assert.equal((await inspect(session)).nodes.find(n=>n.id==='choose_pony').radius,15,'resetting storage does not switch the current display');
- assert.equal((await session.result('show_project_screen',{screen:original.project.manifest.entry})).ok,true);assert.equal((await inspect(session)).nodes.find(n=>n.id==='choose_pony').radius,0);
+ assert.equal((await session.api.show({screen:original.project.manifest.entry})).ok,true);assert.equal((await inspect(session)).nodes.find(n=>n.id==='choose_pony').radius,0);
  await writeFile(join(output,'measurements.json'),JSON.stringify({server:'NaWServer',executableSha256,editorHtml:true,httpGuards:{foreignHost:403,foreignOrigin:403,contentType:415,commandBytes:413},webSocketRejectedPairs:6,webSocketRejections,webSocketPressure,webSocketProjectEvent:projectEvent,webSocketCatalogEvent:catalogEvent,unicodeStore:true,rejectedArguments:{byteString:byteArgument,nestedArray:deepArgumentReceipt},temporaryPorts:[new URL(firstUrl).port,new URL(session.url).port],originalRevision:original.revision,savedRevision:afterSave.revision,restoredRevision:restored.revision,resetRevision:reset.revision,previewGeometry:beforeSave,restoredGeometry:pick(r)},null,2));
  assert.equal(await session.stop(),0);active=null;
- console.log('PASS: native NaWServer editor HTML/assets, CBOR WebSockets and project_changed -> real stdio MCP -> actual ProjectService preview/save/show/reset, Unicode file-store restart, revision conflict, authored stacked styles, invalid style preservation, write/action/event receipts, rejected byte/deep CBOR arguments without crashing, live bindings and hidden UI');
+ console.log('PASS: native NaWServer editor HTML/assets, CBOR WebSockets and project_changed -> direct HTTP API -> actual ProjectService preview/save/show/reset, Unicode file-store restart, revision conflict, authored stacked styles, invalid style preservation, write/action/event receipts, rejected byte/deep CBOR arguments without crashing, live bindings and hidden UI');
 }finally{await active?.stop();await rm(temporary,{recursive:true,force:true});}

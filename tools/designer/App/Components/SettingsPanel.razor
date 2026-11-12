@@ -1,13 +1,69 @@
 @using NaCBORUI.Designer.App.Services
+@using NaCBORUI.Designer.Core
 @inject UiText T
 
 <div class="settings-scrim" @onclick="OnClose">
     <section class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title" @onclick:stopPropagation="true">
         <header class="settings-head">
-            <div><h2 id="settings-title">@T["Подключение"]</h2><p>@T["Адрес MCP и параметры модели"]</p></div>
+            <div><h2 id="settings-title">@T["Настройки"]</h2></div>
             <button class="icon-button" type="button" title="@T["Закрыть"]" aria-label="@T["Закрыть настройки"]" @onclick="OnClose">×</button>
         </header>
-        <div class="settings-fields">
+        <div class="settings-tabs" role="tablist" aria-label="@T["Настройки"]">
+            <button type="button" role="tab" id="model-settings-tab" aria-controls="model-settings" aria-selected="@ModelTab" class="@(ModelTab ? "selected" : null)" @onclick="() => SelectTab(SettingsTab.Model)">@T["Модель"]</button>
+            <button type="button" role="tab" id="target-settings-tab" aria-controls="target-settings" aria-selected="@DevicesTab" class="@(DevicesTab ? "selected" : null)" @onclick="() => SelectTab(SettingsTab.Devices)">@T["Устройства"]</button>
+            <button type="button" role="tab" id="language-settings-tab" aria-controls="language-settings" aria-selected="@LanguageTab" class="@(LanguageTab ? "selected" : null)" @onclick="() => SelectTab(SettingsTab.Language)">@T["Язык"]</button>
+        </div>
+        <div class="settings-fields" role="tabpanel" id="@PanelId" aria-labelledby="@(PanelId + "-tab")">
+            @if (DevicesTab)
+            {
+            <section class="connection-catalog">
+                <header><strong>@T["Подключения"]</strong><div>
+                    <button class="icon-button" type="button" aria-label="@T["Добавить подключение"]" title="@T["Добавить подключение"]" disabled="@(Draft.Connections.Count >= DesignerSettings.MaxConnections)" @onclick="AddConnection">＋</button>
+                    <button class="icon-button" type="button" aria-label="@T["Копировать подключение"]" title="@T["Копировать подключение"]" disabled="@(Draft.Connections.Count >= DesignerSettings.MaxConnections)" @onclick="CopyConnection">⧉</button>
+                    <button class="icon-button" type="button" aria-label="@T["Удалить подключение"]" title="@T["Удалить подключение"]" disabled="@(Draft.Connections.Count <= 1)" @onclick="RemoveConnection">×</button>
+                </div></header>
+                <div class="connection-catalog-scroll"><table>
+                    <colgroup><col style="width:32%"/><col style="width:25%"/><col style="width:43%"/></colgroup>
+                    <thead><tr><th>@T["Имя"]</th><th>@T["Режим"]</th><th>@T["Адрес"]</th></tr></thead>
+                    <tbody>@foreach (var profile in Draft.Connections)
+                    {
+                        <tr @key="profile.Id" class="@(profile.Id == Draft.SelectedConnectionId ? "selected" : null)" aria-selected="@(profile.Id == Draft.SelectedConnectionId)" tabindex="0" @onclick="() => Draft.SelectConnection(profile.Id)" @onkeydown="e => SelectOnKey(e, profile.Id)">
+                            <td title="@profile.Name">@profile.Name</td><td>@ModeLabel(ProfileMode(profile))</td><td title="@ProfileAddress(profile)">@ProfileAddress(profile)</td>
+                        </tr>
+                    }</tbody>
+                </table></div>
+                <label>@T["Имя подключения"]<input @bind="SelectedName" @bind:event="oninput" maxlength="@DesignerSettings.MaxConnectionNameLength" aria-label="@T["Имя подключения"]" /></label>
+            </section>
+            <fieldset class="connection-modes">
+                <legend>@T["Подключение"]</legend>
+                @foreach (var mode in Enum.GetValues<DesignerConnectionMode>().Where(mode => OperatingSystem.IsWindows() || mode != DesignerConnectionMode.UsbPreview))
+                {
+                    <label class="connection-mode"><input type="radio" name="connection-mode" value="@mode" checked="@(Draft.ConnectionMode == mode)" @onchange="() => Draft.ConnectionMode = mode" />@ModeLabel(mode)</label>
+                }
+            </fieldset>
+            @if (Draft.ConnectionMode == DesignerConnectionMode.DirectApi)
+            {
+                <label>@T["Адрес устройства"]<input @bind="Draft.DeviceOrigin" aria-label="@T["Адрес устройства"]" spellcheck="false" inputmode="url" placeholder="http://device-address" /></label>
+            }
+            else if (Draft.ConnectionMode == DesignerConnectionMode.UsbPreview)
+            {
+                <label>@T["USB-порт"]<input @bind="Draft.UsbPort" aria-label="@T["USB-порт"]" spellcheck="false" placeholder="COM…" /></label>
+            }
+            else if (Draft.ConnectionMode == DesignerConnectionMode.NativeMcp)
+            {
+                <label>@T["MCP устройства"]<input @bind="Draft.McpEndpoint" aria-label="@T["MCP устройства"]" spellcheck="false" inputmode="url" placeholder="http://device-address/mcp" /></label>
+            }
+            else
+            {
+                <label>@T["MCP-прокси"]<input @bind="Draft.ProxyMcpEndpoint" aria-label="@T["MCP-прокси"]" spellcheck="false" inputmode="url" placeholder="http://proxy-address/mcp" /></label>
+            }
+            @if (Draft.ConnectionMode is DesignerConnectionMode.NativeMcp or DesignerConnectionMode.ProxyMcp)
+            {
+                <label>@T["MCP server ID"]<input @bind="Draft.McpServerId" spellcheck="false" /></label>
+            }
+            }
+            @if (ModelTab)
+            {
             <label>@T["Провайдер"]
                 <select @bind="Draft.Provider"><option value="openrouter">OpenRouter</option><option value="openai">OpenAI compatible</option></select>
             </label>
@@ -35,25 +91,34 @@
                     @foreach (var model in FilteredModels) { <option value="@model">@model</option> }
                 </select>
             }
-            <label>@T["MCP URL"]
-                <input @bind="Draft.McpEndpoint" spellcheck="false" inputmode="url" placeholder="http://127.0.0.1:5302/mcp" />
-            </label>
-            <label>@T["MCP server ID"]
-                <input @bind="Draft.McpServerId" spellcheck="false" />
-            </label>
+
+            }
+            @if (LanguageTab)
+            {
+                <fieldset class="language-options" aria-label="@T["Язык"]">
+                    <label><input type="radio" name="interface-language" value="ru" checked="@(T.Language == "ru")" @onchange="ChangeLanguage" />Русский</label>
+                    <label><input type="radio" name="interface-language" value="en" checked="@(T.Language == "en")" @onchange="ChangeLanguage" />English</label>
+                </fieldset>
+            }
         </div>
-        <p class="settings-note">@T["Для телефона по USB: adb reverse tcp:5302 tcp:5302, затем MCP URL http://127.0.0.1:5302/mcp. Для эмулятора: http://10.0.2.2:5302/mcp."]</p>
-        <details class="settings-error @(!string.IsNullOrWhiteSpace(Error) ? "has-error" : "")"><summary>ⓘ @(string.IsNullOrWhiteSpace(Error) ? T["Диагностика"] : T["Ошибка"])</summary><p>@(Error ?? T["Ошибок нет"])</p></details>
+        <details class="settings-error @(!string.IsNullOrWhiteSpace(Error) ? "has-error" : "")"><summary>ⓘ @(string.IsNullOrWhiteSpace(Error) ? (SavedNotice ?? T["Диагностика"]) : T["Ошибка"])</summary><p>@(Error ?? SavedNotice ?? T["Ошибок нет"])</p></details>
         <footer class="settings-actions">
             <button class="button secondary" type="button" @onclick="OnClose">@T["Закрыть"]</button>
-            <button class="button primary" type="button" @onclick="Save">@T["Сохранить"]</button>
+            @if (!LanguageTab)
+            {
+                <button class="button primary" type="button" @onclick="Save">@(ModelTab ? T["Сохранить модель"] : T["Сохранить подключения"])</button>
+            }
         </footer>
     </section>
 </div>
 
 @code {
     [Parameter, EditorRequired] public DesignerSettings Settings { get; set; } = new();
-    [Parameter] public EventCallback<DesignerSettings> OnSave { get; set; }
+    [Parameter] public EventCallback<DesignerSettings> OnSaveModel { get; set; }
+    [Parameter] public EventCallback<DesignerSettings> OnSaveConnections { get; set; }
+    [Parameter] public EventCallback OnTabChanged { get; set; }
+    [Parameter] public EventCallback<string> OnLanguageChanged { get; set; }
+    [Parameter] public string? SavedNotice { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public EventCallback<DesignerSettings> OnLoadModels { get; set; }
     [Parameter] public IReadOnlyList<string> Models { get; set; } = Array.Empty<string>();
@@ -62,24 +127,100 @@
     private string ModelFilter = string.Empty;
     private bool OnlyFree;
     private IEnumerable<string> FilteredModels => Models.Where(model => (!OnlyFree || model.EndsWith(":free", StringComparison.OrdinalIgnoreCase)) && model.Contains(ModelFilter, StringComparison.OrdinalIgnoreCase));
-    private DesignerSettings Draft { get; set; } = new();
+    private enum SettingsTab { Devices, Model, Language }
+    private SettingsTab Tab;
+    private bool DevicesTab => Tab == SettingsTab.Devices;
+    private bool ModelTab => Tab == SettingsTab.Model;
+    private bool LanguageTab => Tab == SettingsTab.Language;
+    private string PanelId => ModelTab ? "model-settings" : LanguageTab ? "language-settings" : "target-settings";
+    private DesignerSettings ModelDraft = new();
+    private DesignerSettings ConnectionDraft = new();
+    private DesignerSettings Draft => ModelTab ? ModelDraft : ConnectionDraft;
     private DesignerSettings? _source;
 
     protected override void OnParametersSet()
     {
         if (ReferenceEquals(_source, Settings)) return;
+        if (_source is null) { ModelDraft = Settings.Clone(); ConnectionDraft = Settings.Clone(); }
+        else if (ModelTab) ModelDraft = Settings.Clone();
+        else if (DevicesTab) ConnectionDraft = Settings.Clone();
         _source = Settings;
-        Draft = new DesignerSettings
-        {
-            Provider = Settings.Provider,
-            ModelEndpoint = Settings.ModelEndpoint,
-            Model = Settings.Model,
-            McpEndpoint = Settings.McpEndpoint,
-            McpServerId = Settings.McpServerId,
-            ApiKey = Settings.ApiKey
-        };
     }
 
-    private Task Save() => OnSave.InvokeAsync(Draft);
+    private string SelectedName
+    {
+        get => Draft.Connections.FirstOrDefault(p => p.Id == Draft.SelectedConnectionId)?.Name ?? string.Empty;
+        set { var profile = Draft.Connections.FirstOrDefault(p => p.Id == Draft.SelectedConnectionId); if (profile is not null) profile.Name = value; }
+    }
+    private DesignerConnectionMode ProfileMode(DesignerConnectionProfile profile) => profile.Id == Draft.SelectedConnectionId ? Draft.ConnectionMode : profile.ConnectionMode;
+    private string ProfileAddress(DesignerConnectionProfile profile) => profile.Id == Draft.SelectedConnectionId
+        ? Draft.ConnectionMode switch { DesignerConnectionMode.DirectApi => Draft.DeviceOrigin, DesignerConnectionMode.NativeMcp => Draft.McpEndpoint, DesignerConnectionMode.UsbPreview => Draft.UsbPort, _ => Draft.ProxyMcpEndpoint }
+        : profile.ConnectionMode switch { DesignerConnectionMode.DirectApi => profile.DeviceOrigin, DesignerConnectionMode.NativeMcp => profile.McpEndpoint, DesignerConnectionMode.UsbPreview => profile.UsbPort, _ => profile.ProxyMcpEndpoint };
+    private void SelectOnKey(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs e, string id) { if (e.Key is "Enter" or " ") Draft.SelectConnection(id); }
+    private void AddConnection()
+    {
+        if (Draft.Connections.Count >= DesignerSettings.MaxConnections) return;
+        Draft.CaptureSelectedConnection();
+        var profile = new DesignerConnectionProfile { Id = Guid.NewGuid().ToString("N"), Name = T["Подключение"] + " " + (Draft.Connections.Count + 1), ConnectionMode = DesignerConnectionMode.DirectApi };
+        Draft.Connections.Add(profile); Draft.SelectConnection(profile.Id);
+    }
+    private void CopyConnection()
+    {
+        if (Draft.Connections.Count >= DesignerSettings.MaxConnections) return;
+        Draft.CaptureSelectedConnection();
+        var source = Draft.Connections.First(p => p.Id == Draft.SelectedConnectionId);
+        var profile = source.CloneAsNew((source.Name.Length > 65 ? source.Name[..65] : source.Name) + " (" + T["копия"] + ")");
+        Draft.Connections.Add(profile); Draft.SelectConnection(profile.Id);
+    }
+    private void RemoveConnection()
+    {
+        if (Draft.Connections.Count <= 1) return;
+        var selected = Draft.SelectedConnectionId;
+        Draft.Connections.RemoveAll(p => p.Id == selected);
+        Draft.SelectConnection(Draft.Connections[0].Id);
+    }
+    private string ModeLabel(DesignerConnectionMode mode) => mode switch
+    {
+        DesignerConnectionMode.DirectApi => T["Прямой API"],
+        DesignerConnectionMode.NativeMcp => T["MCP устройства"],
+        DesignerConnectionMode.UsbPreview => "USB",
+        _ => T["MCP-прокси"]
+    };
+    private async Task SelectTab(SettingsTab tab)
+    {
+        if (Tab == tab) return;
+        Tab = tab;
+        await OnTabChanged.InvokeAsync();
+    }
+    private Task Save()
+    {
+        if (ModelTab) return OnSaveModel.InvokeAsync(ModelDraft);
+        ConnectionDraft.CaptureSelectedConnection(); return OnSaveConnections.InvokeAsync(ConnectionDraft);
+    }
+    private Task ChangeLanguage(ChangeEventArgs args) =>
+        OnLanguageChanged.InvokeAsync(args.Value?.ToString() ?? string.Empty);
     private Task LoadModels() => OnLoadModels.InvokeAsync(Draft);
 }
+
+<style>
+.language-options{display:flex;flex-wrap:wrap;gap:8px 16px;margin:0;padding:0;border:0;}
+.settings-fields .language-options label{display:flex;align-items:center;gap:6px;min-height:32px;cursor:pointer;}
+.settings-fields .language-options input{width:16px;height:16px;min-height:0;margin:0;}
+.connection-modes{display:flex;flex-wrap:wrap;gap:8px 14px;margin:0;padding:6px 0;border:0;min-width:0;}
+.connection-modes legend{font-size:12px;color:var(--text-muted);padding:0;}
+.settings-fields .connection-mode{display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:13px;cursor:pointer;}
+.settings-fields .connection-mode input{width:16px;height:16px;margin:0;}
+.connection-catalog{min-width:0;display:grid;gap:7px;}
+.connection-catalog header{display:flex;align-items:center;justify-content:space-between;gap:6px;}
+.connection-catalog header>div{display:flex;gap:5px;}
+.connection-catalog-scroll{max-height:160px;overflow:auto;border:1px solid var(--line);border-radius:4px;}
+.connection-catalog table{border-collapse:collapse;table-layout:fixed;width:100%;font-size:12px;}
+.connection-catalog th,.connection-catalog td{text-align:left;padding:4px 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-bottom:1px solid var(--line);}
+.connection-catalog th{position:sticky;top:0;background:var(--surface);font-weight:600;}
+.connection-catalog tbody tr{cursor:pointer;}
+.connection-catalog tbody tr.selected{background:var(--surface-raised);color:var(--accent);}
+.connection-catalog tbody tr:focus-visible{outline:1px solid var(--accent);outline-offset:-1px;}
+.settings-tabs{display:flex;flex:none;gap:2px;border-bottom:1px solid var(--line);margin-bottom:12px;}
+.settings-tabs button{flex:1;padding:7px 12px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted);font-weight:600;cursor:pointer;}
+.settings-tabs button.selected{border-bottom-color:var(--accent);color:var(--ink);background:var(--surface-raised);}
+</style>

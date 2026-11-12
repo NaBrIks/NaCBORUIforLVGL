@@ -3,7 +3,7 @@
 import {writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {loadProject} from '../windows_player/loader.mjs';
-import {compileSchemes} from '../windows_player/schemes.mjs';
+import {compileSchemes} from '../common/appearance/schemes.mjs';
 const packet=await loadProject(fileURLToPath(new URL('./demo.json',import.meta.url)));
 const schemes=await compileSchemes();
 const array=(name,bytes)=>`alignas(4) static const unsigned char ${name}[]={${[...bytes].join(',')}};\n`;

@@ -24,11 +24,11 @@ export function widgetCatalog(capabilities) {
       method.parameters.forEach(s=>validateParameterSchema(s));
       codes.add(method.opcode);aliases.add(method.alias);
     }
-    const {title,description,preview,defaults,events}=entry.contract;
+    const {title,description,preview,defaults,events,appearance}=entry.contract;
     if(title!==undefined&&(typeof title!=='string'||title.length>128)||description!==undefined&&(typeof description!=='string'||description.length>512))throw Error('Invalid extension presentation');
     if(preview!==undefined&&(!Number.isInteger(preview.width)||preview.width<1||preview.width>8192||!Number.isInteger(preview.height)||preview.height<1||preview.height>8192))throw Error('Invalid extension dimensions');
     if(events!==undefined){if(!Array.isArray(events)||new Set(events.map(e=>e.name)).size!==events.length)throw Error('Invalid extension events');for(const event of events){if(!bindingContract.events.includes(event.name)||Object.keys(event).some(key=>!['name','value'].includes(key)))throw Error('Invalid extension event');if(event.value!==undefined)validateDataSchema(event.value);}}
-    const family={id:entry.id,name:entry.name,abi:entry.abi,methods,title,description,preview,defaults,events};
+    const family={id:entry.id,name:entry.name,abi:entry.abi,methods,title,description,preview,defaults,events,appearance};
     if(defaults!==undefined){if(!defaults||typeof defaults!=='object'||Array.isArray(defaults))throw Error('Invalid extension defaults');for(const [alias,value] of Object.entries(defaults))encodeWidgetMethod(family,alias,value);}
     ids.add(entry.id);names.add(entry.name);widgets.push(family);
   }

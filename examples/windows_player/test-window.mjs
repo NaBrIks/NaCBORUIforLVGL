@@ -79,7 +79,7 @@ try {
   r=await command({op:'publish',source:'demo.speed',value:{kmh:42.5,unit:'km/h',sequence:7}});assert.equal(r.ok,true);
   await new Promise(yes=>setTimeout(yes,100));
   r=await inspect(instance,'speed','speed_arc');assert.equal(r.nodes[0].text,'42.5 km/h');assert.equal(r.nodes[1].value,43);
-  const palettes=JSON.parse(await readFile(join(here,'schemes.json'),'utf8')).schemes;
+  const palettes=JSON.parse(await readFile(join(here,'../common/appearance/schemes.json'),'utf8')).schemes;
   const snapshots=join(root,'local/windows-schemes');await mkdir(snapshots,{recursive:true});
   const before=await inspect(instance,'speed','counter','running');
   for(const [id,palette] of Object.entries(palettes)) {

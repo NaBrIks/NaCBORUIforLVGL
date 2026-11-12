@@ -3,6 +3,7 @@
 #pragma once
 #include "demo_data.hpp"
 #include "appearance.hpp"
+#include "layout_diagnostics.hpp"
 #include "host_fonts.hpp"
 #include "system_metrics.hpp"
 #include "native_view.hpp"
@@ -30,6 +31,7 @@ public:
 	void connection(const std::string &);
 	std::vector<uint8_t> view_frame();
 	void view_input(int32_t, int32_t, bool);
+	bool view_input_available() const {return bool(view_pointer_); }
 	void load_schemes(const std::filesystem::path &, const std::string &);
 	std::string capabilities() const;
 	void configure_store(const std::filesystem::path &prefix);
@@ -52,8 +54,8 @@ public:
 	}
 
 private:
-	bool graphics_{}, layout_debug_{};
-	lvgl_cbor::LayoutDebugOptions layout_options_;
+	bool graphics_{};
+	example_ui::LayoutDiagnostics layout_debug_;
 	bool publish_layout_debug(std::string &);
 	std::unique_ptr<native_view::Pointer> view_pointer_;
 	lvgl_cbor::WidgetRegistry widgets_;

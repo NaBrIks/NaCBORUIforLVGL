@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using NaCBORUI.Designer.Core;
 using NaCBORUI.Designer.App.Services;
 
 namespace NaCBORUI.Designer.App;
@@ -12,7 +13,8 @@ public static class MauiProgram
         builder.Services.AddMauiBlazorWebView();
         builder.Services.AddSingleton<UiText>();
         builder.Services.AddSingleton<DesignerSettingsStore>();
-        builder.Services.AddSingleton<DesignerSessionAdapter>();
+        builder.Services.AddScoped<IDesignerDirectBridge, BrowserToolsBridge>();
+        builder.Services.AddScoped<DesignerSessionAdapter>();
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.AddDebug();

@@ -17,7 +17,7 @@ const command=async request=>{const result=await device.command(request);assert.
 const inspect=(instance,...ids)=>command({op:'inspect',nodes:ids.map(id=>({id,instance}))});
 async function toggle(instance,node) {for(const event of ['pressed','released'])await command({op:'event',instance,node,event});}
 const project=JSON.parse(await readFile(new URL('../demo.json',import.meta.url),'utf8'));
-const palettes=JSON.parse(await readFile(new URL('../../windows_player/schemes.json',import.meta.url),'utf8')).schemes;
+const palettes=JSON.parse(await readFile(new URL('../../common/appearance/schemes.json',import.meta.url),'utf8')).schemes;
 try {
   let r=await command({op:'inspect'});assert.deepEqual([r.width,r.height],[320,170]);assert.ok(r.flushes>0);
   await command({op:'click',node:'go_home'});r=await command({op:'inspect'});const homeInstance=r.views[0].pageInstance;

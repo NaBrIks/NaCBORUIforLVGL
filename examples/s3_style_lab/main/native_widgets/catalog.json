@@ -6,7 +6,23 @@
     "abi": "signal-1",
     "contract": {
       "title": "Сигнал · индикатор состояния",
-      "description": "Нативная лампа и текст состояния: STOP / RUN / WARN / FAULT.",
+      "description": "Machine status lamp with a dot and status text.",
+      "appearance": {
+        "purpose": "Status lamp for a machine or process. STOP means stopped, RUN means normal operation, WARN calls for attention, and FAULT means failure.",
+        "guidance": "Keep the status word legible and make WARN and FAULT distinct. The dot and word are two visual cues for the same state.",
+        "elements": [
+          {"element": "Housing background", "part": "MAIN", "property": "bg_color", "schemeRole": "inst_main", "defaultColor": "#182c38"},
+          {"element": "Housing border", "part": "MAIN", "property": "border_color", "schemeRole": "inst_main", "defaultColor": "#375363"},
+          {"element": "Title and STOP label", "part": "ITEMS", "property": "text_color", "schemeRole": "inst_items", "defaultColor": "#91adbc"},
+          {"element": "STOP dot", "part": "ITEMS", "property": "bg_color", "schemeRole": "inst_items", "defaultColor": "#91adbc"},
+          {"element": "RUN dot", "part": "INDICATOR", "property": "bg_color", "schemeRole": "inst_value", "defaultColor": "#38d6ae"},
+          {"element": "RUN label", "part": "INDICATOR", "property": "text_color", "schemeRole": "inst_value", "defaultColor": "#38d6ae"},
+          {"element": "WARN dot", "part": "SELECTED", "property": "bg_color", "schemeRole": "inst_warn", "defaultColor": "#ffc166"},
+          {"element": "WARN label", "part": "SELECTED", "property": "text_color", "schemeRole": "inst_warn", "defaultColor": "#ffc166"},
+          {"element": "FAULT dot", "part": "KNOB", "property": "bg_color", "schemeRole": "inst_fault", "defaultColor": "#ff6e76"},
+          {"element": "FAULT label", "part": "KNOB", "property": "text_color", "schemeRole": "inst_fault", "defaultColor": "#ff6e76"}
+        ]
+      },
       "preview": {
         "width": 220,
         "height": 100
@@ -59,7 +75,26 @@
     "abi": "speedometer-1",
     "contract": {
       "title": "Вектор · стрелочный спидометр",
-      "description": "Собственная отрисовка: 61 риска, подписи шкалы, цветные зоны, треугольная стрелка и цифровое показание.",
+      "description": "Analog speed gauge with a needle, digital reading and warning zone.",
+      "appearance": {
+        "purpose": "Analog speed gauge. The needle and digital reading show current speed. The warning zone starts at the configured redline.",
+        "guidance": "Give the needle and reading priority over the tick marks. Keep the warning zone and over-limit digits recognizable.",
+        "elements": [
+          {"element": "Housing background", "part": "MAIN", "property": "bg_color", "schemeRole": "inst_main", "defaultColor": "#182c38"},
+          {"element": "Housing border", "part": "MAIN", "property": "border_color", "schemeRole": "inst_main", "defaultColor": "#375363"},
+          {"element": "Unfilled scale track", "part": "MAIN", "property": "arc_color", "schemeRole": "inst_main", "defaultColor": "#304652"},
+          {"element": "Major ticks", "part": "MAIN", "property": "line_color", "schemeRole": "inst_main", "defaultColor": "#e9f3f6"},
+          {"element": "Tick labels and normal reading", "part": "MAIN", "property": "text_color", "schemeRole": "inst_main", "defaultColor": "#e9f3f6"},
+          {"element": "Minor ticks", "part": "ITEMS", "property": "line_color", "schemeRole": "inst_items", "defaultColor": "#91adbc"},
+          {"element": "Heading and unit", "part": "ITEMS", "property": "text_color", "schemeRole": "inst_items", "defaultColor": "#91adbc"},
+          {"element": "Needle hub rim", "part": "ITEMS", "property": "bg_color", "schemeRole": "inst_items", "defaultColor": "#4d6673"},
+          {"element": "Normal operating zone", "part": "INDICATOR", "property": "arc_color", "schemeRole": "inst_value", "defaultColor": "#38d6ae"},
+          {"element": "Needle and counterweight", "part": "INDICATOR", "property": "line_color", "schemeRole": "inst_value", "defaultColor": "#ffc166"},
+          {"element": "Warning zone", "part": "SELECTED", "property": "arc_color", "schemeRole": "inst_warn", "defaultColor": "#ff6e76"},
+          {"element": "Over-limit digital reading", "part": "SELECTED", "property": "text_color", "schemeRole": "inst_warn", "defaultColor": "#ff6e76"},
+          {"element": "Needle hub center", "part": "KNOB", "property": "bg_color", "schemeRole": "inst_fault", "defaultColor": "#e9f3f6"}
+        ]
+      },
       "preview": {
         "width": 340,
         "height": 292
@@ -169,7 +204,25 @@
     "activate": "activate",
     "contract": {
       "title": "Полюс · обзорный радар",
-      "description": "Нативная полярная развёртка: вращающийся луч, след луча, послесвечение целей, сетка и контакты. Таймер принадлежит экземпляру.",
+      "description": "Polar contact tracker with a sweeping beam, contact markers and fading echoes.",
+      "appearance": {
+        "purpose": "Polar contact display. Angle shows bearing and distance from the center shows range. The beam shows scan position. Contact markers and echoes fade after the beam passes.",
+        "guidance": "Give live contacts and the sweep more contrast than the range rings, bearing grid and compass. Keep fresh labels readable against the field.",
+        "elements": [
+          {"element": "Housing background", "part": "MAIN", "property": "bg_color", "schemeRole": "inst_main", "defaultColor": "#182c38"},
+          {"element": "Housing border", "part": "MAIN", "property": "border_color", "schemeRole": "inst_main", "defaultColor": "#375363"},
+          {"element": "Range rings", "part": "MAIN", "property": "arc_color", "schemeRole": "inst_main", "defaultColor": "#2a5558"},
+          {"element": "Bearing grid spokes", "part": "MAIN", "property": "line_color", "schemeRole": "inst_main", "defaultColor": "#23444b"},
+          {"element": "Fresh contact labels", "part": "MAIN", "property": "text_color", "schemeRole": "inst_main", "defaultColor": "#e9f3f6"},
+          {"element": "Radar field", "part": "ITEMS", "property": "bg_color", "schemeRole": "inst_items", "defaultColor": "#081b21"},
+          {"element": "Heading, compass and older contact labels", "part": "ITEMS", "property": "text_color", "schemeRole": "inst_items", "defaultColor": "#91adbc"},
+          {"element": "Sweep and trailing beam", "part": "INDICATOR", "property": "line_color", "schemeRole": "inst_value", "defaultColor": "#38d6ae"},
+          {"element": "Contact markers", "part": "INDICATOR", "property": "bg_color", "schemeRole": "inst_value", "defaultColor": "#38d6ae"},
+          {"element": "Fading echoes", "part": "INDICATOR", "property": "arc_color", "schemeRole": "inst_value", "defaultColor": "#38d6ae"},
+          {"element": "Scan, range and contact status", "part": "INDICATOR", "property": "text_color", "schemeRole": "inst_value", "defaultColor": "#38d6ae"},
+          {"element": "Origin marker", "part": "KNOB", "property": "bg_color", "schemeRole": "inst_fault", "defaultColor": "#e9f3f6"}
+        ]
+      },
       "preview": {
         "width": 416,
         "height": 412

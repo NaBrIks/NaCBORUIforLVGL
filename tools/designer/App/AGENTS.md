@@ -4,7 +4,7 @@ This project is the MAUI Blazor Hybrid client for Windows and Android. Before ch
 
 Keep presentation behind `Services/DesignerSessionAdapter`. All model, agent, MCP, device API and LVGL preview operations belong to `NaCBORUI.Designer.Core`; do not add independent HTTP, OpenAI or JSON-RPC clients here. The provider key is stored only with MAUI `SecureStorage` and must never enter project JSON, preferences, logs or assets.
 
-Targets are .NET 10 Android (API 24+) and unpackaged Windows. Do not add iOS/Mac targets or bind any local server port.
+Targets are .NET 10 Android (API 24+) and unpackaged Windows. The opt-in Windows-only NaWServer MCP listener may bind loopback as documented at repository root. No other listener or iOS/Mac target is part of the app.
 
 Run SPLA network/stream operations outside the WebView/UI synchronization context.
 Android's native HTTP/SSE path can throw NetworkOnMainThreadException there even

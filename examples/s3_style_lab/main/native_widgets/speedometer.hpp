@@ -12,37 +12,48 @@ namespace lab_widgets::speedometer
 		auto *layer = lv_event_get_layer(event);
 		lv_area_t a; lv_obj_get_coords(obj, &a); int w = lv_area_get_width(&a), h = lv_area_get_height(&a);
 		const int r = std::max(20, std::min((w - 28) / 2, (h - 58) / 2)), cx = a.x1 + w / 2, cy = a.y1 + 36 + r;
-		drawing::text(layer, s.title, a.x1 + 12, a.y1 + 10, w - 24, muted);
-		drawing::arc(layer, cx, cy, r, 135, 405, 0x304652, 8);
+		const auto foreground = lv_obj_get_style_text_color(obj, LV_PART_MAIN);
+		const auto secondary = lv_obj_get_style_text_color(obj, LV_PART_ITEMS);
+		const auto warning_text = lv_obj_get_style_text_color(obj, LV_PART_SELECTED);
+		const auto track = paint(obj, LV_PART_MAIN, LV_STYLE_ARC_COLOR, 0x304652);
+		const auto normal_zone = paint(obj, LV_PART_INDICATOR, LV_STYLE_ARC_COLOR, green);
+		const auto warning_zone = paint(obj, LV_PART_SELECTED, LV_STYLE_ARC_COLOR, red);
+		const auto major_tick = paint(obj, LV_PART_MAIN, LV_STYLE_LINE_COLOR, ink);
+		const auto minor_tick = paint(obj, LV_PART_ITEMS, LV_STYLE_LINE_COLOR, muted);
+		const auto pointer = paint(obj, LV_PART_INDICATOR, LV_STYLE_LINE_COLOR, amber);
+		const auto hub = paint(obj, LV_PART_ITEMS, LV_STYLE_BG_COLOR, 0x4d6673);
+		const auto center = paint(obj, LV_PART_KNOB, LV_STYLE_BG_COLOR, ink);
+		drawing::text(layer, s.title, a.x1 + 12, a.y1 + 10, w - 24, secondary);
+		drawing::arc(layer, cx, cy, r, 135, 405, track, 8);
 		const float span = float(std::max<int32_t>(1, s.high - s.low));
 		const float warning = std::clamp((s.redline - s.low) / span, 0.0f, 1.0f);
-		drawing::arc(layer, cx, cy, r, 135, 135 + 270 * warning, green, 6);
-		drawing::arc(layer, cx, cy, r, 135 + 270 * warning, 405, red, 6);
+		drawing::arc(layer, cx, cy, r, 135, 135 + 270 * warning, normal_zone, 6);
+		drawing::arc(layer, cx, cy, r, 135 + 270 * warning, 405, warning_zone, 6);
 		for(int i = 0; i <= 60; ++i)
 		{
 			const float angle = 135 + 4.5f * i; const bool major = i % 5 == 0;
 			drawing::line(layer, drawing::polar(cx, cy, r - 12, angle),
-			    drawing::polar(cx, cy, r - (major ? 25 : 18), angle), major ? ink : muted, major ? 2 : 1);
+			    drawing::polar(cx, cy, r - (major ? 25 : 18), angle), major ? major_tick : minor_tick, major ? 2 : 1);
 			if(major)
 			{
 				char value[20]; std::snprintf(value, sizeof(value), "%ld", long(s.low + (s.high - s.low) * i / 60));
 				auto p = drawing::polar(cx, cy, r - 39, angle);
-				drawing::text(layer, value, p.x - 22, p.y - 7, 44, ink, LV_FONT_DEFAULT, LV_TEXT_ALIGN_CENTER);
+				drawing::text(layer, value, p.x - 22, p.y - 7, 44, foreground, LV_FONT_DEFAULT, LV_TEXT_ALIGN_CENTER);
 			}
 		}
 		const float angle = 135 + 270 * std::clamp(float((s.value - s.low) / span), 0.0f, 1.0f);
 		auto tip = drawing::polar(cx, cy, r - 24, angle), left = drawing::polar(cx, cy, 6, angle - 90),
 		    right = drawing::polar(cx, cy, 6, angle + 90);
-		lv_draw_triangle_dsc_t needle; lv_draw_triangle_dsc_init(&needle); needle.color = color(amber);
+		lv_draw_triangle_dsc_t needle; lv_draw_triangle_dsc_init(&needle); needle.color = pointer;
 		needle.p[0] = {lv_value_precise_t(tip.x), lv_value_precise_t(tip.y)};
 		needle.p[1] = {lv_value_precise_t(left.x), lv_value_precise_t(left.y)};
 		needle.p[2] = {lv_value_precise_t(right.x), lv_value_precise_t(right.y)}; lv_draw_triangle(layer, &needle);
-		drawing::line(layer, {cx, cy}, drawing::polar(cx, cy, 19, angle + 180), amber, 4);
-		drawing::circle(layer, cx, cy, 10, 0x4d6673); drawing::circle(layer, cx, cy, 5, ink);
+		drawing::line(layer, {cx, cy}, drawing::polar(cx, cy, 19, angle + 180), pointer, 4);
+		drawing::circle(layer, cx, cy, 10, hub); drawing::circle(layer, cx, cy, 5, center);
 		char value[24]; std::snprintf(value, sizeof(value), "%.0f", s.value);
-		drawing::text(layer, value, cx - 65, cy + 28, 130, s.value >= s.redline ? red : ink, &lv_font_montserrat_28,
+		drawing::text(layer, value, cx - 65, cy + 28, 130, s.value >= s.redline ? warning_text : foreground, &lv_font_montserrat_28,
 		    LV_TEXT_ALIGN_CENTER);
-		drawing::text(layer, s.unit, cx - 65, cy + 61, 130, muted, LV_FONT_DEFAULT, LV_TEXT_ALIGN_CENTER);
+		drawing::text(layer, s.unit, cx - 65, cy + 61, 130, secondary, LV_FONT_DEFAULT, LV_TEXT_ALIGN_CENTER);
 	}
 
 	inline void title(lv_obj_t *obj, const char *value)
@@ -75,6 +86,9 @@ namespace lab_widgets::speedometer
 	{
 		auto *obj = frame(parent, 340, 292); if(!own(obj, new(std::nothrow) State{})) return nullptr;
 
+		default_text<muted>(obj, LV_PART_ITEMS);
+		default_text<red>(obj, LV_PART_SELECTED);
+		attach_theme(obj);
 		lv_obj_add_event_cb(obj, draw, LV_EVENT_DRAW_MAIN, nullptr); return obj;
 	}
 

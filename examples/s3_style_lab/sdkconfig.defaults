@@ -49,3 +49,5 @@ CONFIG_NAWSERVER_WEBSOCKET=y
 
 # The UI API serializes rich catalog/project metadata on the HTTP worker.
 CONFIG_NAWSERVER_TCP_HTTP_STACK_SIZE=12288
+
+CONFIG_NAWSERVER_TCP_MANAGED=y

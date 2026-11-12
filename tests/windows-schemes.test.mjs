@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,mkdtemp,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';import {join} from 'node:path';
-import {compileSchemes,roleStyles,contrast} from '../examples/windows_player/schemes.mjs';
+import {compileSchemes,roleStyles,contrast} from '../examples/common/appearance/schemes.mjs';
 import {decodeProject,encodeProject} from '../packages/project-codec/index.js';
 
 test('Windows schemes use the standard palettes and the existing project/style codecs',async()=>{
@@ -18,7 +18,7 @@ test('Windows schemes use the standard palettes and the existing project/style c
   assert.equal(Object.keys(project.styles).length,60);
 });
 test('Scheme text remains readable in normal and pressed button states',async()=>{
-  const catalog=JSON.parse(await readFile(new URL('../examples/windows_player/schemes.json',import.meta.url),'utf8'));
+  const catalog=JSON.parse(await readFile(new URL('../examples/common/appearance/schemes.json',import.meta.url),'utf8'));
   for(const scheme of Object.values(catalog.schemes)) {
     const roles=roleStyles(scheme);
     assert.ok(contrast(scheme.canvas,scheme.text)>=4.5,scheme.name);
@@ -30,7 +30,7 @@ test('Scheme text remains readable in normal and pressed button states',async()=
 test('Invalid appearance catalog is rejected before native application',async t=>{
   const dir=await mkdtemp(join(tmpdir(),'nacborui-schemes-'));t.after(()=>rm(dir,{recursive:true,force:true}));
   const file=join(dir,'schemes.json');
-  const catalog=JSON.parse(await readFile(new URL('../examples/windows_player/schemes.json',import.meta.url),'utf8'));
+  const catalog=JSON.parse(await readFile(new URL('../examples/common/appearance/schemes.json',import.meta.url),'utf8'));
   catalog.schemes.cream.primary='red';await writeFile(file,JSON.stringify(catalog));
   await assert.rejects(compileSchemes(file),/Scheme color/);
   catalog.schemes.cream.primary='#e18f2f';catalog.default='missing';await writeFile(file,JSON.stringify(catalog));
