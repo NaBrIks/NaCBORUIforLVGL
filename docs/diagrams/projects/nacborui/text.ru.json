@@ -9,8 +9,8 @@
         "origin": "authored"
       },
       "doc": {
-        "v": "Реализованная архитектура, сверена с кодом на 2026-10-29. Узлы — логические обязанности, не извлечённый C++ граф. Браузер, MCP и Windows launcher разделяют кодеки. Настоящий Win32 LVGL player исполняет CBOR тем же C++ runtime, что S3; источники/действия принадлежат приложению. HTTP/WS адаптеры используются аппаратным приложением, desktop предоставляет файлы и собственный NaWServer HTTP API. MCP должен исполняться внутри целевого приложения; встроенный endpoint пока не реализован. Preview и save независимы. См. docs/readme_windows_player_ru.md, docs/readme_projects_ru.md и docs/readme_bindings_ru.md.",
-        "at": "2026-11-10T03:38:05Z",
+        "v": "Логическая архитектура по текущему дереву. Web Editor и Designer разделяют PC-кодеки. На устройстве и Windows работают общие C++ сервисы и LVGL. Direct API передаёт CBOR через NaWServer. Нативный MCP Windows и внешний loopback Windows Designer опциональны. Режимы, ограничения и снимки описаны в docs/readme_mcp_ru.md и docs/readme_display_feedback_ru.md.",
+        "at": "2026-11-12T08:46:15Z",
         "origin": "authored"
       }
     },
@@ -64,13 +64,13 @@
     },
     "e_mcp": {
       "name": {
-        "v": "MCP-адаптер",
-        "at": "2026-10-28T07:58:08Z",
+        "v": "Designer и MCP",
+        "at": "2026-11-12T08:46:15Z",
         "origin": "authored"
       },
       "description": {
-        "v": "Три режима Designer: прямой API (основной) с общими JS-кодеками внутри WebView и HttpClient приложения; native MCP целевого приложения; явно выбранный MCP-прокси. Оба MCP-профиля используют один HTTP-клиент SPLA. Автозапуска внешних процессов/listener нет. Native Windows MCP PoC находится внутри NaWServer, LVGL_CBOR_NATIVE_MCP по умолчанию OFF; 11 реальных metadata/data/action/frame tools, без JSON-authoring. Direct API предоставляет 21 инструмент через тот же SPLA IToolHost; UI JSON компилируется локально в CBOR. История/модель/очередь остаются SPLA.",
-        "at": "2026-11-10T06:44:08Z",
+        "v": "Основной режим Designer использует общие JS-кодеки внутри WebView и Direct API цели. Профили Device MCP и внешнего MCP используют HTTP-клиент SPLA. Нативный Windows player может включить ограниченный /mcp; по умолчанию выключено. Отдельный опциональный loopback endpoint Windows Designer публикует инструменты подключённой Direct API сессии, полный английский промпт и завершённый кадр предпросмотра. Для снимка после навигации используется afterScene. У прошивки 7″ S3 отдельного /mcp нет.",
+        "at": "2026-11-12T08:46:15Z",
         "origin": "authored"
       }
     },
@@ -225,8 +225,225 @@
         "origin": "authored"
       },
       "description": {
-        "v": "examples/windows_player: настоящий LVGL Win32 и штатный NaWServer Windows backend. ProjectService/ScreenRuntime/DataRegistry исполняют документы, схемы, биндинги, события и вложенные страницы. web_server.cpp раздаёт frontend/dist и HTTP/WS API с одного origin; product networking только NaWServer. /viewer — ограниченный native frame и независимый pointer input, /editor/ — общий редактор проекта без LLM. Два профиля: system с обнаруженной Windows topology; graphics с raster/vector/controller/MCP canvas/settings. В Настройках только схемы и demo-контролы. Host launcher выполняет JSON/CBOR-компиляцию и жизненный цикл процесса. LLM-цикл, HostAgent, assistant.* registry, формы API/моделей/ключа, DPAPI adapter и хранение ключа удалены по указанию владельца 09.11.2026. Внешний tools/designer использует SPLA для модели/чата/MCP и MAUI SecureStorage для ключа; общие EN/RU инструкции/JSON справочники перенесены в tools/designer/prompts, get_ui_reference сохранён. FileProjectStore/WindowsProjectStore сохраняют пользовательские документы и схемы; authored-base upgrade сохраняет точный старый проект через immutable base cache, для немодифицированной старой страницы settings допустим только named reset через MCP, без сброса canvas. get_display_frame кодируется во внешнем MCP host, native формат МК не меняется. Новые независимые подсистемы/стеки без согласования владельца запрещены AGENTS.md.",
-        "at": "2026-11-09T10:25:39Z",
+        "v": "examples/windows_player: настоящий LVGL Win32 с общими ProjectService, ScreenRuntime, StyleService и DataRegistry. Профиль system показывает CPU/RAM/GPU; graphics показывает растровую и векторную графику, пульт и холст. NaWServer раздаёт общий веб-редактор, нативный кадр и HTTP/WS API. Проекты JSON компилируются на ПК общими кодеками; WindowsProjectStore сохраняет изменения. Опциональный встроенный /mcp использует те же сервисы. Чат и ключи модели принадлежат отдельному Designer.",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      }
+    },
+    "v_readme_overview": {
+      "name": {
+        "v": "README · редакторы, проект и LVGL",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      },
+      "doc": {
+        "v": "От авторинга к настоящему LVGL: общий проект компилируется в CBOR, а устройства и Windows используют одно переносимое ядро. Схема предназначена для README.",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_author": {
+      "name": {
+        "v": "Author",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_project": {
+      "name": {
+        "v": "UI definition",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_run": {
+      "name": {
+        "v": "Run on the target",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_editor": {
+      "name": {
+        "v": "Web Editor",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "Browser editor for layout, styles, bindings and events.",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_designer": {
+      "name": {
+        "v": "Designer",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "Windows/Android authoring with SPLA and optional external MCP on Windows.",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_definition": {
+      "name": {
+        "v": "JSON / CBOR",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "Editable project with nested screens, styles, bindings and events. Shared codecs compile it to CBOR.",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_runtime": {
+      "name": {
+        "v": "LVGL runtime",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "Shared C++ runtime: ProjectService, styles, bindings and screen composition.",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_esp": {
+      "name": {
+        "v": "ESP32",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "Native rendering and touch/buttons on the embedded target.",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_win": {
+      "name": {
+        "v": "Windows",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "Native Win32 LVGL player for desktop development and demos.",
+        "at": "2026-11-12T08:46:15Z",
+        "origin": "authored"
+      }
+    },
+    "v_readme_live_flow": {
+      "name": {
+        "v": "README · данные, биндинги и события",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      },
+      "doc": {
+        "v": "Прямой путь: приложение публикует данные, биндинг обновляет виджет. Обратный: событие LVGL вызывает зарегистрированное действие или запись. Схема предназначена для README.",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_application": {
+      "name": {
+        "v": "Application",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_registry_zone": {
+      "name": {
+        "v": "Data contract",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_runtime_zone": {
+      "name": {
+        "v": "Page runtime",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_display_zone": {
+      "name": {
+        "v": "Display",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_sources": {
+      "name": {
+        "v": "App sources",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "Application-owned values and latest snapshots.",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_actions": {
+      "name": {
+        "v": "App actions",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "Actions and writable sources execute in the application.",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_registry": {
+      "name": {
+        "v": "DataRegistry",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "Typed catalog of sources and actions, owned snapshots and bounded events.",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_bindings": {
+      "name": {
+        "v": "Bindings",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "Data changes update widget methods in the UI context.",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_events": {
+      "name": {
+        "v": "UI events",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "LVGL events queue declared actions or writes.",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      }
+    },
+    "e_overview_screen": {
+      "name": {
+        "v": "LVGL screen",
+        "at": "2026-11-12T08:46:37Z",
+        "origin": "authored"
+      },
+      "description": {
+        "v": "Native widgets render and handle user input.",
+        "at": "2026-11-12T08:46:37Z",
         "origin": "authored"
       }
     }

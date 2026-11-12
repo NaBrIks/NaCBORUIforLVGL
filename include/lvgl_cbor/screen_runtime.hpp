@@ -12,6 +12,8 @@ namespace lvgl_cbor
 {
 	namespace detail { struct CompositionState; struct ScreenViews; }
 	class DataRegistry;
+	// Set by the application from packet provenance, never by a wire field.
+	enum class ScreenValidation { Checked, TrustedEmbedded };
 	class ScreenResolver
 	{
 	public:
@@ -19,6 +21,13 @@ namespace lvgl_cbor
 		virtual bool resolve_screen(const std::string &, const uint8_t *&, size_t &) const = 0;
 		virtual void composition_changed()
 		{
+		}
+
+		virtual bool resolve_screen(const std::string &name, const uint8_t *&bytes, size_t &size,
+		    ScreenValidation &validation) const
+		{
+			validation = ScreenValidation::Checked;
+			return resolve_screen(name, bytes, size);
 		}
 
 	};
@@ -88,6 +97,8 @@ namespace lvgl_cbor
 		// Prepare then activate a standalone screen; failure preserves the old instance.
 		bool load(const uint8_t *packet, size_t length, ScreenReply &reply,
 		    const std::vector<ScreenViewSelection> &selections = {});
+		bool load(const uint8_t *packet, size_t length, ScreenReply &reply,
+		    const std::vector<ScreenViewSelection> &selections, ScreenValidation validation);
 		// Same description can be instantiated repeatedly in different runtimes/parents. No global ID
 		// map.
 		bool mount(const uint8_t *packet, size_t length, lv_obj_t *parent, ScreenReply &reply);
@@ -141,7 +152,8 @@ namespace lvgl_cbor
 		std::unique_ptr<ScreenRuntime> make_child(const std::string &);
 		friend struct detail::ScreenViews;
 		bool replace(const uint8_t *, size_t, lv_obj_t *, bool, ScreenReply &,
-		    const std::vector<ScreenViewSelection> &selections = {});
+		    const std::vector<ScreenViewSelection> &selections = {},
+		    ScreenValidation validation = ScreenValidation::Checked);
 		static void root_deleted(lv_event_t *);
 		static void release_deleted(void *);
 		static void fallback_deleted(lv_event_t *);

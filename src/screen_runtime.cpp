@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Oleg Kozhevnikov
 #include "screen_internal.hpp"
+#include "screen_phase_profile.hpp"
 #include "screen_bindings.hpp"
 #include "screen_views.hpp"
 #include <cstdio>
@@ -208,6 +209,12 @@ namespace lvgl_cbor
 	bool ScreenRuntime::load(const uint8_t *p, size_t n, ScreenReply &r,
 	    const std::vector<ScreenViewSelection> &selections)
 	{
+		return load(p, n, r, selections, ScreenValidation::Checked);
+	}
+
+	bool ScreenRuntime::load(const uint8_t *p, size_t n, ScreenReply &r,
+	    const std::vector<ScreenViewSelection> &selections, ScreenValidation validation)
+	{
 		if(!active_)
 		{
 			r = {}; std::snprintf(r.error, sizeof(r.error), "runtime_inactive"); return false;
@@ -218,7 +225,7 @@ namespace lvgl_cbor
 			r = {}; std::snprintf(r.error, sizeof(r.error), "runtime_busy"); return false;
 		}
 
-		return replace(p, n, nullptr, true, r, selections);
+		return replace(p, n, nullptr, true, r, selections, validation);
 	}
 
 	bool ScreenRuntime::busy() const
@@ -249,7 +256,7 @@ namespace lvgl_cbor
 	}
 
 	bool ScreenRuntime::replace(const uint8_t *packet, size_t length, lv_obj_t *parent, bool activate,
-	    ScreenReply &reply, const std::vector<ScreenViewSelection> &selections)
+	    ScreenReply &reply, const std::vector<ScreenViewSelection> &selections, ScreenValidation validation)
 	{
 		reply = {};
 		auto fail = [&](const char *s) {
@@ -286,7 +293,8 @@ namespace lvgl_cbor
 		plan.registry = registry_;
 		plan.data = data_;
 		plan.scope = service_->create_scope(limits_.styles);
-		if(!detail::decode_screen(packet, length, plan, resources_, resource_count_, limits_, reply))
+		if(!LVGL_CBOR_MEASURE_PHASE("parse",
+		    detail::decode_screen(packet, length, plan, resources_, resource_count_, limits_, reply, validation)))
 			return false;
 
 		if(activate)
@@ -302,7 +310,7 @@ namespace lvgl_cbor
 		}
 
 		detail::DecodeContext execution{plan, resources_, resource_count_, limits_, reply};
-		if(!detail::execute_screen(plan.program, parent, execution, activate))
+		if(!LVGL_CBOR_MEASURE_PHASE("objects", detail::execute_screen(plan.program, parent, execution, activate)))
 		{
 			if(!reply.error[0])
 				fail("object_execution_failed");
@@ -341,7 +349,7 @@ namespace lvgl_cbor
 		    viewport_ == ScreenViewport::Display ? lv_display_get_horizontal_resolution(display) : plan.width,
 		    activate &&
 		    viewport_ == ScreenViewport::Display ? lv_display_get_vertical_resolution(display) : plan.height);
-		lv_obj_update_layout(plan.root->object);
+		LVGL_CBOR_MEASURE_PHASE("layout", lv_obj_update_layout(plan.root->object));
 		if(activate)
 		{
 			auto *previous = lv_screen_active();

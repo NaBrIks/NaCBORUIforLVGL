@@ -222,7 +222,7 @@ static const StyleSignature27 style_methods_27[] = {
   lv_style_set_text_leading_trim
 };
 static bool execute_style(unsigned signature, unsigned index, lv_style_t *target,
-                          const CborValue &value, StyleDecodeContext &context) {
+                          CborValue &value, StyleDecodeContext &context) {
   switch (signature) {
   case 0: return invoke(style_methods_0, index, target, value, context);
   case 1: return invoke(style_methods_1, index, target, value, context);

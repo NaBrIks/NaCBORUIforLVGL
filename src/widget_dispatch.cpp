@@ -3,7 +3,7 @@
 #include "cbor_reader.hpp"
 #include "lvgl_cbor/widget_execution.hpp"
 #include "screen_internal.hpp"
-#include <cstdio>
+#include <algorithm>
 #include <cstring>
 namespace lvgl_cbor::detail
 {
@@ -106,6 +106,18 @@ namespace lvgl_cbor::detail
 		bool execute_create(CborValue &, lv_obj_t *, std::unique_ptr<ScreenNode> &, size_t, DecodeContext &,
 		    bool);
 
+		bool command_failed(DecodeContext &ctx, const ScreenNode &node, uint16_t method)
+		{
+			// Preserve the innermost failing opcode and use the nearest available node ID.
+			if(!ctx.failed_node && !ctx.reply.error[0])
+				ctx.reply.opcode = method;
+
+			if(!ctx.failed_node || ctx.failed_node->id.empty())
+				ctx.failed_node = &node;
+
+			return false;
+		}
+
 		bool execute_object_command(uint16_t method, CborValue &argument, ScreenNode &node,
 		    WidgetExecutor handler, DecodeContext &ctx)
 		{
@@ -118,7 +130,6 @@ namespace lvgl_cbor::detail
 					return false;
 
 				node.id = id;
-				std::snprintf(ctx.reply.node, sizeof(ctx.reply.node), "%s", id);
 				return true;
 			}
 
@@ -136,7 +147,7 @@ namespace lvgl_cbor::detail
 				if(method == screen_command_style)
 				{
 					// Pass the complete nested map to the independent style executor.
-					if(!own_style(fields, ctx, style))
+					if(!own_style(fields, ctx, style, method))
 						return false;
 				}
 				else
@@ -153,7 +164,7 @@ namespace lvgl_cbor::detail
 					owner = found.owner;
 				}
 
-				if(!next(fields) || !leave(argument, fields))
+				if((method == screen_command_style_ref && !next(fields)) || !leave(argument, fields))
 					return false;
 
 				if(owner)
@@ -173,7 +184,7 @@ namespace lvgl_cbor::detail
 			CborValue commands;
 			size_t length;
 			if(!enter(cursor, commands, length))
-				return false;
+				return command_failed(ctx, node, screen_command_create);
 
 			while(!cbor_value_at_end(&commands))
 			{
@@ -181,26 +192,22 @@ namespace lvgl_cbor::detail
 				size_t fields_count;
 				uint16_t method;
 				if(!enter(commands, fields, fields_count) || !read_code(fields, method))
-					return false;
+					return command_failed(ctx, node, screen_command_create);
 
-				ctx.reply.opcode = method;
-				std::snprintf(ctx.reply.node, sizeof(ctx.reply.node), "%s", node.id.c_str());
 				if(method == screen_command_create)
 				{
 					if(fields_count != 3)
-						return false;
+						return command_failed(ctx, node, method);
 
 					node.children.push_back(std::make_unique<ScreenNode>());
 					if(!execute_create(fields, node.object, node.children.back(), depth + 1, ctx, false))
-						return false;
+						return command_failed(ctx, node, method);
 				}
 				else
 				{
-					if(fields_count != 2 || !execute_object_command(method, fields, node, handler, ctx))
-						return false;
-
-					if(!node.object)
-						return false;
+					if(fields_count != 2 || !execute_object_command(method, fields, node, handler, ctx) ||
+					    !node.object)
+						return command_failed(ctx, node, method);
 
 					++ctx.plan.method_count;
 				}
@@ -208,9 +215,10 @@ namespace lvgl_cbor::detail
 				// The selected handler consumed its argument. Leaving advances past this command,
 				// without scanning or replaying the nested object's already-executed body.
 				if(!leave(commands, fields))
-					return false;
+					return command_failed(ctx, node, method);
 			}
-			return leave(cursor, commands);
+
+			return leave(cursor, commands) || command_failed(ctx, node, screen_command_create);
 		}
 
 		bool execute_create(CborValue &fields, lv_obj_t *parent, std::unique_ptr<ScreenNode> &slot,
@@ -275,7 +283,18 @@ namespace lvgl_cbor::detail
 		    method != screen_command_create)
 			return false;
 
-		return execute_create(fields, parent, ctx.plan.root, 1, ctx, standalone) && leave(cursor, fields);
+		if(execute_create(fields, parent, ctx.plan.root, 1, ctx, standalone) && leave(cursor, fields))
+			return true;
+
+		const auto *node = ctx.failed_node ? ctx.failed_node : ctx.plan.root.get();
+		if(node)
+		{
+			const auto length = std::min(node->id.size(), sizeof(ctx.reply.node) - 1);
+			std::memcpy(ctx.reply.node, node->id.data(), length);
+			ctx.reply.node[length] = '\0';
+		}
+
+		return false;
 	}
 
 	void delete_tree(ScreenNode *node)

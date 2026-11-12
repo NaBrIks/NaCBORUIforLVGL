@@ -8,12 +8,26 @@ foreach(component_option NA_CBOR_LVGL_COMPONENT NA_CBOR_CBOR_COMPONENT)
     endif()
 endforeach()
 idf_component_register(SRCS src/capabilities.cpp src/style_service.cpp src/style_runtime.cpp src/style_dispatch.cpp src/screen_runtime.cpp src/screen_decode.cpp src/widget_registry.cpp src/widget_dispatch.cpp
-    src/screen_styles.cpp src/data_value.cpp src/data_registry.cpp src/data_catalog.cpp src/binding_expression.cpp src/screen_bindings.cpp src/screen_views.cpp INCLUDE_DIRS include REQUIRES ${NA_CBOR_LVGL_COMPONENT} ${NA_CBOR_CBOR_COMPONENT})
+    src/screen_styles.cpp src/project_codec.cpp src/data_value.cpp src/data_registry.cpp src/data_catalog.cpp src/binding_expression.cpp src/screen_bindings.cpp src/screen_views.cpp INCLUDE_DIRS include REQUIRES ${NA_CBOR_LVGL_COMPONENT} ${NA_CBOR_CBOR_COMPONENT})
 target_compile_features(${COMPONENT_LIB} PUBLIC cxx_std_17)
+set(LVGL_CBOR_NUMBER_FORMAT "snprintf" CACHE STRING "Number formatting backend: streams, to_chars, snprintf")
+set_property(CACHE LVGL_CBOR_NUMBER_FORMAT PROPERTY STRINGS streams to_chars snprintf)
+set(number_format_backends streams to_chars snprintf)
+list(FIND number_format_backends "${LVGL_CBOR_NUMBER_FORMAT}" number_format)
+if(number_format LESS 0)
+  message(FATAL_ERROR "Invalid LVGL_CBOR_NUMBER_FORMAT: ${LVGL_CBOR_NUMBER_FORMAT}")
+endif()
+target_compile_definitions(${COMPONENT_LIB} PUBLIC LVGL_CBOR_NUMBER_FORMAT=${number_format})
+option(LVGL_CBOR_DATA_BINDINGS "Execute screen data bindings and declarative events" ON)
+option(LVGL_CBOR_COMPOSITION "Execute nested screen views" ON)
+target_compile_definitions(${COMPONENT_LIB} PUBLIC
+  LVGL_CBOR_HAS_DATA_BINDINGS=$<BOOL:${LVGL_CBOR_DATA_BINDINGS}>
+  LVGL_CBOR_HAS_COMPOSITION=$<BOOL:${LVGL_CBOR_COMPOSITION}>)
+
 option(LVGL_CBOR_PROJECT_SERVICE "Build the optional project service and storage adapters" ON)
 target_compile_definitions(${COMPONENT_LIB} PUBLIC LVGL_CBOR_HAS_PROJECT_SERVICE=$<BOOL:${LVGL_CBOR_PROJECT_SERVICE}>)
 if(LVGL_CBOR_PROJECT_SERVICE)
-  target_sources(${COMPONENT_LIB} PRIVATE src/project_codec.cpp src/project_service.cpp src/project_store.cpp src/project_catalog_store.cpp)
+  target_sources(${COMPONENT_LIB} PRIVATE src/project_service.cpp src/project_store.cpp src/project_catalog_store.cpp)
 endif()
 
 option(LVGL_CBOR_HISTORY "Build optional bounded application-owned time series" OFF)

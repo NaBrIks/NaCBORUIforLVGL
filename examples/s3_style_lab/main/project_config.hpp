@@ -10,7 +10,8 @@
 // ROM base + exactly one filesystem catalog layer. Change these paths/backends for SD.
 namespace lab_project
 {
-	inline lvgl_cbor::ConstProjectSource base(initial_project_packet, sizeof(initial_project_packet));
+	inline lvgl_cbor::ConstProjectSource base(initial_project_packet, sizeof(initial_project_packet),
+	    {"firmware", "compiled project", true, false, "available"}, lvgl_cbor::ScreenValidation::TrustedEmbedded);
 	inline lvgl_cbor::CatalogProjectStore changes("/project");
 	inline constexpr lvgl_cbor::ProjectPolicy policy{true, true, true};
 	inline constexpr lvgl_cbor::ProjectLimits limits{262144, 128};

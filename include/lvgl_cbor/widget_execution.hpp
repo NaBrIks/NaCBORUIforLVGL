@@ -19,6 +19,44 @@ namespace lvgl_cbor
 			       cbor_value_get_int64_checked(&value, &number) == CborNoError;
 		}
 
+		inline bool consume_points(CborValue &value, PointSpan &out, WidgetContext &context)
+		{
+			size_t size;
+			CborValue point;
+			if(!cbor_value_is_array(&value) || cbor_value_get_array_length(&value, &size) != CborNoError ||
+			    size > (context.max_bytes - context.storage.bytes) / sizeof(lv_point_precise_t) ||
+			    cbor_value_enter_container(&value, &point) != CborNoError)
+				return false;
+
+			std::vector<lv_point_precise_t> points;
+			points.reserve(size);
+			for(size_t i = 0; i < size; ++i)
+			{
+				size_t count;
+				CborValue xy;
+				int64_t x, y;
+				if(!cbor_value_is_array(&point) ||
+				    cbor_value_get_array_length(&point, &count) != CborNoError || count != 2 ||
+				    cbor_value_enter_container(&point, &xy) != CborNoError || !read_integer(xy, x) ||
+				    cbor_value_advance(&xy) != CborNoError || !read_integer(xy, y) ||
+				    cbor_value_advance(&xy) != CborNoError ||
+				    cbor_value_leave_container(&point, &xy) != CborNoError)
+					return false;
+
+				if(x < line_point_min || x > line_point_max || y < line_point_min || y > line_point_max)
+					return false;
+
+				points.push_back({lv_value_precise_t(x), lv_value_precise_t(y)});
+			}
+			if(cbor_value_leave_container(&value, &point) != CborNoError)
+				return false;
+
+			context.storage.bytes += size * sizeof(lv_point_precise_t);
+			context.storage.points.push_back(std::move(points));
+			out = {context.storage.points.back().data(), uint32_t(size)};
+			return true;
+		}
+
 		template <class T> bool read(const CborValue &value, T &out, WidgetContext &context)
 		{
 			if constexpr(std::is_same_v<T, bool>)
@@ -65,36 +103,8 @@ namespace lvgl_cbor
 			}
 			else if constexpr(std::is_same_v<T, PointSpan>)
 			{
-				size_t size;
-				CborValue point;
-				if(!cbor_value_is_array(&value) || cbor_value_get_array_length(&value, &size) != CborNoError ||
-				    size > (context.max_bytes - context.storage.bytes) / sizeof(lv_point_precise_t) ||
-				    cbor_value_enter_container(&value, &point) != CborNoError)
-					return false;
-
-				std::vector<lv_point_precise_t> points;
-				points.reserve(size);
-				for(size_t i = 0; i < size; ++i)
-				{
-					size_t count;
-					CborValue xy;
-					int64_t x, y;
-					if(!cbor_value_is_array(&point) ||
-					    cbor_value_get_array_length(&point, &count) != CborNoError || count != 2 ||
-					    cbor_value_enter_container(&point, &xy) != CborNoError || !read_integer(xy, x) ||
-					    cbor_value_advance(&xy) != CborNoError || !read_integer(xy, y) ||
-					    cbor_value_advance(&point) != CborNoError)
-						return false;
-
-					if(x < line_point_min || x > line_point_max || y < line_point_min || y > line_point_max)
-						return false;
-
-					points.push_back({lv_value_precise_t(x), lv_value_precise_t(y)});
-				}
-				context.storage.bytes += size * sizeof(lv_point_precise_t);
-				context.storage.points.push_back(std::move(points));
-				out = {context.storage.points.back().data(), uint32_t(size)};
-				return true;
+				auto cursor = value;
+				return consume_points(cursor, out, context);
 			}
 			else if constexpr(std::is_floating_point_v<T>)
 			{
@@ -159,12 +169,21 @@ namespace lvgl_cbor
 			}
 		}
 
+		template<class T>
+		bool consume_argument(CborValue &value, T &out, WidgetContext &context)
+		{
+			if constexpr(std::is_same_v<T, PointSpan>)
+				return consume_points(value, out, context);
+			else
+				return read(value, out, context) && cbor_value_advance(&value) == CborNoError;
+		}
+
 		template <class ... A, size_t... I>
-		bool read_arguments(const CborValue &value, std::tuple<A...> &args, WidgetContext &context,
+		bool read_arguments(CborValue &value, std::tuple<A...> &args, WidgetContext &context,
 		    std::index_sequence<I...>)
 		{
 			if constexpr(sizeof...(A) == 1)
-				return read(value, std::get<0>(args), context);
+				return consume_argument(value, std::get<0>(args), context);
 			else
 			{
 				size_t count;
@@ -174,8 +193,8 @@ namespace lvgl_cbor
 				    cbor_value_enter_container(&value, &it) != CborNoError)
 					return false;
 
-				return ((read(it, std::get<I>(args), context) && cbor_value_advance(&it) == CborNoError) &&
-				       ...);
+				return (consume_argument(it, std::get<I>(args), context) && ...) &&
+				       cbor_value_leave_container(&value, &it) == CborNoError;
 			}
 		}
 
@@ -187,8 +206,7 @@ namespace lvgl_cbor
 	    WidgetContext &context)
 	{
 		std::tuple<A...> args;
-		if(!execution::read_arguments(cursor, args, context, std::index_sequence_for<A...>{}) ||
-		    cbor_value_advance(&cursor) != CborNoError)
+		if(!execution::read_arguments(cursor, args, context, std::index_sequence_for<A...>{}))
 			return false;
 
 		std::apply([&](A... values) {

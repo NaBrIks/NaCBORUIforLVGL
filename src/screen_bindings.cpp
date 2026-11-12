@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Oleg Kozhevnikov
 #include "screen_bindings.hpp"
+#include "cbor_reader.hpp"
+#include <cstdio>
+#if !defined(LVGL_CBOR_HAS_DATA_BINDINGS) || LVGL_CBOR_HAS_DATA_BINDINGS
 #include "binding_expression.hpp"
 #include "screen_views.hpp"
-#include "cbor_reader.hpp"
 #include <cmath>
-#include <cstdio>
-#include <iomanip>
-#include <locale>
-#include <sstream>
+#include "number_format.hpp"
 namespace lvgl_cbor::detail
 {
 	namespace
@@ -379,36 +378,14 @@ namespace lvgl_cbor::detail
 						return false;
 					}
 
-					std::ostringstream out;
-					out.imbue(std::locale::classic());
 					auto p = r.format.find("precision");
-					if(p != r.format.end())
+					const auto precision = p == r.format.end() ? -1 : int(std::get<int64_t>(p->second.value));
+					rendered = format_binding_number(n, precision);
+					if(rendered.empty())
 					{
-						if(std::fabs(n) >= 1e21)
-						{
-							e = "binding_format_range";
-							return false;
-						}
-
-						int precision = int(std::get<int64_t>(p->second.value));
-						double scale = std::pow(10.0, precision);
-						n = std::round(n * scale) / scale;
-						out << std::fixed << std::setprecision(precision);
+						e = "binding_format_range";
+						return false;
 					}
-					else
-					{
-						if(n != 0)
-						{
-							double scale = std::pow(10.0, 14 - std::floor(std::log10(std::fabs(n))));
-							if(std::isfinite(scale) && scale > 0 && std::isfinite(n * scale))
-								n = std::round(n * scale) / scale;
-						}
-
-						out << std::setprecision(15);
-					}
-
-					out << (n == 0 ? 0 : n);
-					rendered = out.str();
 				}
 
 				rendered = text_option("prefix", "") + rendered + text_option("suffix", "");
@@ -689,3 +666,33 @@ namespace lvgl_cbor::detail
 	}
 
 } // namespace lvgl_cbor::detail
+
+
+#else
+namespace lvgl_cbor::detail
+{
+	void deactivate_bindings(ScreenPlan &)
+	{
+	}
+
+	void activate_bindings(ScreenPlan &, bool)
+	{
+	}
+
+	bool prepare_bindings(ScreenPlan &, const CborValue &map, const Resource *, size_t,
+	    const ScreenLimits &, ScreenReply &reply)
+	{
+		for(const char *key : {"bindings", "events"})
+		{
+			CborValue value, items;
+			if(field(map, key, value) && (!cbor_value_is_array(&value) ||
+			    cbor_value_enter_container(&value, &items) != CborNoError || !cbor_value_at_end(&items)))
+			{
+				std::snprintf(reply.error, sizeof(reply.error), "bindings_unavailable");
+				return false;
+			}
+		}
+		return true;
+	}
+}
+#endif

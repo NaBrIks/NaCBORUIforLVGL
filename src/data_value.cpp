@@ -4,8 +4,7 @@
 #include "lvgl_cbor/data_registry.hpp"
 #include <cmath>
 #include <cstring>
-#include <iomanip>
-#include <sstream>
+#include "number_format.hpp"
 namespace lvgl_cbor
 {
 	namespace
@@ -377,9 +376,8 @@ namespace lvgl_cbor
 			if(!std::isfinite(*p))
 				return "null";
 
-			std::ostringstream o;
-			o << std::setprecision(17) << (*p == 0 ? 0 : *p);
-			return o.str();
+			auto formatted = detail::format_decimal(*p, 17);
+			return formatted.empty() ? "null" : formatted;
 		}
 
 		if(auto p = std::get_if<std::string>(&v.value))

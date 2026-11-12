@@ -246,7 +246,13 @@ namespace lvgl_cbor
 
 	bool ConstProjectSource::read(ProjectBundle &out, std::string &error, ProjectLimits limits) const
 	{
-		return parse_project(bytes_, out, error, limits);
+		if(!parse_project(bytes_, out, error, limits))
+			return false;
+
+		for(auto &screen : out.screens)
+			screen.bytes.validation = bytes_.validation;
+
+		return true;
 	}
 
 } // namespace lvgl_cbor

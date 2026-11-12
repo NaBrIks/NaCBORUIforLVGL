@@ -19,6 +19,6 @@ export function generateStyleDispatch(contract) {
     source += `static const StyleSignature${signature.id} style_methods_${signature.id}[] = {\n  ${entries.join(',\n  ')}\n};\n`;
     cases.push(`  case ${signature.id}: return invoke(style_methods_${signature.id}, index, target, value, context);`);
   }
-  source += `static bool execute_style(unsigned signature, unsigned index, lv_style_t *target,\n                          const CborValue &value, StyleDecodeContext &context) {\n  switch (signature) {\n${cases.join('\n')}\n  default: return false;\n  }\n}\n`;
+  source += `static bool execute_style(unsigned signature, unsigned index, lv_style_t *target,\n                          CborValue &value, StyleDecodeContext &context) {\n  switch (signature) {\n${cases.join('\n')}\n  default: return false;\n  }\n}\n`;
   return source;
 }

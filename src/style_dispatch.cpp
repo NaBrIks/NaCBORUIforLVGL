@@ -32,7 +32,7 @@ namespace lvgl_cbor::detail
 		RESOURCE_TYPE(const lv_style_transition_dsc_t *)
 #undef RESOURCE_TYPE
 
-		bool read_tracks(const CborValue &value, StyleStorage &storage, const int32_t *&pointer)
+		bool read_tracks(CborValue &value, StyleStorage &storage, const int32_t *&pointer)
 		{
 			size_t count;
 			CborValue it;
@@ -51,6 +51,9 @@ namespace lvgl_cbor::detail
 
 				array.push_back(int32_t(n));
 			}
+			if(cbor_value_leave_container(&value, &it) != CborNoError)
+				return false;
+
 			array.push_back(LV_GRID_TEMPLATE_LAST);
 			storage.values += array.size();
 			storage.tracks.push_back(std::move(array));
@@ -58,7 +61,7 @@ namespace lvgl_cbor::detail
 			return true;
 		}
 
-		template <class T> bool read_argument(const CborValue &value, T &out, StyleDecodeContext &context)
+		template <class T> bool read_scalar(const CborValue &value, T &out, StyleDecodeContext &context)
 		{
 			if constexpr(std::is_same_v<T, bool>)
 			{
@@ -75,12 +78,6 @@ namespace lvgl_cbor::detail
 			}
 			else if constexpr(std::is_pointer_v<T>)
 			{
-				if constexpr(std::is_same_v<T, const int32_t *>)
-				{
-					if(context.storage && cbor_value_is_array(&value))
-						return read_tracks(value, *context.storage, out);
-				}
-
 				char name[64];
 				if(!text(value, name, sizeof(name)))
 					return false;
@@ -108,13 +105,23 @@ namespace lvgl_cbor::detail
 			}
 		}
 
+		template<class T>
+		bool consume_argument(CborValue &value, T &out, StyleDecodeContext &context)
+		{
+			if constexpr(std::is_same_v<T, const int32_t *>)
+				if(context.storage && cbor_value_is_array(&value))
+					return read_tracks(value, *context.storage, out);
+
+			return read_scalar(value, out, context) && cbor_value_advance(&value) == CborNoError;
+		}
+
 		template <class ... A, size_t... I>
-		bool read_arguments(const CborValue &value, std::tuple<A...> &args, StyleDecodeContext &context,
+		bool read_arguments(CborValue &value, std::tuple<A...> &args, StyleDecodeContext &context,
 		    std::index_sequence<I...>)
 		{
 			if constexpr(sizeof...(A) == 1)
 			{
-				return read_argument(value, std::get<0>(args), context);
+				return consume_argument(value, std::get<0>(args), context);
 			}
 			else
 			{
@@ -125,15 +132,14 @@ namespace lvgl_cbor::detail
 				    cbor_value_enter_container(&value, &it) != CborNoError)
 					return false;
 
-				return (
-					(read_argument(it, std::get<I>(args), context) && cbor_value_advance(&it) == CborNoError) &&
-					...);
+				return (consume_argument(it, std::get<I>(args), context) && ...) &&
+				       cbor_value_leave_container(&value, &it) == CborNoError;
 			}
 		}
 
 		template <class ... A, size_t N>
 		bool invoke(void(*const (&methods)[N])(lv_style_t *, A ...), unsigned index, lv_style_t *target,
-		    const CborValue &value, StyleDecodeContext &context)
+		    CborValue &value, StyleDecodeContext &context)
 		{
 			if(index >= N || !methods[index])
 				return false;
@@ -151,7 +157,7 @@ namespace lvgl_cbor::detail
 #include "style_methods.inc"
 	} // namespace
 
-	bool apply_style_methods(const CborValue &map, lv_style_t *target, const Resource *resources,
+	bool apply_style_methods(CborValue &map, lv_style_t *target, const Resource *resources,
 	    size_t resource_count, StyleResult &out, StyleStorage *storage)
 	{
 		out = {};
@@ -181,10 +187,10 @@ namespace lvgl_cbor::detail
 				return fail("style_operation");
 
 			++out.count;
-			if(cbor_value_advance(&it) != CborNoError)
-				return fail("method_advance");
 		}
-		return cbor_value_at_end(&it) || fail("method_count");
+
+		return (cbor_value_at_end(&it) && cbor_value_leave_container(&map, &it) == CborNoError) ||
+		       fail("method_count");
 	}
 
 } // namespace lvgl_cbor::detail

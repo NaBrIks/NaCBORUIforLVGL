@@ -13,10 +13,13 @@ namespace lvgl_cbor::detail
 		}
 
 	} // namespace
-	bool own_style(const CborValue &map, DecodeContext &c, lv_style_t *&result)
+	bool own_style(CborValue &map, DecodeContext &c, lv_style_t *&result, uint16_t command)
 	{
 		if(c.plan.styles.size() >= c.limits.styles)
+		{
+			c.reply.opcode = command;
 			return fail(c, "style_capacity");
+		}
 
 		auto style = std::make_shared<OwnedStyle>();
 		style->storage = c.plan.storage;

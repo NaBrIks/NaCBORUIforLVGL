@@ -2,9 +2,10 @@
 // Copyright (c) 2026 Oleg Kozhevnikov
 #include "screen_views.hpp"
 #include "cbor_reader.hpp"
+#include <cstdio>
+#if !defined(LVGL_CBOR_HAS_COMPOSITION) || LVGL_CBOR_HAS_COMPOSITION
 #include "lvgl_cbor/data_registry.hpp"
 #include <algorithm>
-#include <cstdio>
 #include <limits>
 
 namespace lvgl_cbor::detail
@@ -268,13 +269,14 @@ namespace lvgl_cbor::detail
 					return show_error(slot, "composition_instances", reply);
 
 				const uint8_t *packet{}; size_t length{};
-				if(!owner->resolver_ || !owner->resolver_->resolve_screen(page.screen, packet, length))
+				auto validation = ScreenValidation::Checked;
+				if(!owner->resolver_ || !owner->resolver_->resolve_screen(page.screen, packet, length, validation))
 					return show_error(slot, "view_screen_not_found", reply);
 
 				if(!alive || !slot.node->object)  return false;
 
 				page.runtime = owner->make_child(screen);
-				if(!page.runtime->replace(packet, length, slot.node->object, false, reply, selections))
+				if(!page.runtime->replace(packet, length, slot.node->object, false, reply, selections, validation))
 				{
 					const std::string error = reply.error;
 					page.runtime.reset();
@@ -521,3 +523,63 @@ namespace lvgl_cbor::detail
 	}
 
 } // namespace lvgl_cbor::detail
+
+
+#else
+namespace lvgl_cbor::detail
+{
+	std::shared_ptr<CompositionState> composition_state(CompositionLimits)
+	{
+		auto state = std::make_shared<CompositionState>();
+		state->limits = {1, 2, 0};
+		return state;
+	}
+
+	bool prepare_views(ScreenPlan &, const CborValue &map, ScreenRuntime &, ScreenReply &reply,
+	    const std::vector<ScreenViewSelection> &)
+	{
+		CborValue value, items;
+		if(!field(map, "views", value) || (cbor_value_is_array(&value) &&
+		    cbor_value_enter_container(&value, &items) == CborNoError && cbor_value_at_end(&items)))
+			return true;
+
+		std::snprintf(reply.error, sizeof(reply.error), "views_unavailable");
+		return false;
+	}
+
+	void deactivate_views(ScreenPlan &)
+	{
+	}
+
+	void activate_views(ScreenPlan &, bool)
+	{
+	}
+
+	std::function<void()> navigation(ScreenPlan &, ScreenNode &, const std::string &,
+	    const std::string &, std::string &error)
+	{
+		error = "views_unavailable";
+		return {};
+	}
+
+	bool navigate_view(ScreenPlan &, const char *, const char *, ScreenReply &reply)
+	{
+		std::snprintf(reply.error, sizeof(reply.error), "views_unavailable");
+		return false;
+	}
+
+	lv_obj_t *find_view_instance(const ScreenPlan &, uint32_t, const char *)
+	{
+		return nullptr;
+	}
+
+	std::vector<ScreenViewSelection> collect_view_selections(const ScreenPlan &)
+	{
+		return {};
+	}
+
+	void collect_view_status(const ScreenPlan &, std::vector<ScreenViewStatus> &)
+	{
+	}
+}
+#endif

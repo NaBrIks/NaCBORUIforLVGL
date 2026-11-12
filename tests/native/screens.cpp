@@ -8,6 +8,7 @@
 #include "lvgl_cbor/data_registry.hpp"
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iterator>
 #include <string>
@@ -95,10 +96,39 @@ int main(int argc, char **argv)
 		}
 		auto *live = runtime.root();
 		auto *trace = runtime.find("trace");
+		const auto valid = raw_line_packet(2);
+		auto reject = [&](const std::vector<uint8_t> &packet, const char *error) {
+			require(!runtime.load(packet.data(), packet.size(), reply) && std::strcmp(reply.error, error) == 0,
+			    "strict envelope rejects malformed packet");
+			require(runtime.root() == live && lv_screen_active() == live, "invalid envelope preserves live screen");
+		};
+		auto with_field = [&](const char *key, lvgl_cbor::DataValue value) {
+			auto packet = valid;
+			require(packet.front() == 0xa8, "raw fixture uses a short eight-field map");
+			++packet.front();
+			const auto extra = lvgl_cbor::encode_data_value(lvgl_cbor::DataValue::Object{{key, std::move(value)}});
+			packet.insert(packet.end(), extra.begin() + 1, extra.end());
+			return packet;
+		};
+		reject(with_field("id", "duplicate"), "envelope_unknown_or_duplicate_field");
+		reject(with_field("unknown", 1), "envelope_unknown_or_duplicate_field");
+		auto trailing = valid;
+		trailing.push_back(0);
+		reject(trailing, "invalid_or_deep_cbor");
+		auto deep = with_field("captions", nullptr);
+		deep.pop_back(); // Replace null with 41 nested one-item arrays.
+		deep.insert(deep.end(), 41, 0x81);
+		deep.push_back(0xf6);
+		reject(deep, "invalid_or_deep_cbor");
+		auto tagged = with_field("captions", nullptr);
+		tagged.insert(tagged.end() - 1, 0xc0);
+		reject(tagged, "invalid_or_deep_cbor");
+
 		for(size_t count : {size_t(1), size_t(257)})
 		{
 			const auto packet = raw_line_packet(count);
-			require(!runtime.load(packet.data(), packet.size(), reply) && reply.opcode == 256,
+			require(!runtime.load(packet.data(), packet.size(), reply) && reply.opcode == 256 &&
+			    std::strcmp(reply.node, "trace") == 0,
 			    "raw line outside cardinality contract rejected by method");
 			require(runtime.root() == live && lv_screen_active() == live && runtime.find("trace") == trace &&
 			    lv_line_get_point_count(trace) == 256, "raw line boundary failure preserves live screen");
@@ -205,6 +235,14 @@ int main(int argc, char **argv)
 		     "cursor_v2"})
 		{
 			load(name, false);
+			if(std::strcmp(name, "cursor_bad_unknown_type") == 0)
+				require(std::strcmp(reply.node, "root") == 0 && reply.opcode == 0,
+				    "failed child factory reports parent ID and create opcode");
+
+			if(std::strcmp(name, "cursor_bad_bad_style") == 0)
+				require(std::strcmp(reply.node, "root") == 0 && std::strcmp(reply.error, "methods_map") == 0,
+				    "style failure keeps its error and node ID");
+
 			require(runtime.root() == before && lv_screen_active() == before,
 			    "cursor failure after partial creation preserves live screen");
 		}

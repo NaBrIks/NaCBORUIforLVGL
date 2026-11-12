@@ -1,0 +1,124 @@
+{
+  "id": "v_readme_live_flow",
+  "project": "nacborui",
+  "axis": "axis_flow",
+  "placements": [
+    {
+      "entity": "e_overview_application",
+      "parent": null,
+      "x": 0,
+      "y": 0,
+      "width": 230,
+      "height": 325,
+      "override": {
+        "border": {
+          "color": "#fdba74"
+        },
+        "fill": "#fff7ed",
+        "header": {
+          "fill": "#ffedd5"
+        }
+      }
+    },
+    {
+      "entity": "e_overview_registry_zone",
+      "parent": null,
+      "x": 285,
+      "y": 0,
+      "width": 245,
+      "height": 325,
+      "override": {
+        "border": {
+          "color": "#93c5fd"
+        },
+        "fill": "#eff6ff",
+        "header": {
+          "fill": "#dbeafe"
+        }
+      }
+    },
+    {
+      "entity": "e_overview_runtime_zone",
+      "parent": null,
+      "x": 585,
+      "y": 0,
+      "width": 245,
+      "height": 325,
+      "override": {
+        "border": {
+          "color": "#c4b5fd"
+        },
+        "fill": "#f5f3ff",
+        "header": {
+          "fill": "#ede9fe"
+        }
+      }
+    },
+    {
+      "entity": "e_overview_display_zone",
+      "parent": null,
+      "x": 885,
+      "y": 0,
+      "width": 225,
+      "height": 325,
+      "override": {
+        "border": {
+          "color": "#86efac"
+        },
+        "fill": "#f0fdf4",
+        "header": {
+          "fill": "#dcfce7"
+        }
+      }
+    },
+    {
+      "entity": "e_overview_sources",
+      "parent": "e_overview_application",
+      "x": 25,
+      "y": 75,
+      "width": 180,
+      "height": 62
+    },
+    {
+      "entity": "e_overview_actions",
+      "parent": "e_overview_application",
+      "x": 25,
+      "y": 230,
+      "width": 180,
+      "height": 62
+    },
+    {
+      "entity": "e_overview_registry",
+      "parent": "e_overview_registry_zone",
+      "x": 315,
+      "y": 150,
+      "width": 185,
+      "height": 65
+    },
+    {
+      "entity": "e_overview_bindings",
+      "parent": "e_overview_runtime_zone",
+      "x": 615,
+      "y": 75,
+      "width": 185,
+      "height": 62
+    },
+    {
+      "entity": "e_overview_events",
+      "parent": "e_overview_runtime_zone",
+      "x": 615,
+      "y": 230,
+      "width": 185,
+      "height": 62
+    },
+    {
+      "entity": "e_overview_screen",
+      "parent": "e_overview_display_zone",
+      "x": 910,
+      "y": 150,
+      "width": 175,
+      "height": 65
+    }
+  ],
+  "routing": "orthogonal"
+}

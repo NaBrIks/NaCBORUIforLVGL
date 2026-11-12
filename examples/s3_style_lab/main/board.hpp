@@ -29,6 +29,7 @@ struct DisplayConfig
 	bool rle{};
 	bool rle_buffer{true};
 };
+esp_err_t initialize_display(const DisplayConfig &, void (*milestone)(const char *));
 bool display_transfer_available(bool cyclic);
 DisplayConfig display_config();
 DisplayConfig display_config_saved();

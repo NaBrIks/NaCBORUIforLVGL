@@ -94,10 +94,21 @@ namespace lvgl_cbor
 
 			bool resolve_screen(const std::string &name, const uint8_t *&bytes, size_t &size) const override
 			{
-				auto *doc = project_detail::find(bundle.screens, name);
-				if(!doc)  return false;
+				ScreenValidation validation;
+				return resolve_screen(name, bytes, size, validation);
+			}
 
-				bytes = doc->bytes.data; size = doc->bytes.size; return true;
+			bool resolve_screen(const std::string &name, const uint8_t *&bytes, size_t &size,
+			    ScreenValidation &validation) const override
+			{
+				const auto *doc = project_detail::find(bundle.screens, name);
+				if(!doc)
+					return false;
+
+				bytes = doc->bytes.data;
+				size = doc->bytes.size;
+				validation = doc->bytes.validation;
+				return true;
 			}
 
 			void composition_changed() override
@@ -235,7 +246,7 @@ namespace lvgl_cbor
 			}
 			next->runtime.set_layout_debug_options(layout_options);
 			next->runtime.set_layout_debug(layout_debug);
-			if(!next->runtime.load(bytes.data, bytes.size, reply, selections))  return false;
+			if(!next->runtime.load(bytes.data, bytes.size, reply, selections, bytes.validation))  return false;
 
 			presentation = std::move(next);
 			presentation->changed = [this]() {

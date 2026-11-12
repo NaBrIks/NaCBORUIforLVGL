@@ -26,6 +26,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
+#ifndef LVGL_CBOR_DISPLAY_FEEDBACK
+#define LVGL_CBOR_DISPLAY_FEEDBACK 1
+#endif
 namespace
 {
 	esp_lcd_panel_handle_t panel;
@@ -34,8 +37,9 @@ namespace
 	const uint16_t *last_frame{};
 	std::mutex framebuffer_mutex;
 	DisplayConfig active_config;
-	DisplayRegions pending_regions;
 	bool render_locked{};
+#if LVGL_CBOR_DISPLAY_FEEDBACK
+	DisplayRegions pending_regions;
 	std::array<DisplayRegion,192> dirty_history{};
 	size_t dirty_head{}, dirty_count{};
 	uint32_t revision{}, history_floor{};
@@ -75,9 +79,13 @@ namespace
 		regions.items[regions.count++]=next;
 	}
 
+
+#endif
+
 	void publish_frame(const uint8_t *pixels)
 	{
 		last_frame = reinterpret_cast<const uint16_t *>(pixels);
+#if LVGL_CBOR_DISPLAY_FEEDBACK
 		if(!++revision)
 		{
 			++revision;
@@ -93,13 +101,17 @@ namespace
 			dirty_history[dirty_head]=region;
 			dirty_head=(dirty_head+1)%dirty_history.size();
 		}
+
+#endif
 	}
 
 	void refresh_event(lv_event_t *event)
 	{
 		if(lv_event_get_code(event) == LV_EVENT_REFR_START)
 		{
+#if LVGL_CBOR_DISPLAY_FEEDBACK
 			pending_regions.count = 0;
+#endif
 			// With two buffers LVGL renders to the other buffer. DIRECT sync
 			// copies from the published buffer into that render target.
 			if(active_config.buffers == 1)
@@ -189,8 +201,14 @@ namespace
 
 	void flush(lv_display_t *display, const lv_area_t *area, uint8_t *pixels)
 	{
+
+#if LVGL_CBOR_DISPLAY_FEEDBACK
 		add_region(pending_regions,{uint32_t(area->x1),uint32_t(area->y1),
 		    uint32_t(lv_area_get_width(area)),uint32_t(lv_area_get_height(area)),0});
+
+#else
+		(void)area;
+#endif
 		// DIRECT supplies the full framebuffer pointer for each dirty area.
 		// Submit only the last area, once all writes to that buffer are complete.
 		if(lv_display_flush_is_last(display))
@@ -246,8 +264,20 @@ uint32_t display_touch_errors()
 
 esp_err_t initialize_display()
 {
-	active_config=display_config_saved();
+	return initialize_display(display_config_saved(), nullptr);
+}
+
+esp_err_t initialize_display(const DisplayConfig &configuration, void (*milestone)(const char *))
+{
+	active_config = configuration;
+	if(milestone)
+	{
+		lv_init();
+		milestone("lvgl");
+	}
+#if LVGL_CBOR_DISPLAY_FEEDBACK
 	revision=esp_random();
+#endif
 	i2c_config_t bus{}; bus.mode = I2C_MODE_MASTER; bus.sda_io_num = 8; bus.scl_io_num = 9;
 	bus.sda_pullup_en = GPIO_PULLUP_ENABLE; bus.scl_pullup_en = GPIO_PULLUP_ENABLE; bus.master.clk_speed = 400000;
 	ESP_ERROR_CHECK(i2c_param_config(I2C_NUM_0, &bus));
@@ -278,7 +308,10 @@ esp_err_t initialize_display()
 		ESP_ERROR_CHECK(esp_lcd_rgb_panel_get_frame_buffer(panel, 2, &front, &back));
 	else
 		ESP_ERROR_CHECK(esp_lcd_rgb_panel_get_frame_buffer(panel, 1, &back));
-	lv_init(); auto *display = lv_display_create(800, 480); if(!display) return ESP_ERR_NO_MEM;
+	if(milestone) milestone("display_buffers");
+	else lv_init();
+
+	auto *display = lv_display_create(800, 480); if(!display) return ESP_ERR_NO_MEM;
 
 	lv_display_set_color_format(display, LV_COLOR_FORMAT_RGB565);
 	lv_display_set_buffers(display, back, front, 800 * 480 * 2, active_config.direct ? LV_DISPLAY_RENDER_MODE_DIRECT : LV_DISPLAY_RENDER_MODE_FULL);
@@ -344,6 +377,7 @@ esp_err_t display_config_save(DisplayConfig config)
 	return result;
 }
 
+#if LVGL_CBOR_DISPLAY_FEEDBACK
 bool display_frame_regions(uint32_t since,DisplayRegions &regions)
 {
 	std::lock_guard<std::mutex> lock(framebuffer_mutex);
@@ -411,3 +445,5 @@ bool display_copy_region(const DisplayRegion &region,size_t offset,uint8_t *out,
 	}
 	return true;
 }
+
+#endif

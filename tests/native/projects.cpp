@@ -76,6 +76,44 @@ int main(int argc, char **argv)
 		assert(error == "project_read_only"); ScreenReply reply; assert(readonly.load_screen("", reply));
 		assert(readonly.status().displayed_screen == "main");
 	}
+	{
+		ProjectBundle built_in;
+		assert(parse_project(bytes(base), built_in, error));
+		auto &screen = built_in.screens.front().bytes;
+		std::vector<uint8_t> probe(screen.data, screen.data + screen.size);
+		assert(probe.front() >= 0xa0 && probe.front() < 0xb7);
+		++probe.front();
+		probe.insert(probe.end(), {0x65, 'p', 'r', 'o', 'b', 'e', 0x01});
+		screen = bytes(probe);
+		auto image = encode_project(built_in);
+		ConstProjectSource checked(image.data(), image.size());
+		ConstProjectSource trusted(image.data(), image.size(), checked.storage_info(),
+		    ScreenValidation::TrustedEmbedded);
+		ProjectService ordinary(checked);
+		assert(ordinary.begin(error));
+		ScreenReply reply;
+		assert(!ordinary.load_screen("main", reply));
+		assert(std::string(reply.error) == "envelope_unknown_or_duplicate_field");
+
+		MemoryProjectStore overrides;
+		ProjectService mixed(trusted, &overrides);
+		assert(mixed.begin(error));
+		assert(mixed.load_screen("main", reply));
+		auto *active = mixed.root();
+		assert(!mixed.preview(bytes(image), "main", reply));
+		assert(std::string(reply.error) == "envelope_unknown_or_duplicate_field" && mixed.root() == active);
+		probe.back() = 0x02;
+		assert(mixed.write_screen("main", bytes(probe), error));
+		assert(!mixed.load_screen("main", reply));
+		assert(std::string(reply.error) == "envelope_unknown_or_duplicate_field" && mixed.root() == active);
+
+		ProjectService reloaded(trusted, &overrides);
+		assert(reloaded.begin(error));
+		assert(!reloaded.load_screen("main", reply));
+		assert(std::string(reply.error) == "envelope_unknown_or_duplicate_field");
+		assert(mixed.reset("screens", "main", error));
+		assert(mixed.load_screen("main", reply));
+	}
 	MemoryProjectStore store;
 	{
 		ProjectService service(source, &store); assert(service.begin(error));

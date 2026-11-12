@@ -8,6 +8,8 @@
 | [LilyGO T-Display-S3](lilygo_t_display_s3/README.md) | 320×170 ST7789 example with USB diagnostics and an optional Wi-Fi preview | Build the USB profile first |
 | [Native widget](native_widget/README.md) | Portable custom-component registration in an application | Register the sample widget and publish its metadata |
 
+[S3 memory bench](memory_bench/README.md) compares direct LVGL calls, flash CBOR and successive runtime features.
+
 The [screens](screens/) directory contains editable layout samples.
 [Common](common/README.md) contains shared example modules.
 See [licenses and third-party notices](../LICENSES.md).

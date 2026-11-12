@@ -13,6 +13,7 @@ namespace lvgl_cbor
 		const uint8_t *data{};
 		size_t size{};
 		std::shared_ptr<const std::vector<uint8_t> > owner;
+		ScreenValidation validation = ScreenValidation::Checked;
 	};
 	struct ProjectDocument { std::string name; ProjectBytes bytes; };
 	struct ProjectBundle {
@@ -47,8 +48,9 @@ namespace lvgl_cbor
 		ProjectStorageInfo info_;
 	public:
 		ConstProjectSource(const uint8_t *data, size_t size,
-		    ProjectStorageInfo info = {"firmware", "compiled project", true, false, "available"})
-		  : bytes_{data, size, {}}, info_(std::move(info))
+		    ProjectStorageInfo info = {"firmware", "compiled project", true, false, "available"},
+		    ScreenValidation validation = ScreenValidation::Checked)
+		  : bytes_{data, size, {}, validation}, info_(std::move(info))
 		{
 		}
 

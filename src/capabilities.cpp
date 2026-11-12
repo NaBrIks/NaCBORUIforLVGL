@@ -110,12 +110,19 @@ namespace lvgl_cbor
 		    ",\"depth\":" + std::to_string(limits.screen.depth);
 		out += ",\"styles\":" + std::to_string(limits.screen.styles) +
 		    ",\"textBytes\":" + std::to_string(limits.screen.text_bytes) + "}";
+#if !defined(LVGL_CBOR_HAS_DATA_BINDINGS) || LVGL_CBOR_HAS_DATA_BINDINGS
 		DataRegistry empty;
 		out += ",\"binding\":" + (data ? data->catalog_json() : empty.catalog_json());
+#else
+		(void)data;
+#endif
+#if !defined(LVGL_CBOR_HAS_COMPOSITION) || LVGL_CBOR_HAS_COMPOSITION
 		out += ",\"composition\":{\"version\":" + std::to_string(composition_contract::version) +
 		    ",\"maxDepth\":" + std::to_string(composition_contract::maxDepth) +
 		    ",\"maxInstances\":" + std::to_string(composition_contract::maxInstances) +
-		    ",\"inactiveCache\":" + std::to_string(composition_contract::inactiveCache) + "}}";
+		    ",\"inactiveCache\":" + std::to_string(composition_contract::inactiveCache) + "}";
+#endif
+		out += "}";
 		return out;
 	}
 

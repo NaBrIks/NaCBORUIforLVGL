@@ -1,0 +1,5 @@
+sdkconfig.*
+!sdkconfig.defaults
+out/
+dependencies.lock
+wifi_secret.hpp

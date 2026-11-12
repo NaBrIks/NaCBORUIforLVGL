@@ -126,6 +126,83 @@
       "to": "e_projects",
       "type": "call",
       "origin": "authored"
+    },
+    {
+      "id": "r_overview_editor_overview_definition_data_flow",
+      "from": "e_overview_editor",
+      "to": "e_overview_definition",
+      "type": "data-flow",
+      "origin": "authored"
+    },
+    {
+      "id": "r_overview_designer_overview_definition_data_flow",
+      "from": "e_overview_designer",
+      "to": "e_overview_definition",
+      "type": "data-flow",
+      "origin": "authored"
+    },
+    {
+      "id": "r_overview_definition_overview_runtime_data_flow",
+      "from": "e_overview_definition",
+      "to": "e_overview_runtime",
+      "type": "data-flow",
+      "origin": "authored"
+    },
+    {
+      "id": "r_overview_runtime_overview_esp_runs",
+      "from": "e_overview_runtime",
+      "to": "e_overview_esp",
+      "type": "runs",
+      "origin": "authored"
+    },
+    {
+      "id": "r_overview_runtime_overview_win_runs",
+      "from": "e_overview_runtime",
+      "to": "e_overview_win",
+      "type": "runs",
+      "origin": "authored"
+    },
+    {
+      "id": "r_overview_sources_overview_registry_data_flow",
+      "from": "e_overview_sources",
+      "to": "e_overview_registry",
+      "type": "data-flow",
+      "origin": "authored"
+    },
+    {
+      "id": "r_overview_registry_overview_bindings_data_flow",
+      "from": "e_overview_registry",
+      "to": "e_overview_bindings",
+      "type": "data-flow",
+      "origin": "authored"
+    },
+    {
+      "id": "r_overview_bindings_overview_screen_data_flow",
+      "from": "e_overview_bindings",
+      "to": "e_overview_screen",
+      "type": "data-flow",
+      "origin": "authored"
+    },
+    {
+      "id": "r_overview_screen_overview_events_event",
+      "from": "e_overview_screen",
+      "to": "e_overview_events",
+      "type": "event",
+      "origin": "authored"
+    },
+    {
+      "id": "r_overview_events_overview_registry_event",
+      "from": "e_overview_events",
+      "to": "e_overview_registry",
+      "type": "event",
+      "origin": "authored"
+    },
+    {
+      "id": "r_overview_registry_overview_actions_event",
+      "from": "e_overview_registry",
+      "to": "e_overview_actions",
+      "type": "event",
+      "origin": "authored"
     }
   ]
 }

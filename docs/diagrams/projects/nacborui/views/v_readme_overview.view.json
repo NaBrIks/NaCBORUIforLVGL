@@ -1,0 +1,107 @@
+{
+  "id": "v_readme_overview",
+  "project": "nacborui",
+  "axis": "axis_flow",
+  "placements": [
+    {
+      "entity": "e_overview_author",
+      "parent": null,
+      "x": 0,
+      "y": 0,
+      "width": 280,
+      "height": 310,
+      "override": {
+        "border": {
+          "color": "#93c5fd"
+        },
+        "fill": "#eff6ff",
+        "header": {
+          "fill": "#dbeafe"
+        }
+      }
+    },
+    {
+      "entity": "e_overview_project",
+      "parent": null,
+      "x": 340,
+      "y": 0,
+      "width": 280,
+      "height": 310,
+      "override": {
+        "border": {
+          "color": "#c4b5fd"
+        },
+        "fill": "#f5f3ff",
+        "header": {
+          "fill": "#ede9fe"
+        }
+      }
+    },
+    {
+      "entity": "e_overview_run",
+      "parent": null,
+      "x": 680,
+      "y": 0,
+      "width": 450,
+      "height": 310,
+      "override": {
+        "border": {
+          "color": "#86efac"
+        },
+        "fill": "#f0fdf4",
+        "header": {
+          "fill": "#dcfce7"
+        }
+      }
+    },
+    {
+      "entity": "e_overview_editor",
+      "parent": "e_overview_author",
+      "x": 30,
+      "y": 65,
+      "width": 220,
+      "height": 65
+    },
+    {
+      "entity": "e_overview_designer",
+      "parent": "e_overview_author",
+      "x": 30,
+      "y": 190,
+      "width": 220,
+      "height": 65
+    },
+    {
+      "entity": "e_overview_definition",
+      "parent": "e_overview_project",
+      "x": 370,
+      "y": 125,
+      "width": 220,
+      "height": 65
+    },
+    {
+      "entity": "e_overview_runtime",
+      "parent": "e_overview_run",
+      "x": 710,
+      "y": 125,
+      "width": 180,
+      "height": 65
+    },
+    {
+      "entity": "e_overview_esp",
+      "parent": "e_overview_run",
+      "x": 920,
+      "y": 65,
+      "width": 180,
+      "height": 65
+    },
+    {
+      "entity": "e_overview_win",
+      "parent": "e_overview_run",
+      "x": 920,
+      "y": 190,
+      "width": 180,
+      "height": 65
+    }
+  ],
+  "routing": "orthogonal"
+}

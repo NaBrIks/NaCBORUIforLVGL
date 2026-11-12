@@ -37,6 +37,7 @@
 
 ## Разработка и история
 
+- [Замеры Flash, RAM, PSRAM и отклика S3](readme_memory_ru.md)
 - [Источники и лицензии](readme_sources_ru.md)
 - [Модель проекта SeMaps](readme_semaps_ru.md)
 - [Проверки и измерения по датам](reviews/README.md)

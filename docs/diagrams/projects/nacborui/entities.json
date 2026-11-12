@@ -102,6 +102,120 @@
       "kind": "app",
       "origin": "authored",
       "status": "present"
+    },
+    {
+      "id": "e_overview_author",
+      "kind": "group",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_project",
+      "kind": "group",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_run",
+      "kind": "group",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_editor",
+      "kind": "app",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_designer",
+      "kind": "app",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_definition",
+      "kind": "store",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_runtime",
+      "kind": "component",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_esp",
+      "kind": "external",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_win",
+      "kind": "external",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_application",
+      "kind": "group",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_registry_zone",
+      "kind": "group",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_runtime_zone",
+      "kind": "group",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_display_zone",
+      "kind": "group",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_sources",
+      "kind": "component",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_actions",
+      "kind": "component",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_registry",
+      "kind": "service",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_bindings",
+      "kind": "component",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_events",
+      "kind": "component",
+      "origin": "authored",
+      "status": "present"
+    },
+    {
+      "id": "e_overview_screen",
+      "kind": "component",
+      "origin": "authored",
+      "status": "present"
     }
   ]
 }

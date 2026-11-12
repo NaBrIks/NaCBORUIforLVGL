@@ -14,7 +14,7 @@ namespace lvgl_cbor::detail
 		uint16_t opcode{};
 		const char *error{};
 	};
-	bool apply_style_methods(const CborValue &map, lv_style_t *target, const Resource *resources,
+	bool apply_style_methods(CborValue &map, lv_style_t *target, const Resource *resources,
 	    size_t resource_count, StyleResult &result,
 	    StyleStorage *screen_storage = nullptr);
 } // namespace lvgl_cbor::detail

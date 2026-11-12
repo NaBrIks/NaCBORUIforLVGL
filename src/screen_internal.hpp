@@ -46,13 +46,14 @@ namespace lvgl_cbor::detail
 		size_t resource_count;
 		ScreenLimits limits;
 		ScreenReply &reply;
+		const ScreenNode *failed_node{};
 	};
 	WidgetFactory widget_factory(unsigned id);
 	size_t widget_factory_count();
 	bool decode_screen(const uint8_t *, size_t, ScreenPlan &, const Resource *, size_t,
-	    const ScreenLimits &, ScreenReply &);
+	    const ScreenLimits &, ScreenReply &, ScreenValidation);
 	bool execute_screen(CborValue &, lv_obj_t *, DecodeContext &, bool standalone);
-	bool own_style(const CborValue &, DecodeContext &, lv_style_t *&);
+	bool own_style(CborValue &, DecodeContext &, lv_style_t *&, uint16_t command = 0);
 	void delete_tree(ScreenNode *);
 	lv_obj_t *find_object(ScreenNode *, const char *);
 } // namespace lvgl_cbor::detail
