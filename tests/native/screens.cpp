@@ -99,6 +99,17 @@ int main(int argc, char **argv)
 		    "trusted slider value skips the narrowing range check");
 		require(runtime.find("slider") && lv_slider_get_value(runtime.find("slider")) == 25,
 		    "LVGL sees the narrowed value");
+		const auto shared = fixture(dir, "shared");
+		require(runtime.load(shared.data(), shared.size(), reply, {}, ScreenValidation::TrustedEmbedded),
+		    "embedded screen loads named and inline styles");
+		require(lv_color_to_u32(lv_obj_get_style_bg_color(runtime.find("button_a"), LV_PART_MAIN)) ==
+		    0xff246e8cu, "embedded screen resolves a named style");
+		const auto interleaved = fixture(dir, "cursor_interleaved");
+		require(runtime.load(interleaved.data(), interleaved.size(), reply, {}, ScreenValidation::TrustedEmbedded),
+		    "embedded screen executes nested and interleaved commands");
+		require(std::string(lv_label_get_text(runtime.find("parent"))) == "after" &&
+		    std::string(lv_label_get_text(runtime.find("caption"))) == "inside",
+		    "embedded command cursor resumes after nested objects");
 	}
 	{
 		lvgl_cbor::ScreenRuntime runtime(resources, 2);

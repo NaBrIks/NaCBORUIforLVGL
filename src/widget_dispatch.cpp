@@ -3,6 +3,9 @@
 #include "cbor_reader.hpp"
 #include "lvgl_cbor/widget_execution.hpp"
 #include "screen_internal.hpp"
+#ifdef LVGL_CBOR_NAIVE_EMBEDDED
+#include "screen_trusted_reader.hpp"
+#endif
 #include <algorithm>
 #include <cstring>
 namespace lvgl_cbor::detail
@@ -23,6 +26,31 @@ namespace lvgl_cbor::detail
 			return cbor_value_is_array(&cursor) &&
 			       cbor_value_get_array_length(&cursor, &length) == CborNoError &&
 			       cbor_value_enter_container(&cursor, &child) == CborNoError;
+		}
+
+		bool enter_command(CborValue &cursor, CborValue &fields, size_t &count, const DecodeContext &ctx)
+		{
+#ifdef LVGL_CBOR_NAIVE_EMBEDDED
+			if(ctx.trusted_embedded)
+			{
+				count = 0;
+				return enter_embedded_command(cursor, fields);
+			}
+#else
+			(void)ctx;
+#endif
+			return enter(cursor, fields, count);
+		}
+
+		bool command_arity(size_t actual, size_t expected, const DecodeContext &ctx)
+		{
+#ifdef LVGL_CBOR_NAIVE_EMBEDDED
+			if(ctx.trusted_embedded)
+				return true;
+#else
+			(void)ctx;
+#endif
+			return actual == expected;
 		}
 
 		bool leave(CborValue &cursor, CborValue &child)
@@ -191,12 +219,12 @@ namespace lvgl_cbor::detail
 				CborValue fields;
 				size_t fields_count;
 				uint16_t method;
-				if(!enter(commands, fields, fields_count) || !read_code(fields, method))
+				if(!enter_command(commands, fields, fields_count, ctx) || !read_code(fields, method))
 					return command_failed(ctx, node, screen_command_create);
 
 				if(method == screen_command_create)
 				{
-					if(fields_count != 3)
+					if(!command_arity(fields_count, 3, ctx))
 						return command_failed(ctx, node, method);
 
 					node.children.push_back(std::make_unique<ScreenNode>());
@@ -205,7 +233,8 @@ namespace lvgl_cbor::detail
 				}
 				else
 				{
-					if(fields_count != 2 || !execute_object_command(method, fields, node, handler, ctx) ||
+					if(!command_arity(fields_count, 2, ctx) ||
+					    !execute_object_command(method, fields, node, handler, ctx) ||
 					    !node.object)
 						return command_failed(ctx, node, method);
 
@@ -279,7 +308,8 @@ namespace lvgl_cbor::detail
 		CborValue fields;
 		size_t count;
 		uint16_t method;
-		if(!enter(cursor, fields, count) || count != 3 || !read_code(fields, method) ||
+		if(!enter_command(cursor, fields, count, ctx) || !command_arity(count, 3, ctx) ||
+		    !read_code(fields, method) ||
 		    method != screen_command_create)
 			return false;
 

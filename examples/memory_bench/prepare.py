@@ -37,6 +37,8 @@ if environment in ("phases-og", "phases-os"):
     arguments += " -DBENCH_SCREEN_PHASES=ON"
 if os.environ.get("NACBOR_BENCH_TRUSTED_CBOR") == "1":
     arguments += " -DBENCH_TRUSTED_CBOR=ON"
+if os.environ.get("NACBOR_BENCH_NAIVE_EMBEDDED") == "1":
+    arguments += " -DLVGL_CBOR_NAIVE_EMBEDDED=ON"
 env.BoardConfig().update("build.cmake_extra_args", arguments)
 build.mkdir(parents=True, exist_ok=True)
 mode = f"{arguments}:{os.environ.get('NACBOR_BENCH_CACHED_COMPONENTS', '')}"
