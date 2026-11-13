@@ -8,6 +8,7 @@
 #include "lvgl_cbor/screen_runtime.hpp"
 #include "lvgl_cbor/project_service.hpp"
 #include "lvgl_cbor/data_registry.hpp"
+#include "appearance.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -58,7 +59,7 @@ static void separate(lv_obj_t *root)
 
 int main(int argc, char **argv)
 {
-	require(argc == 2, "fixture directory");
+	require(argc == 2 || (argc == 3 && std::string(argv[2]) == "--interfaces"), "fixture directory");
 	lv_init(); auto *display = lv_display_create(800, 480);
 	std::vector<uint8_t> pixels(800 * 480 * 2);
 	lv_display_set_color_format(display, LV_COLOR_FORMAT_RGB565);
@@ -68,13 +69,95 @@ int main(int argc, char **argv)
 	});
 	const lvgl_cbor::Resource resources[]{{"montserrat_20", "const lv_font_t *", &lv_font_montserrat_20},
 		{"montserrat_28", "const lv_font_t *", &lv_font_montserrat_28}};
+	Appearance appearance{"inst_main", "inst_items", "inst_value", "inst_warn", "inst_fault"};
 	lvgl_cbor::WidgetRegistry registry;
-	require(lab_widgets::register_examples(registry), "register three native components");
+	require(lab_widgets::register_examples(registry, appearance), "register three native components");
 	require(registry.revision() == 3, "catalog publication revision");
-	require(!lab_widgets::register_examples(registry), "duplicate registration rejected");
+	require(!lab_widgets::register_examples(registry, appearance), "duplicate registration rejected");
 	require(registry.revision() == 3, "failed registration does not publish a change");
 	{std::ofstream out(std::string(argv[1]) + "/native-capabilities.json");
 	 out << lvgl_cbor::runtime_capabilities_json(resources, 2, {}, &registry);}
+	if(argc == 3)
+	{
+		const std::string path = argv[1];
+		std::ifstream file(path + "/interfaces.cbor", std::ios::binary);
+		std::vector<uint8_t> bytes{std::istreambuf_iterator<char>(file), {}};
+		lvgl_cbor::ConstProjectSource source(bytes.data(), bytes.size());
+		lvgl_cbor::DataRegistry data;
+		using S = lvgl_cbor::DataSchema;
+		std::string error;
+		require(data.add_source({"demo.speed", S::object({{"kmh", S::number(0, 180)}, {"unit", S::text(16)}})}, error), error.c_str());
+		require(data.add_source({"system.clock", S::object({{"localTime", S::text(8)}, {"syncState", S::text(16)}})}, error), error.c_str());
+		require(data.add_source({"system.network", S::object({{"ip", S::text(15)}})}, error), error.c_str());
+		auto cockpitResources = appearance.resources();
+		cockpitResources.insert(cockpitResources.end(), std::begin(resources), std::end(resources));
+		std::ifstream appearanceFile(path + "/appearance.cbor", std::ios::binary);
+		std::vector<uint8_t> appearanceBytes{std::istreambuf_iterator<char>(appearanceFile), {}};
+		require(appearance.load({appearanceBytes.data(), appearanceBytes.size(), {}}, "cream", cockpitResources.data(),
+		    cockpitResources.size(), error), error.c_str());
+		lvgl_cbor::ProjectService project(source, nullptr, {}, {}, cockpitResources.data(), cockpitResources.size(),
+		    &registry, {}, &data);
+		require(project.begin(error), error.c_str());
+		lvgl_cbor::ScreenReply reply;
+		require(project.load_screen("", reply), reply.error);
+		auto select = [&](const char *id) {
+			auto *control = project.find(id);
+			if(!control)
+				for(const auto &slot : project.status().views)
+					if(slot.node == "interface") control = project.find(slot.page_instance, id);
+			require(control, id);
+			lv_obj_send_event(control, LV_EVENT_CLICKED, nullptr);
+			data.flush();
+			lv_refr_now(display);
+			lv_obj_update_layout(lv_screen_active());
+		};
+		auto page = [&](const char *view, const char *screen) {
+			for(const auto &slot : project.status().views)
+				if(slot.node == view && slot.selected == screen && slot.error.empty()) return true;
+			return false;
+		};
+		require(page("interface", "shell"), "classic interface is selected at boot");
+		select("nav-1");
+		require(page("content", "radar"), "classic radar tab");
+		require(data.publish("system.clock", lvgl_cbor::DataValue::Object{{"localTime", "12:34:56"},
+		    {"syncState", "synced"}}, error), error.c_str());
+		require(data.publish("system.network", lvgl_cbor::DataValue::Object{{"ip", "192.0.2.20"}}, error), error.c_str());
+		data.flush();
+		select("to-cockpit");
+		require(page("interface", "cockpit") && page("readouts", "cockpit-lcd"), "cockpit and LCD");
+		lv_area_t visible{}, hidden{};
+		lv_obj_get_coords(project.find("to-classic"), &visible);
+		lv_obj_get_coords(project.find("to-cockpit"), &hidden);
+		require(visible.x1 == 736 && visible.y1 == 436 && hidden.x1 >= 800, "only return button in the viewport");
+		for(const auto &slot : project.status().views)
+			if(slot.node == "interface")
+			{
+				auto *clock = project.find(slot.page_instance, "clock");
+				auto *ip = project.find(slot.page_instance, "ip");
+				require(clock && std::string(lv_label_get_text(clock)) == "12:34:56", "radio clock binding");
+				require(ip && std::string(lv_label_get_text(ip)) == "192.0.2.20", "radio IP binding");
+			}
+		auto capture = [&](const char *name) {
+			lv_refr_now(display);
+			std::ofstream out(path + name, std::ios::binary);
+			out.write(reinterpret_cast<const char *>(pixels.data()), pixels.size());
+		};
+		for(const auto &slot : project.status().views)
+			if(slot.node == "interface") contained(project.find(slot.page_instance, "cockpit"));
+		capture("/cockpit-lcd.rgb565");
+		select("led");
+		require(page("readouts", "cockpit-led"), "LED readouts selected");
+		capture("/cockpit-led.rgb565");
+		select("lcd");
+		require(page("readouts", "cockpit-lcd"), "LCD readouts restored");
+		select("to-classic");
+		require(page("interface", "shell") && page("content", "radar"), "classic interface and tab restored");
+		lv_obj_get_coords(project.find("to-cockpit"), &visible);
+		lv_obj_get_coords(project.find("to-classic"), &hidden);
+		require(visible.x1 == 736 && visible.y1 == 436 && hidden.x1 >= 800, "only flight button in the viewport");
+		return 0;
+	}
+
 	std::ifstream file(std::string(argv[1]) + "/demo.cbor", std::ios::binary);
 	std::vector<uint8_t> packet{std::istreambuf_iterator<char>(file), {}}; require(!packet.empty(), "packet");
 	auto *original = lv_screen_active();
@@ -85,7 +168,7 @@ int main(int argc, char **argv)
 		require(runtime.load(packet.data(), packet.size(), reply), reply.error);
 		require(reply.nodes == 5, "only authoring nodes counted");
 		auto &pump = lab_widgets::state<lab_widgets::signal::State>(runtime.find("signal"));
-		require(std::string(lv_label_get_text(pump.status)) == "RUN", "simple scalar handler");
+		require(pump.value == 1, "simple scalar handler");
 		auto &gauge = lab_widgets::state<lab_widgets::speedometer::State>(runtime.find("speedometer"));
 		require(gauge.value == 87 && std::string(gauge.unit) == "km/h" && gauge.high == 240, "tuple handler");
 		auto &radar = lab_widgets::state<lab_widgets::radar::State>(runtime.find("radar"));
@@ -133,6 +216,7 @@ int main(int argc, char **argv)
 		require(std::string(after.targets[1].name) == "BRAVO", "text survives input buffer release");
 	}
 	require(lv_screen_active() == original && lv_obj_get_child_count(original) == 0, "complete native object teardown");
+
 	{
 		std::ifstream file(std::string(argv[1]) + "/layout.cbor", std::ios::binary);
 		std::vector<uint8_t> bytes{std::istreambuf_iterator<char>(file), {}};
@@ -180,4 +264,5 @@ int main(int argc, char **argv)
 	lv_display_delete(display); lv_deinit();
 	std::puts(
 		"Native graphics: rasterized dial/radar, animated pixels, cursor, registration, 100 replacements and timer teardown passed");
+
 }

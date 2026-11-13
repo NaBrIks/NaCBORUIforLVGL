@@ -30,9 +30,19 @@ test('exported owner project keeps all four screen packets and six authoring sty
  const {files}=compileCatalog(baseProject,next,caps);inspectCatalog(files.get('catalog.0'),files);
 });
 
-test('stock RGB S3 catalog boots the shell with four complete pages and a functional Setup',()=>{
+test('stock RGB S3 catalog switches complete interfaces and preserves Setup',()=>{
  const project=prepareStockProject(storageProject),caps=provisioningCapabilities(capabilities);
- assert.equal(project.manifest.entry,'shell');
+ assert.equal(project.manifest.entry,'interface-select');
+ const [view,toCockpit,toClassic]=project.screens['interface-select'].root.children;
+ assert.equal(view.view.initial,'shell');
+ assert.deepEqual(view.view.pages.map(page=>page.screen),['shell','cockpit']);
+ assert.equal(toCockpit.style.x,toClassic.style.x);
+ assert.equal(toCockpit.style.y,toClassic.style.y);
+ assert.deepEqual([toCockpit,toClassic].map(node=>node.events[0].navigate),
+  [{view:'interface',screen:'cockpit'},{view:'interface',screen:'shell'}]);
+ const pressure=project.screens.cockpit.root.children.find(node=>node.id==='pressure');
+ assert.deepEqual(pressure.children.find(node=>node.id==='readouts').view.pages.map(page=>page.screen),
+  ['cockpit-lcd','cockpit-led']);
  const {root}=project.screens.shell;
  assert.deepEqual(root.children.find(node=>node.id==='content').view.pages.map(page=>page.screen),['dashboard','radar','trip','setup']);
  const controls=project.screens.setup.root.children;

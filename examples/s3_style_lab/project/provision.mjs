@@ -5,6 +5,7 @@ import {screenContract} from '../../../packages/screen-codec/index.js';
 import {appendShell,demoShellOptions,withSystemBindings} from './shell.mjs';
 import {withAppearanceSetup} from './appearance-setup.mjs';
 import {withDisplaySetup} from './display-setup.mjs';
+import {withCockpit} from './cockpit.mjs';
 
 export function provisioningCapabilities(capabilities){
  const binding=withSystemBindings(capabilities.binding);
@@ -30,7 +31,7 @@ export function provisioningCapabilities(capabilities){
 
 export function prepareStockProject(project){
  const shell=prepareProvisioningProject(project,{shell:true,shellOptions:demoShellOptions});
- return withDisplaySetup(withAppearanceSetup(shell));
+ return withCockpit(withDisplaySetup(withAppearanceSetup(shell)));
 }
 
 // Explicit PC-side recompilation of authoring JSON after an append-only contract
