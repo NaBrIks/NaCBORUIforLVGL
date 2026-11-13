@@ -12,9 +12,9 @@ Windows target предоставляет `/api/view/frame` через суще�
 `fresh:true` ждёт следующего завершённого обновления, `afterScene` — кадра
 после смены сцены. При отсутствии предпросмотра используется запрос кадра
 у устройства. Внешний локальный endpoint Designer в Windows использует тот же
-путь. См. [снимок через MCP Designer](readme_maui_designer_ru.md#снимок-через-mcp-designer).
+путь. См. [снимок через MCP Designer](readme_maui_designer.ru.md#снимок-через-mcp-designer).
 
-Опциональный [MCP Windows-проигрывателя](readme_windows_native_mcp_ru.md#изображение-и-бюджеты)
+Опциональный [MCP Windows-проигрывателя](readme_windows_native_mcp.ru.md#изображение-и-бюджеты)
 снимает кадр LVGL и кодирует PNG внутри проигрывателя.
 
 ## Порции LVF2 на S3
@@ -87,5 +87,5 @@ bytes/pixels и поддержку capture. Нельзя угадывать фо
 На частичных draw buffers полный кадр может требовать дополнительной памяти
 и перерисовки; это необходимо проверить на конкретной плате.
 
-[Нативный просмотр](readme_modules_files_css_mcp_ru.md#макет-и-настоящий-lvgl) ·
-[Designer](readme_maui_designer_ru.md) · [Статус MCP](readme_mcp_ru.md).
+[Нативный просмотр](readme_modules_files_css_mcp.ru.md#макет-и-настоящий-lvgl) ·
+[Designer](readme_maui_designer.ru.md) · [Статус MCP](readme_mcp.ru.md).

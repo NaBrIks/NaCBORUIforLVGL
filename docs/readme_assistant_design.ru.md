@@ -43,7 +43,7 @@ tools/assistant_reference.mjs теперь только проверяет по�
 
 Designer по умолчанию работает с HTTP/CBOR API устройства напрямую.
 В Windows отдельно доступны [встроенный MCP проигрывателя и внешний MCP
-Designer](readme_mcp_ru.md).
+Designer](readme_mcp.ru.md).
 
 ## Проверка результата
 
@@ -58,5 +58,5 @@ MCP Windows-проигрывателя самостоятельно отдаёт
 Для внешних совместимых endpoint Designer использует HTTP MCP-клиент SPLA.
 Референсы и журналы опытов остаются в игнорируемом `local/`.
 
-[Статус MCP](readme_mcp_ru.md) · [Кадр LVGL](readme_display_feedback_ru.md) ·
-[Designer](readme_maui_designer_ru.md).
+[Статус MCP](readme_mcp.ru.md) · [Кадр LVGL](readme_display_feedback.ru.md) ·
+[Designer](readme_maui_designer.ru.md).

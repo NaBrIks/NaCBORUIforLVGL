@@ -243,7 +243,7 @@ Windows-проигрыватель выполняет настоящий LVGL и
 его геометрии, состояний, стилей, биндингов и событий без перепрошивки МК.
 Память, FPS и аппаратные драйверы МК этим не проверяются.
 
-Windows-приложение предоставляет [постоянный HTTP API для того же MCP](readme_windows_api_ru.md).
+Windows-приложение предоставляет [постоянный HTTP API для того же MCP](readme_windows_api.ru.md).
 `npm run player` включает loopback API; JSON/CBOR также можно открыть файлом и
 включить `--watch`. Preview/save/show используют общий C++ ProjectService.
 Построенный редактор и его WebSocket работают с того же origin NaWServer. Для JSON/API
@@ -292,14 +292,14 @@ node examples/windows_player/test-catalog.mjs local/windows-no-history/Release/n
 с событиями/полями остаётся работоспособной без DataHistory.
 
 `test-catalog.mjs` проверяет скрытый LVGL через HTTP API NaWServer.
-[Встроенный MCP проигрывателя](readme_windows_native_mcp_ru.md) имеет отдельный
+[Встроенный MCP проигрывателя](readme_windows_native_mcp.ru.md) имеет отдельный
 набор проверок.
 Проверяются JSON/CBOR, группы/поля/байтовые бюджеты, динамическая регистрация и конфликт
 catalogRevision, запись контрола, mean, разрывы и освобождение истории, а также реальные
 пиксели графика. Это сквозная host-проверка, не аппаратная приёмка.
-Описание API: [реестр данных](readme_data_catalog_ru.md).
+Описание API: [реестр данных](readme_data_catalog.ru.md).
 
-Три новых варианта, авторский каталог и изменение дизайна через MCP описаны в [руководстве схем и стека стилей](readme_appearance_ru.md). Для registry-demo используйте `--schemes examples/windows_player/registry-schemes.json`; без этого параметра загружается старый стандартный каталог.
+Три новых варианта, авторский каталог и изменение дизайна через MCP описаны в [руководстве схем и стека стилей](readme_appearance.ru.md). Для registry-demo используйте `--schemes examples/windows_player/registry-schemes.json`; без этого параметра загружается старый стандартный каталог.
 
 ## Обнаружение CPU/GPU в системной демке, 2026-11-08
 
@@ -323,4 +323,4 @@ Windows-приложением. Проекты без системного эк�
 В меню «Оформление → Границы и глубина компонентов» включаются штатные стили:
 обводка 1 px и прозрачные тайлы 16×16 A1 с цифрами глубины 0–9. Тот же флаг доступен
 через существующий MCP action `ui.layout_debug`. [Устройство режима и проверка
-неизменности геометрии](readme_layout_debug_ru.md).
+неизменности геометрии](readme_layout_debug.ru.md).

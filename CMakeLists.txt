@@ -10,7 +10,7 @@ endforeach()
 idf_component_register(SRCS src/capabilities.cpp src/style_service.cpp src/style_runtime.cpp src/style_dispatch.cpp src/screen_runtime.cpp src/screen_decode.cpp src/widget_registry.cpp src/widget_dispatch.cpp
     src/screen_styles.cpp src/project_codec.cpp src/data_value.cpp src/data_registry.cpp src/data_catalog.cpp src/binding_expression.cpp src/screen_bindings.cpp src/screen_views.cpp INCLUDE_DIRS include REQUIRES ${NA_CBOR_LVGL_COMPONENT} ${NA_CBOR_CBOR_COMPONENT})
 target_compile_features(${COMPONENT_LIB} PUBLIC cxx_std_17)
-option(LVGL_CBOR_NAIVE_EMBEDDED "Use the experimental reader for trusted embedded screens" OFF)
+option(LVGL_CBOR_NAIVE_EMBEDDED "Skip additional checks for trusted embedded screens" OFF)
 if(LVGL_CBOR_NAIVE_EMBEDDED)
   target_compile_definitions(${COMPONENT_LIB} PRIVATE LVGL_CBOR_NAIVE_EMBEDDED)
 endif()

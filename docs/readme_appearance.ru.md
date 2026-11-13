@@ -95,4 +95,4 @@ ProjectService/HTTP API. Preview не пишет storage; save проверяе�
 регистрируется приложением отдельно. Для выбираемых вариантов переносимого UI
 используйте обычные страницы/ссылки и события либо существующий каталог схем.
 
-[Windows API](readme_windows_api_ru.md) · [Режимы MCP](readme_mcp_ru.md).
+[Windows API](readme_windows_api.ru.md) · [Режимы MCP](readme_mcp.ru.md).

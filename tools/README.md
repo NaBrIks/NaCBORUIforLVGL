@@ -1,6 +1,6 @@
 # Tools
 
-Каталог и файловая система проекта: `project_image.mjs` готовит ROM-базу TPMS/GPS и независимые файлы начального каталога; `build_project_fs.ps1` упаковывает SPIFFS 4 МиБ. `deploy_s3.ps1` по умолчанию пишет только приложение, а `-ProvisionFilesystem` явно заменяет FS и обновляет таблицу разделов. `project_persistence.mjs http://DEVICE prepare|verify` проверяет сохранение нового экрана/стиля через перезапуск. [Формат, пути, команды и ограничения](../docs/readme_project_storage_ru.md).
+Каталог и файловая система проекта: `project_image.mjs` готовит ROM-базу TPMS/GPS и независимые файлы начального каталога; `build_project_fs.ps1` упаковывает SPIFFS 4 МиБ. `deploy_s3.ps1` по умолчанию пишет только приложение, а `-ProvisionFilesystem` явно заменяет FS и обновляет таблицу разделов. `project_persistence.mjs http://DEVICE prepare|verify` проверяет сохранение нового экрана/стиля через перезапуск. [Формат, пути, команды и ограничения](../docs/readme_project_storage.ru.md).
 
 Биндинги: `binding_contract.mjs` проверяет общий контракт, `binding_fixtures.mjs` готовит пакеты настоящего JS-кодека для нативного теста.
 
@@ -8,7 +8,7 @@
 
 Модули и размеры: `check_optional_modules.mjs` собирает files-only/css-only/minimal и проверяет удаление JS и CSS отключённых модулей. `pack_assets.mjs` пишет размеры встроенных файлов в assets.manifest.generated.json; справочники ПК туда не входят. `check_embedded_assets.mjs http://DEVICE` побайтно сверяет все файлы с устройством. `build_s3.ps1 -WithoutEditor` собирает отдельный s3-no-editor без массивов сайта.
 
-См. [курсорный исполнитель экранов v3 и стили v2](../docs/readme_fast_executor_ru.md). `extension_fixtures.mjs` и `check_native_extensions.mjs` проверяют runtime-регистрацию через реальный C++-каталог.
+См. [курсорный исполнитель экранов v3 и стили v2](../docs/readme_fast_executor.ru.md). `extension_fixtures.mjs` и `check_native_extensions.mjs` проверяют runtime-регистрацию через реальный C++-каталог.
 
 - `node tools/build_style_matrix.mjs` — матрица LVGL 9.6.0 из официальных исходников с хешами источников; shared-сигнатуры совпадают с ABI.
 - `node tools/style_contract.mjs` — проверка фиксированного ABI и генерация C++/JS/таблиц индексов и полей редактора.

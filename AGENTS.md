@@ -1,5 +1,7 @@
 # NaCBORUIforLVGL: agent entry point
 
+- Publish English documentation as `name.md` and the corresponding Russian version as `name.ru.md`. Keep the same stem in both languages and update links when renaming documents.
+
 - Owner formatting decision 2026-10-30: maintained C/C++ uses the unchanged
   NaWServer Uncrustify profile, version 0.83.0_f. Read agents/code_style.md before
   edits and use uncrustify-check.cmd / uncrustify-apply.cmd, thin wrappers over
@@ -17,9 +19,9 @@
 
 - Public repository: documentation, examples, fixtures and screenshots must not disclose a developer's actual network topology, host/device identifiers, credentials or personal filesystem paths. Use neutral placeholders and reserved documentation addresses. Keep original deployment evidence and environment-specific diagnostics only in ignored local storage.
 
-- Owner authorized data bindings/events on 2026-10-22. Owner refinement 2026-10-23: Bluetooth libraries and their examples belong to their own projects, not this UI repository. Read docs/readme_bindings_ru.md and docs/adr/ADR_20261022_data-bindings-events.md; earlier binding deferrals are superseded. Application-owned DataRegistry exposes typed symbolic sources/actions. The generic editor uses those schemas; do not add Bluetooth implementations, library dependencies or scanner examples to this repository. Keep callback observations owned/bounded, serialize registry/LVGL work on the UI task, and preserve the previous full project when recompiling ABI fingerprints. Hardware flashing was authorized for this task; future unrelated flashing still needs an owner request.
+- Owner authorized data bindings/events on 2026-10-22. Owner refinement 2026-10-23: Bluetooth libraries and their examples belong to their own projects, not this UI repository. Read docs/readme_bindings.ru.md and docs/adr/ADR_20261022_data-bindings-events.md; earlier binding deferrals are superseded. Application-owned DataRegistry exposes typed symbolic sources/actions. The generic editor uses those schemas; do not add Bluetooth implementations, library dependencies or scanner examples to this repository. Keep callback observations owned/bounded, serialize registry/LVGL work on the UI task, and preserve the previous full project when recompiling ABI fingerprints. Hardware flashing was authorized for this task; future unrelated flashing still needs an owner request.
 
-- Owner decision 2026-10-22: use a whole Project JSON/CBOR document with screens, shared styles and manifest. Read docs/readme_projects_ru.md and docs/adr/ADR_20261022_project-service.md. Application-owned ProjectService loads screens by name, resolves a base plus one optional changes store, and exposes configurable storage/policy through optional HTTP/MCP adapters. Paths/media are configured in firmware code. Preview and explicit save are separate; connecting and auto-preview never persist. Project settings/file/device operations belong only on the Project page, not a permanent toolbar in every editor.
+- Owner decision 2026-10-22: use a whole Project JSON/CBOR document with screens, shared styles and manifest. Read docs/readme_projects.ru.md and docs/adr/ADR_20261022_project-service.md. Application-owned ProjectService loads screens by name, resolves a base plus one optional changes store, and exposes configurable storage/policy through optional HTTP/MCP adapters. Paths/media are configured in firmware code. Preview and explicit save are separate; connecting and auto-preview never persist. Project settings/file/device operations belong only on the Project page, not a permanent toolbar in every editor.
 
 - Owner requirement 2026-10-22: build a general-purpose editor, never a UI tailored to a particular application or demo component. Native component choices, names, method IDs, parameter forms and initial dimensions come from the device catalog through shared mechanisms. Do not add dedicated controls, name/ID-based branches, special ordering or custom editor forms for radar, speedometer or another individual native component. Keep such implementations and fixtures in optional example modules. A new native component supported by the shared parameter schema must be usable through registration and metadata without changing the editor. Any missing parameter shape must extend the common schema/form mechanism rather than introduce a component-specific workaround.
 
@@ -27,7 +29,7 @@
 
 - Owner UI refinements 2026-10-22: MCU open/save commands belong at the top of the Project page as visible labelled buttons. Use visible icon buttons for tree add/remove/reorder actions. Tree context menus add components from the common catalog and attach/detach named styles; drag-and-drop changes order/parent with cycle rejection. Styles use a left-hand named list with CRUD/context actions, never the former top selector.
 
-- Owner decision 2026-10-22 (latest): screen ABI v3 is a cursor-executed command stream. Opcode 0 creates a component and selects its native handler once; 1..255 are common commands; 256..65535 are local methods of that component. Execute nested CBOR bodies directly, with no intermediate command tree, method descriptors, signature tables or phase sorting on MCU. Styles remain ABI v2 with dense pointer arrays per signature and receive their own nested block. Preserve runtime native registration via WidgetRegistry. Screen v1/v2 wire compatibility is explicitly waived. Read docs/readme_fast_executor_ru.md and docs/adr/ADR_20261022_cursor-component-executor-v3.md.
+- Owner decision 2026-10-22 (latest): screen ABI v3 is a cursor-executed command stream. Opcode 0 creates a component and selects its native handler once; 1..255 are common commands; 256..65535 are local methods of that component. Execute nested CBOR bodies directly, with no intermediate command tree, method descriptors, signature tables or phase sorting on MCU. Styles remain ABI v2 with dense pointer arrays per signature and receive their own nested block. Preserve runtime native registration via WidgetRegistry. Screen v1/v2 wire compatibility is explicitly waived. Read docs/readme_fast_executor.ru.md and docs/adr/ADR_20261022_cursor-component-executor-v3.md.
 
 Read agents/architecture.md and docs/README.md before changes.
 
@@ -37,7 +39,7 @@ Read agents/architecture.md and docs/README.md before changes.
   edit registry/view JSON directly. Confirm `list_projects` identifies `nacborui`
   before mutations; an old session may still point to another workspace. Current
   maps are authored logical architecture, not an extracted C++ symbol graph.
-  See docs/readme_semaps_ru.md for startup, MCP scopes and verification.
+  See docs/readme_semaps.ru.md for startup, MCP scopes and verification.
 
 - Owner refinement 2026-10-22: keep code maximally modular. Each module owns one responsibility; keep App.vue as composition and presentation. Share validation and bidirectional value adapters instead of maintaining parallel implementations. Combining or deleting duplicate code while preserving behavior is encouraged.
 - Owner preference 2026-10-22: evaluate proposals before adopting them, especially ideas explicitly called proposals rather than commands. Explain advantages, disadvantages, suitability and how established the approach is. Treat the suggested mechanism as a design option; distinguish it from required behavior and make a reasoned recommendation.
@@ -49,9 +51,9 @@ Read agents/architecture.md and docs/README.md before changes.
 - Work in this project; preserve neighbouring repositories and existing user changes.
 - Application data and binding names remain symbolic UTF-8. The owner now authorizes numeric style-operation keys: the versioned contract in contracts/style-api-v2.json defines family-local signatures and method indices. Do not generalize these opcodes into arbitrary application-field IDs.
 - New screens must be loadable at runtime without rebuilding firmware. Bindings connect to capabilities already provided by the application.
-- Owner storage request 2026-10-22: keep the S3 filesystem in its final 4 MiB, preserve NVS/PHY/app offsets, and use a ROM TPMS/GPS demo plus one indexed filesystem changes layer. Discover independent screens/styles through ProjectService catalog metadata. Ordinary app updates must not reprovision the filesystem; preview/save stay separate. See docs/readme_project_storage_ru.md. Demo data is not live sensor integration.
+- Owner storage request 2026-10-22: keep the S3 filesystem in its final 4 MiB, preserve NVS/PHY/app offsets, and use a ROM TPMS/GPS demo plus one indexed filesystem changes layer. Discover independent screens/styles through ProjectService catalog metadata. Ordinary app updates must not reprovision the filesystem; preview/save stay separate. See docs/readme_project_storage.ru.md. Demo data is not live sensor integration.
 - Separate confirmed owner requirements, proposals and measured implementation facts. Do not invent benchmark results, versions or completed features.
-- Current agent rules live in agents/ in English. User-facing guides live in docs/readme_*_ru.md. Accepted ADRs are immutable; supersede them with a new ADR. Plans and ideas remain editable.
+- Current agent rules live in agents/ in English. User-facing guides live in docs/readme_*.ru.md. Accepted ADRs are immutable; supersede them with a new ADR. Plans and ideas remain editable.
 - Before creating, changing or assessing a UI, read and apply docs/ui-principles.md (the full owner UI standard), including the complete working overview requirement. Newer explicit owner instructions take precedence.
 - Keep transient generated files, local credentials and build outputs out of source control. Versioned contract derivatives are reviewable source artifacts. The owner-authorized S3 demo adapts GPL-3.0-only files from ESP32-yaidfws; retain provenance and licenses. Do not extend this license to independently authored core code or copy other third-party code implicitly.
 - Do not commit, push, configure remotes or publish without an owner request.
@@ -60,7 +62,7 @@ Read agents/architecture.md and docs/README.md before changes.
 ## Recommended development environment (owner clarification, 2026-10-26)
 
 The intended reproducible baseline is documented in
-[docs/readme_development_environment_ru.md](docs/readme_development_environment_ru.md).
+[docs/readme_development_environment.ru.md](docs/readme_development_environment.ru.md).
 Use username-independent paths and prefer shared versioned SDKs under the chosen
 PlatformIO packages directory. This is a recommendation/default, not a mandatory
 machine layout or a prohibition on other explicit configurations. Alternative
@@ -73,14 +75,14 @@ Do not silently change versions based on historical verification reports.
   Windows validation. Reverse events remain normal; only history is optional.
   Preserve styles/multiple selector references as part of full redesign through
   existing project MCP operations, including user-authored schemes. Read
-  docs/readme_data_catalog_ru.md. Android remains in plans. This iteration does
+  docs/readme_data_catalog.ru.md. Android remains in plans. This iteration does
   not authorize a new hardware acceptance claim or require touching NTP.
 
 - Owner request 2026-11-07: maintain a permanent Windows loopback HTTP API and
   project-scoped nacborui_windows MCP over existing services. Normal npm player
   enables port 5300; direct run.mjs needs --api/--api-port. Reuse ProjectService,
   DataRegistry and FileProjectStore; don't add another styling/storage engine.
-  Read docs/readme_windows_api_ru.md. Keep data raw CBOR outside control framing;
+  Read docs/readme_windows_api.ru.md. Keep data raw CBOR outside control framing;
   Windows persistent paths are UTF-8/wide-CRT. Never use port 443.
 
 ## Mandatory common stack — owner decision 2026-11-07
@@ -110,7 +112,7 @@ Only presentation/platform storage adapters belong here. Do not change SPLA or
 copy its engine sources. Until NuGet packages exist, use overridable ProjectReference
 paths and route all build artifacts into this repository's ignored local directory.
 Direct MCU MCP and voice input are outside this acceptance. The opt-in Windows Designer listener is documented below.
-Read docs/readme_maui_designer_ru.md before changing the integration.
+Read docs/readme_maui_designer.ru.md before changing the integration.
 
 ## No independent parallel subsystems — owner decision 2026-11-09
 

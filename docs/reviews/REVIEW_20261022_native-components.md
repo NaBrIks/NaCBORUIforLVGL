@@ -49,4 +49,4 @@
 
 На LCD оставлена демонстрация: FEED PUMP P-17 / RUN; BUFFER TANK T-04 / 72%; линия INTAKE 82%, FILTER 64%, OUTPUT 38%, AUTO/RUN. USB-камера физически подтвердила содержимое. Фото: `local/native-widgets-lcd.jpg` (1280×720). Для снимка временно уменьшена аппаратная экспозиция; исходный режим камеры восстановлен. Изображение не ретушировалось.
 
-Артефакты: `local/native-widgets-hardware.json`, `local/modules-device-assets.json`, `local/s3-deployment.json`, `local/native-widgets-*-tests.log`, `local/native-widget-fixtures/demo.json` и `.cbor`. Руководство: [readme_native_components_ru.md](../readme_native_components_ru.md).
+Артефакты: `local/native-widgets-hardware.json`, `local/modules-device-assets.json`, `local/s3-deployment.json`, `local/native-widgets-*-tests.log`, `local/native-widget-fixtures/demo.json` и `.cbor`. Руководство: [readme_native_components.ru.md](../readme_native_components.ru.md).

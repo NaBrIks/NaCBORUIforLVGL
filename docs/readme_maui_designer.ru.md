@@ -1,6 +1,6 @@
 # MAUI-конструктор: SPLA + Windows/Android
 
-[Подключения Designer](readme_designer_connections_ru.md): прямой API по
+[Подключения Designer](readme_designer_connections.ru.md): прямой API по
 умолчанию, два профиля MCP и USB для T-Display-S3 на Windows.
 [Реальная проверка OpenRouter на Windows/Android и исправление потока UI — 09.11.2026](reviews/REVIEW_20261109_maui-real-chat.md).
 
@@ -12,7 +12,7 @@
 Основной режим — прямой API: общие JS-кодеки работают локально без Node.
 Для двух MCP-профилей используется один клиент SPLA. Полное редактирование
 JSON доступно в прямом режиме. [Опциональный встроенный MCP проигрывателя
-Windows](readme_windows_native_mcp_ru.md) предоставляет свой каталог инструментов.
+Windows](readme_windows_native_mcp.ru.md) предоставляет свой каталог инструментов.
 
 HTTP/SSE/OpenAI-код клиента остаётся существующим SPLA.
 
@@ -56,7 +56,7 @@ JSON прикладывается как текст к сообщению, ка�
 Контракт действия `ui.layout_debug_options` принадлежит устройству.
 Designer вызывает его через прямой API, если действие объявлено в каталоге.
 Настройка диагностики не меняет сохранённый проект.
-[Контракт, стоимость и ограничения фигурных компонентов](readme_layout_debug_ru.md).
+[Контракт, стоимость и ограничения фигурных компонентов](readme_layout_debug.ru.md).
 
 ## Копирование кадра в буфер
 

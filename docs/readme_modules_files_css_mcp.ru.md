@@ -143,4 +143,4 @@ npm run build
 
 Designer по умолчанию работает с HTTP/CBOR API устройства напрямую.
 В Windows отдельно доступны [встроенный MCP проигрывателя и внешний MCP
-Designer](readme_mcp_ru.md).
+Designer](readme_mcp.ru.md).

@@ -10,4 +10,4 @@ Optional capabilities come from `/api/capabilities`; they restrict resources, co
 
 Screen ABI v3: the PC validates semantics and phase order, then command-stream.js emits nested arrays. Opcode 0 creates and selects a handler; common commands use 1..255, component-local methods 256..65535. Styles are separate nested blocks executed under style ABI v2. Array order survives CBOR map-key sorting. Runtime extension catalogs contain local methods, not signature indices.
 
-`decodeScreen` and `normalizeScreen` also accept capabilities. Declarative decoding rejects repeated methods and operation orders that the authoring format cannot preserve. Optional envelope `captions` records generated Button labels without adding a runtime opcode. See examples/native_widget and docs/readme_fast_executor_ru.md.
+`decodeScreen` and `normalizeScreen` also accept capabilities. Declarative decoding rejects repeated methods and operation orders that the authoring format cannot preserve. Optional envelope `captions` records generated Button labels without adding a runtime opcode. See examples/native_widget and docs/readme_fast_executor.ru.md.

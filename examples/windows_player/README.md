@@ -66,7 +66,7 @@ The application menu **Оформление: Кремовая → Цветова
 Кремовая, Изумрудная, Тёмная**, in the UI-standard order, with the current choice
 checked. The default catalog uses Cream. Custom catalogs may override ordinary
 role style properties, including radius/borders; the registry example provides
-Classic, Space and Pony variants. See [custom appearance](../../docs/readme_appearance_ru.md).
+Classic, Space and Pony variants. See [custom appearance](../../docs/readme_appearance.ru.md).
 
 The palette data in `../common/appearance/schemes.json` comes from TechnicalShell's standard color
 tokens. These are data values, not a copy of its CSS or frontend implementation.
@@ -208,10 +208,10 @@ Designer normally connects to this player using Direct API. To test the
 limited native MCP proof of concept, build with `LVGL_CBOR_NATIVE_MCP=ON`
 (default `OFF`) and start the player with the API enabled. NaWServer then
 serves `/mcp` on the same loopback address and port. Use the
-[native MCP build and verification guide](../../docs/readme_windows_native_mcp_ru.md)
+[native MCP build and verification guide](../../docs/readme_windows_native_mcp.ru.md)
 for its supported operations.
 
-[API guide](../../docs/readme_windows_api_ru.md).
+[API guide](../../docs/readme_windows_api.ru.md).
 
 ## Verification
 
@@ -354,7 +354,7 @@ snapshots and local measurements to ignored `local/windows-system`. Add
 `--require-gpu` after the optional executable argument to require working GPU
 load/memory counters on the acceptance machine.
 
-[Подробное руководство на русском](../../docs/readme_windows_player_ru.md)
+[Подробное руководство на русском](../../docs/readme_windows_player.ru.md)
 
 ## Grouped catalog, optional history and custom design
 
@@ -373,8 +373,8 @@ SystemMetrics histories remain independent. Test the OFF executable with
 For a new design, use Designer in Direct API mode to edit ordinary project styles
 and ordered component references, then preview or save the project.
 The optional native MCP proof of concept has its own verification guide.
-See [catalog/history](../../docs/readme_data_catalog_ru.md),
-[custom appearance via MCP](../../docs/readme_appearance_ru.md) and
+See [catalog/history](../../docs/readme_data_catalog.ru.md),
+[custom appearance via MCP](../../docs/readme_appearance.ru.md) and
 [validation](../../docs/reviews/REVIEW_20261107_data-catalog-history.md).
 
 ## Native graphics gallery
@@ -386,18 +386,18 @@ Run `npm run player:test-graphics` for hidden native pixel/animation acceptance.
 
 `LVGL_CBOR_GRAPHICS_GALLERY=ON` is the default Windows CMake profile; OFF excludes
 the extra native component/resources and heavy decoder/vector flags. MCU profiles
-are unchanged. See [formats, flags and validation](../../docs/readme_graphics_ru.md).
+are unchanged. See [formats, flags and validation](../../docs/readme_graphics.ru.md).
 
 A saved Windows project survives authored-base upgrades through the existing
 ProjectService and FileProjectStore. Legacy stores without a cached original base
 can use `--base-recovery original.json` once; an incorrect base never resets user
-changes. See [Windows storage and verification](../../docs/readme_windows_api_ru.md).
+changes. See [Windows storage and verification](../../docs/readme_windows_api.ru.md).
 
 NaWServer serves native display and pointer input at `/viewer` and the project
 editor at `/editor/`. Use the [SPLA-based Designer](../../tools/designer/README.md)
 for model-driven authoring. It carries the bilingual instructions and method
 references in `tools/designer/prompts`. See
-[display transport and MCP feedback](../../docs/readme_display_feedback_ru.md).
+[display transport and MCP feedback](../../docs/readme_display_feedback.ru.md).
 
 Upgrading an existing saved project preserves its old pages by design. If Settings
 was the unmodified old demo page, reset only its `screens/settings` override using

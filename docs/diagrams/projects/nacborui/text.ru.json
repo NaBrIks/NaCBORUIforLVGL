@@ -9,7 +9,7 @@
         "origin": "authored"
       },
       "doc": {
-        "v": "Логическая архитектура по текущему дереву. Web Editor и Designer разделяют PC-кодеки. На устройстве и Windows работают общие C++ сервисы и LVGL. Direct API передаёт CBOR через NaWServer. Нативный MCP Windows и внешний loopback Windows Designer опциональны. Режимы, ограничения и снимки описаны в docs/readme_mcp_ru.md и docs/readme_display_feedback_ru.md.",
+        "v": "Логическая архитектура по текущему дереву. Web Editor и Designer разделяют PC-кодеки. На устройстве и Windows работают общие C++ сервисы и LVGL. Direct API передаёт CBOR через NaWServer. Нативный MCP Windows и внешний loopback Windows Designer опциональны. Режимы, ограничения и снимки описаны в docs/readme_mcp.ru.md и docs/readme_display_feedback.ru.md.",
         "at": "2026-11-12T08:46:15Z",
         "origin": "authored"
       }
@@ -21,7 +21,7 @@
         "origin": "authored"
       },
       "doc": {
-        "v": "Реальный поток demo.speed: автономный таймер25Гц → owned CBOR event → UI publish_cbor → flush → биндинг/стрелка и общий WS адаптер. Clock/network идут тем же data_changed. Источник живёт вне страницы; page instance владеет подписками, inactive bindings на паузе. Browser bootstrap+WS не меняет авторскую модель. Ограничения: queue4, frame192, WS3584, latest10Гц. См. docs/readme_demo_events_ru.md и docs/reviews/REVIEW_20261028_demo-layout-data.md.",
+        "v": "Реальный поток demo.speed: автономный таймер25Гц → owned CBOR event → UI publish_cbor → flush → биндинг/стрелка и общий WS адаптер. Clock/network идут тем же data_changed. Источник живёт вне страницы; page instance владеет подписками, inactive bindings на паузе. Browser bootstrap+WS не меняет авторскую модель. Ограничения: queue4, frame192, WS3584, latest10Гц. См. docs/readme_demo_events.ru.md и docs/reviews/REVIEW_20261028_demo-layout-data.md.",
         "at": "2026-10-28T07:58:17Z",
         "origin": "authored"
       }

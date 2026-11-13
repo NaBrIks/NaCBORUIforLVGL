@@ -24,10 +24,11 @@ if formatter is not None:
 if profile == 14:
     arguments += f" -DBENCH_APP_STREAMS={app_streams}"
 environment = env.subst("$PIOENV")
-if environment in ("phases-og", "phases-os"):
+phase_optimizations = {"phases-og": "DEBUG", "phases-os": "SIZE", "phases-o2": "PERF"}
+if environment in phase_optimizations:
     if profile not in (2, 4):
         raise ValueError("Phase timing needs a minimal CBOR scene")
-    optimization = "SIZE" if environment == "phases-os" else "DEBUG"
+    optimization = phase_optimizations[environment]
     sdkconfig = project / f"sdkconfig.{environment}"
     setting = f"CONFIG_COMPILER_OPTIMIZATION_{optimization}=y"
     if not sdkconfig.exists():
@@ -39,6 +40,10 @@ if os.environ.get("NACBOR_BENCH_TRUSTED_CBOR") == "1":
     arguments += " -DBENCH_TRUSTED_CBOR=ON"
 if os.environ.get("NACBOR_BENCH_NAIVE_EMBEDDED") == "1":
     arguments += " -DLVGL_CBOR_NAIVE_EMBEDDED=ON"
+if os.environ.get("NACBOR_BENCH_NO_COMMAND_CHECKS") == "1":
+    if environment not in phase_optimizations or os.environ.get("NACBOR_BENCH_TRUSTED_CBOR") != "1":
+        raise ValueError("Compile-time check removal needs a phase-timed trusted embedded scene")
+    arguments += " -DBENCH_NO_COMMAND_CHECKS=ON"
 env.BoardConfig().update("build.cmake_extra_args", arguments)
 build.mkdir(parents=True, exist_ok=True)
 mode = f"{arguments}:{os.environ.get('NACBOR_BENCH_CACHED_COMPONENTS', '')}"
@@ -48,7 +53,7 @@ if not profile_file.exists() or profile_file.read_text() != mode:
     profile_file.write_text(mode)
 
 named_styles = os.environ.get("NACBOR_BENCH_NAMED_STYLES") == "1"
-if named_styles and (profile not in (2, 4) or environment not in ("phases-og", "phases-os")):
+if named_styles and (profile not in (2, 4) or environment not in phase_optimizations):
     raise ValueError("Named style comparison needs a minimal phase-timed CBOR scene")
 
 if 0 < profile < 14:

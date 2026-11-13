@@ -39,6 +39,6 @@ SPIFFS: раздел 4194304 B; полезный объём 3848081 B; заня�
 
 ## Код и свидетельства
 
-Руководство: ../readme_project_storage_ru.md; решение: ../adr/ADR_20261022_project-catalog.md. Код: include/lvgl_cbor/project_service.hpp, src/project_catalog_store.cpp, packages/project-codec/catalog.js, examples/s3_style_lab/project/demo.mjs, main/project_config.hpp. Подготовка/запись: tools/project_image.mjs, build_project_fs.ps1, deploy_s3.ps1. Обычный deploy не пишет FS; -ProvisionFilesystem явно заменяет весь её образ.
+Руководство: ../readme_project_storage.ru.md; решение: ../adr/ADR_20261022_project-catalog.md. Код: include/lvgl_cbor/project_service.hpp, src/project_catalog_store.cpp, packages/project-codec/catalog.js, examples/s3_style_lab/project/demo.mjs, main/project_config.hpp. Подготовка/запись: tools/project_image.mjs, build_project_fs.ps1, deploy_s3.ps1. Обычный deploy не пишет FS; -ProvisionFilesystem явно заменяет весь её образ.
 
 local/project-fs-hardware-final.log, project-hardware.json, project-persistence.json, project-persistence-final.log, project-fs-final-device.json, project-fs-module-symbols.json, s3-deployment.json, s3-partitions-after-fs.bin. Фото project-dashboard-final.jpg, project-radar.jpg. Снимки браузера project-filesystem-catalog.png и project-filesystem-styles.png. Экспорт: project-final-project.json/.cbor. Локальные файлы игнорируются Git. Коммит/публикация не выполнялись.

@@ -18,10 +18,10 @@ transfer or history rewrite by itself is not a relicensing operation.
 | Tabler SVG/CSS/webfont assets in `frontend/src/design/icons` | Upstream MIT; copyright 2020-2024 Paweł Kuna, original [LICENSE.txt](frontend/src/design/icons/LICENSE.txt). Do not replace with the project author's header. |
 | Windows gallery Tabler SVG in `examples/windows_player/assets/graphics/tabler` | Upstream MIT, copyright 2020-2026 Paweł Kuna; [full license](examples/windows_player/assets/graphics/tabler/LICENSE) and pinned/adaptation [NOTICE](examples/windows_player/assets/graphics/NOTICE.md) retained. |
 | Adapted T-Display-S3 panel parameters in `examples/lilygo_t_display_s3/main/board.cpp` | Upstream MIT, copyright 2024 Shenzhen Xinyuan Electronic Technology Co., Ltd.; full [NOTICE](examples/lilygo_t_display_s3/NOTICE) and file header retained. |
-| LVGL-derived API names/signatures/reference text in generated contracts/catalogs | Upstream LVGL MIT notice; provenance/SHA records and [source register](docs/readme_sources_ru.md). Generated files are not relabelled as solely project-authored. |
+| LVGL-derived API names/signatures/reference text in generated contracts/catalogs | Upstream LVGL MIT notice; provenance/SHA records and [source register](docs/readme_sources.ru.md). Generated files are not relabelled as solely project-authored. |
 | LVGL and TinyCBOR sources | External dependencies under their own MIT notices, not vendored here. |
 | Montserrat font data supplied by LVGL | Preserve the applicable font license from the selected LVGL dependency when distributing it; project headers do not replace font licenses. |
-| ESP-IDF and managed touch drivers | External dependencies with their own licenses/notices, including Apache-2.0; see [source register](docs/readme_sources_ru.md). |
+| ESP-IDF and managed touch drivers | External dependencies with their own licenses/notices, including Apache-2.0; see [source register](docs/readme_sources.ru.md). |
 | Vue, cborg, Vite and transitive npm dependencies | Their own package licenses; versions/integrities are recorded in lock files. |
 | Installed Windows Segoe UI | OS font is read at runtime, never copied into this repository or bundled. Windows licensing is not replaced by MIT. |
 | NaWServer | Separate owner project/dependency; use the license of the selected revision. |

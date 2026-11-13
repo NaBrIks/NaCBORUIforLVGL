@@ -394,7 +394,7 @@
         },
         "props": {
           "type": "object",
-          "description": "Параметры конкретного виджета; подробнее в readme_screen_model_ru.md",
+          "description": "Параметры конкретного виджета; подробнее в readme_screen_model.ru.md",
           "properties": {
             "text": {
               "type": "string"

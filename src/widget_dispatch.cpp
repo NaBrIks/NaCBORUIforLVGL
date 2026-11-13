@@ -3,7 +3,7 @@
 #include "cbor_reader.hpp"
 #include "lvgl_cbor/widget_execution.hpp"
 #include "screen_internal.hpp"
-#ifdef LVGL_CBOR_NAIVE_EMBEDDED
+#if defined(LVGL_CBOR_NAIVE_EMBEDDED) || defined(LVGL_CBOR_BENCH_NO_COMMAND_CHECKS)
 #include "screen_trusted_reader.hpp"
 #endif
 #include <algorithm>
@@ -30,6 +30,11 @@ namespace lvgl_cbor::detail
 
 		bool enter_command(CborValue &cursor, CborValue &fields, size_t &count, const DecodeContext &ctx)
 		{
+#ifdef LVGL_CBOR_BENCH_NO_COMMAND_CHECKS
+			(void)ctx;
+			count = 0;
+			return enter_embedded_command(cursor, fields);
+#else
 #ifdef LVGL_CBOR_NAIVE_EMBEDDED
 			if(ctx.trusted_embedded)
 			{
@@ -40,10 +45,17 @@ namespace lvgl_cbor::detail
 			(void)ctx;
 #endif
 			return enter(cursor, fields, count);
+#endif
 		}
 
 		bool command_arity(size_t actual, size_t expected, const DecodeContext &ctx)
 		{
+#ifdef LVGL_CBOR_BENCH_NO_COMMAND_CHECKS
+			(void)actual;
+			(void)expected;
+			(void)ctx;
+			return true;
+#else
 #ifdef LVGL_CBOR_NAIVE_EMBEDDED
 			if(ctx.trusted_embedded)
 				return true;
@@ -51,6 +63,7 @@ namespace lvgl_cbor::detail
 			(void)ctx;
 #endif
 			return actual == expected;
+#endif
 		}
 
 		bool leave(CborValue &cursor, CborValue &child)

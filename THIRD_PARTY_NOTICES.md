@@ -29,5 +29,5 @@ it does not change the license of ESP-IDF or the external touch-driver component
 - [LilyGO notice](examples/lilygo_t_display_s3/NOTICE): MIT, Shenzhen Xinyuan
   Electronic Technology Co., Ltd.; the adapted file header is retained.
 - LVGL reference/derived material, SDKs, fonts and npm dependencies: see the
-  complete scope/version [register](docs/readme_sources_ru.md). Their licenses
+  complete scope/version [register](docs/readme_sources.ru.md). Their licenses
   are not replaced with a project-author copyright header.

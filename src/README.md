@@ -17,4 +17,4 @@
 - `cbor_reader.hpp`, `screen_internal.hpp`: private implementation types.
 - `*_methods.inc`: generated from the versioned contracts; do not edit by hand.
 
-See [the Russian runtime guide](../docs/readme_screen_runtime_ru.md). No global mutable parser or instance registry; no LVGL property-name dispatch.
+See [the Russian runtime guide](../docs/readme_screen_runtime.ru.md). No global mutable parser or instance registry; no LVGL property-name dispatch.

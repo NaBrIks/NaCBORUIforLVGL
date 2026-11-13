@@ -1,7 +1,7 @@
 # Модульный редактор, файлы, CSS, MCP — 2026-10-22
 
 > Результаты MCP в этом отчёте относятся к прежней реализации.
-> Актуальные способы подключения описаны в [руководстве MCP](../readme_mcp_ru.md).
+> Актуальные способы подключения описаны в [руководстве MCP](../readme_mcp.ru.md).
 
 
 ## Результат
@@ -61,4 +61,4 @@ check_embedded_assets.mjs побайтно сверил каждый встро�
 - local/modules-hardware-smoke.json, modules-hardware-smoke.log, modules-device-assets.json.
 - local/modules-lcd-verified.jpg — снимок USB Video Device, 1280×720.
 
-Семантика/лимиты CSS, имена модулей и инструкции подключения: [руководство](../readme_modules_files_css_mcp_ru.md). Изменения не закоммичены и не отправлены.
+Семантика/лимиты CSS, имена модулей и инструкции подключения: [руководство](../readme_modules_files_css_mcp.ru.md). Изменения не закоммичены и не отправлены.

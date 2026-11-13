@@ -2,7 +2,7 @@
 
 Основной путь Designer — прямой API устройства. Общие JS-кодеки выполняются
 внутри приложения, а сеть — через его HttpClient. Node.js на телефоне не нужен.
-Подробности: [режимы подключения и USB](readme_designer_connections_ru.md).
+Подробности: [режимы подключения и USB](readme_designer_connections.ru.md).
 
 Два MCP-профиля используют один HTTP-клиент SPLA: встроенный endpoint целевой
 программы и явно заданный внешний совместимый endpoint. Выбор профиля не запускает
@@ -20,7 +20,7 @@ PoC предоставляет 12 инструментов для фактиче
 в native PoC не включён: для редактирования разметки используйте прямой режим
 Designer. Каталог не объявляет отсутствующие функции.
 
-[Сборка, ограничения и результаты Windows PoC](readme_windows_native_mcp_ru.md).
+[Сборка, ограничения и результаты Windows PoC](readme_windows_native_mcp.ru.md).
 Для прошивки S3 предусмотрено подключение по прямому HTTP/CBOR API.
 
 ## Внешний MCP Designer на Windows
@@ -33,7 +33,7 @@ Designer. Каталог не объявляет отсутствующие фу
 `get_authoring_instructions` возвращает полный английский комплект инструкций.
 `get_display_frame` возвращает завершённый кадр предпросмотра с метаданными сцены.
 [Запуск](../tools/designer/README.md#optional-mcp-for-external-agents-on-windows) ·
-[снимок после навигации](readme_maui_designer_ru.md#снимок-через-mcp-designer).
+[снимок после навигации](readme_maui_designer.ru.md#снимок-через-mcp-designer).
 
 ## Владение
 

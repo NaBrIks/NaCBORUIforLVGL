@@ -26,7 +26,7 @@ rendering and local project.
 ## Build
 
 The PowerShell build helper uses Windows directory junctions. Prepare
-[PlatformIO and ESP-IDF 5.5.6](../../docs/readme_development_environment_ru.md),
+[PlatformIO and ESP-IDF 5.5.6](../../docs/readme_development_environment.ru.md),
 install Node.js, and run `npm ci` from the repository root. Supply the pinned
 ESP-IDF components `lvgl__lvgl` 9.6.0 and `espressif__cbor` 0.6.1~4.
 If those components already exist under the Waveshare example's
@@ -135,7 +135,7 @@ read during flush; if its pixels have already been reused in the DMA strip,
 LVGL redraws just that band for capture. The same capture buffer is leased
 to one sender at a time. The previous frame remains visible during transfer. `view_input` takes display-pixel coordinates
 `x`, `y` and a boolean `pressed` and uses the shared LVGL pointer.
-See [Designer connections](../../docs/readme_designer_connections_ru.md#t-display-s3-по-usb).
+See [Designer connections](../../docs/readme_designer_connections.ru.md#t-display-s3-по-usb).
 
 Hardware measurements on one T-Display-S3 with RGB565. Times run from
 the host request to completion. Deltas were isolated speed updates of

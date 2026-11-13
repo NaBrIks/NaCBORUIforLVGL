@@ -35,7 +35,7 @@ node examples/windows_player/run.mjs examples/windows_player/registry-demo.json 
 
 График `registry-demo.json` требует сборку с DataHistory. Внешний вид может
 создаваться из поддерживаемых компонентов/ресурсов и произвольных собственных
-`project.styles`. [Три примера и стек стилей](readme_appearance_ru.md) используют
+`project.styles`. [Три примера и стек стилей](readme_appearance.ru.md) используют
 тот же исполнитель. Палитры приложения и документ проекта имеют отдельную
 область действия; редактирование проекта не регистрирует скрытно новый пункт
 меню Appearance.
@@ -130,15 +130,15 @@ Wildcard CORS и публикация в LAN не включаются. У эт�
 Проверять нужно настоящий NaWServer/LVGL с отдельным тестовым store:
 preview/save/show, конфликт revision, data receipts, ошибки команд, перезапуск,
 UTF-8 пути и WebSocket-события. Для `/mcp` есть отдельный
-[набор проверок с включённой и выключенной опцией](readme_windows_native_mcp_ru.md#проверка).
+[набор проверок с включённой и выключенной опцией](readme_windows_native_mcp.ru.md#проверка).
 
 ## Подключение MCP-клиента
 
 Designer по умолчанию использует прямой HTTP/CBOR API. Для отдельной проверки
 можно включить `LVGL_CBOR_NATIVE_MCP=ON` и получить `/mcp` на том же адресе.
-См. [сборку и каталог инструментов](readme_windows_native_mcp_ru.md).
+См. [сборку и каталог инструментов](readme_windows_native_mcp.ru.md).
 
-Внешний агент может также подключиться к [локальному MCP Designer](readme_mcp_ru.md#внешний-mcp-designer-на-windows).
+Внешний агент может также подключиться к [локальному MCP Designer](readme_mcp.ru.md#внешний-mcp-designer-на-windows).
 
 ## Обновление базового проекта Windows
 
@@ -176,5 +176,5 @@ ProjectService. Сохраняется весь эффективный прое�
 Протоколы и Windows CORS/Origin gate не менялись.
 
 Подробности и команда браузерной проверки:
-[модули редактора](readme_modules_files_css_mcp_ru.md#макет-и-настоящий-lvgl),
+[модули редактора](readme_modules_files_css_mcp.ru.md#макет-и-настоящий-lvgl),
 [приёмка](reviews/REVIEW_20261109_editor-native-preview.md).

@@ -236,9 +236,9 @@ SVG-парсер LVGL ориентирован на SVG Tiny 1.2, а не на �
 браузера. Официальные примеры загрузки и draw-event пути приведены в
 [SVG Decoder](https://lvgl.io/docs/open/libs/image_support/svg).
 
-Дополнительно: [нативные компоненты](readme_native_components_ru.md),
-[биндинги](readme_bindings_ru.md),
-[Windows-проигрыватель](readme_windows_player_ru.md).
+Дополнительно: [нативные компоненты](readme_native_components.ru.md),
+[биндинги](readme_bindings.ru.md),
+[Windows-проигрыватель](readme_windows_player.ru.md).
 
 ## Реализованная Windows-галерея
 
@@ -327,7 +327,7 @@ OK/STOP управляют `demo.running`; +1/+10/СБРОС вызывают `d
 
 В Настройках остались выбор схемы и обычные demo-биндинги: генератор, уровень
 и счётчик. Параметров LLM, поля ключа, чата и источников assistant.* в демке нет.
-Внешний [Designer на SPLA](readme_maui_designer_ru.md) работает с этим
+Внешний [Designer на SPLA](readme_maui_designer.ru.md) работает с этим
 приложением через прямой API, каталог данных и поток кадров. `/viewer` показывает
 настоящий LVGL и принимает указатель, `/editor/` открывает общий редактор проекта.
 
@@ -468,6 +468,6 @@ controller-pressed, controller-mcp-triangle и settings-dark снимки; по 
 LLM-агент удалён из демки 09.11.2026 вместе с настройками, шифрованием ключа
 и браузерными формами. Просмотр/ввод, обычный редактор и сохранение проекта сохранены.
 Отдельный посредник удалён 10.11.2026. [Опциональный MCP проигрывателя
-и внешний endpoint Designer](readme_mcp_ru.md) имеют разные каталоги инструментов.
+и внешний endpoint Designer](readme_mcp.ru.md) имеют разные каталоги инструментов.
 Нативные тесты `test-graphics`, `test-native-view`, `test-layout-debug`
 и `test-base-migration` работают без запросов к провайдеру.

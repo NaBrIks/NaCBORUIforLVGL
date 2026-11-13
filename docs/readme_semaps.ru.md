@@ -11,9 +11,9 @@ checkout. Модель `nacborui` содержит четыре авторски
 | `v_readme_live_flow` | Схема для README. Поток значений в LVGL и обратный путь действий |
 
 Это авторская логическая модель, не автоматически извлечённый C++ symbol graph.
-Контракты описаны в [проектах](readme_projects_ru.md),
-[биндингах](readme_bindings_ru.md), [композиции](readme_page_composition_ru.md)
-и [демособытиях](readme_demo_events_ru.md).
+Контракты описаны в [проектах](readme_projects.ru.md),
+[биндингах](readme_bindings.ru.md), [композиции](readme_page_composition.ru.md)
+и [демособытиях](readme_demo_events.ru.md).
 
 ## Запуск SeMaps
 
@@ -43,5 +43,5 @@ semaps check nacboruiforlvgl.semaps
 
 Модель учитывает Direct API, опциональный встроенный MCP Windows и
 loopback MCP Designer с завершёнными кадрами предпросмотра.
-Подробности в [руководстве MCP](readme_mcp_ru.md) и
-[описании передачи кадров](readme_display_feedback_ru.md).
+Подробности в [руководстве MCP](readme_mcp.ru.md) и
+[описании передачи кадров](readme_display_feedback.ru.md).

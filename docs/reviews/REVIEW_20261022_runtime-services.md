@@ -2,7 +2,7 @@
 
 Дата: 2026-10-22. Рабочая папка: ../lvgl-cbor.
 
-Реализованы возможности подключённой прошивки, общий StyleService, проверяющие двусторонние кодеки, общая проверка документа и разделение App.vue. Подробности и границы: [руководство](../readme_runtime_services_ru.md), [ADR](../adr/ADR_20261022_lvgl-cbor_capabilities-style-service-roundtrip.md).
+Реализованы возможности подключённой прошивки, общий StyleService, проверяющие двусторонние кодеки, общая проверка документа и разделение App.vue. Подробности и границы: [руководство](../readme_runtime_services.ru.md), [ADR](../adr/ADR_20261022_lvgl-cbor_capabilities-style-service-roundtrip.md).
 
 ## Выполненные проверки
 

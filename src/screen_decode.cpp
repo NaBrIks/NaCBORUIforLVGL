@@ -5,9 +5,6 @@
 #include "lvgl_cbor/screen_contract.hpp"
 #include "screen_internal.hpp"
 #include "screen_phase_profile.hpp"
-#ifdef LVGL_CBOR_NAIVE_EMBEDDED
-#include "screen_trusted_reader.hpp"
-#endif
 #include <cstdio>
 #include <cstring>
 namespace lvgl_cbor::detail
@@ -55,16 +52,7 @@ namespace lvgl_cbor::detail
 		};
 		CborValue fields[FieldCount];
 		uint32_t seen = 0;
-#ifdef LVGL_CBOR_NAIVE_EMBEDDED
-		if(validation == ScreenValidation::TrustedEmbedded)
-		{
-			if(!read_embedded_fields(map, names, fields, seen))
-				return fail(c, "embedded_fields");
-		}
-		else
-#else
 		if(validation != ScreenValidation::TrustedEmbedded)
-#endif
 		{
 			bool keys_ok = true;
 			CborValue it;
@@ -108,10 +96,8 @@ namespace lvgl_cbor::detail
 		}
 
 		auto get = [&](Field index, CborValue &value) {
-#ifndef LVGL_CBOR_NAIVE_EMBEDDED
 			if(validation == ScreenValidation::TrustedEmbedded)
 				return field(map, names[index], value);
-#endif
 
 			if(!(seen & (1u << index)))
 				return false;
@@ -176,18 +162,22 @@ namespace lvgl_cbor::detail
 
 			for(size_t i = 0; i < count; ++i)
 			{
+#ifndef LVGL_CBOR_BENCH_NO_COMMAND_CHECKS
 				const char *const keys_allowed[]{"id", "methods"};
-				CborValue methods, id;
-				char name[64];
-				lv_style_t *style;
 				const bool check_keys =
 #ifdef LVGL_CBOR_NAIVE_EMBEDDED
 				    validation != ScreenValidation::TrustedEmbedded;
 #else
 				    true;
 #endif
-				if((check_keys && !keys(item, keys_allowed, 2)) || !field(item, "id", id) ||
-				    !text(id, name, sizeof(name)) || !name[0] || !field(item, "methods", methods))
+				if(check_keys && !keys(item, keys_allowed, 2))
+					return fail(c, "style_definition");
+#endif
+				CborValue methods, id;
+				char name[64];
+				lv_style_t *style;
+				if(!field(item, "id", id) || !text(id, name, sizeof(name)) ||
+				    !name[0] || !field(item, "methods", methods))
 					return fail(c, "style_definition");
 
 				if(!own_style(methods, c, style))

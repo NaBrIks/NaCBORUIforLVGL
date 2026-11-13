@@ -15,4 +15,4 @@ const authoringDocument = decodeStyle(bytes);
 
 Methods taking native pointers use registered resource names. The native application validates each name/type before calling LVGL. Conversion success alone does not establish that a resource exists on the device or that a method visibly affects a particular widget.
 
-See `../../docs/readme_style_protocol_ru.md` for complete version, lifetime and replacement semantics. This independently authored package has no publication license selected yet; it is private workspace code.
+See `../../docs/readme_style_protocol.ru.md` for complete version, lifetime and replacement semantics. This independently authored package has no publication license selected yet; it is private workspace code.

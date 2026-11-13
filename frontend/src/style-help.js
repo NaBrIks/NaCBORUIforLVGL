@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Oleg Kozhevnikov
 // Concise Russian explanations, paraphrased from LVGL 9.6.0 style-properties.mdx
-// and main-modules/draw/draw_descriptors.mdx. Sources: docs/readme_property_help_ru.md.
+// and main-modules/draw/draw_descriptors.mdx. Sources: docs/readme_property_help.ru.md.
 const descriptions={
  width:'Ширина объекта, px.',height:'Высота объекта, px.',length:'Длина, смысл которой зависит от виджета; например, длина делений Scale. На обычном Label не заменяет width/height.',
  min_width:'Нижний предел ширины, px.',max_width:'Верхний предел ширины, px.',min_height:'Нижний предел высоты, px.',max_height:'Верхний предел высоты, px.',

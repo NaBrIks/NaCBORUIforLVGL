@@ -39,7 +39,7 @@ conversation history and does not replace or save the device project.
 Direct API uses the application's bridge to the shared WebView codecs. Device
 MCP and MCP proxy profiles use the same SPLA HTTP client. The optional Windows
 player MCP and the opt-in Windows Designer listener are described in the
-[connection guide](../../../docs/readme_designer_connections_ru.md).
+[connection guide](../../../docs/readme_designer_connections.ru.md).
 
 SPLA owns the session, negotiated protocol, cancellation and tool invocation.
 No substitute process or HTTP listener is started by this core. Discovery must

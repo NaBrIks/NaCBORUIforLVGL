@@ -1,12 +1,12 @@
 # NaCBORUI Designer (Windows / Android)
 
-Актуальные три режима подключения: [Прямой API / MCP устройства / MCP-прокси](../../docs/readme_designer_connections_ru.md). Основной — прямой API с JS-кодеками внутри приложения, без Node.js.
+Актуальные три режима подключения: [Прямой API / MCP устройства / MCP-прокси](../../docs/readme_designer_connections.ru.md). Основной — прямой API с JS-кодеками внутри приложения, без Node.js.
 The standard configuration application shipped with NaCBORUIforLVGL,
 not a demo-specific editor. Sources live in `tools/designer`.
 
 A Blazor Hybrid presentation over the existing SPLA libraries. The app runs the
 conversation, model requests and MCP tools locally through SPLA. The inbound Windows MCP endpoint is opt-in. The browser editor remains available from the Windows LVGL demo.
-See [Russian guide](../../docs/readme_maui_designer_ru.md).
+See [Russian guide](../../docs/readme_maui_designer.ru.md).
 
 ## Source dependencies
 

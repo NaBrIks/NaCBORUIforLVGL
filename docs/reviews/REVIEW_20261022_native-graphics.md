@@ -34,4 +34,4 @@ COMx, ESP32-S3 rev0.2, MAC `02:00:00:00:00:01`, Flash 16 MB / PSRAM 8 MB пов�
 
 На LCD оставлены RUN, спидометр **87 km/h** и работающий радар с четырьмя целями. USB-камера сняла два разных положения луча: `local/native-graphics-lcd-1.jpg` и `local/native-graphics-lcd.jpg`, оба 1280×720. Содержимое физического LCD проверено, вращение видно по разным углам в двух снимках. Исходный режим экспозиции камеры восстановлен. Фотографии не ретушировались.
 
-Доступны файлы импорта `local/native-widget-fixtures/demo.json` и `demo.cbor`; руководство [readme_native_components_ru.md](../readme_native_components_ru.md). Изменения не закоммичены.
+Доступны файлы импорта `local/native-widget-fixtures/demo.json` и `demo.cbor`; руководство [readme_native_components.ru.md](../readme_native_components.ru.md). Изменения не закоммичены.
