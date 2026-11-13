@@ -6,6 +6,8 @@
 
 ## Запуск и примеры
 
+- Подключение из Git через ESP-IDF и Node.js — [EN](readme_git_dependency.md) · [RU](readme_git_dependency.ru.md).
+
 - [Каталог примеров](../examples/README.md)
 - [Среда разработки](readme_development_environment.ru.md)
 - [Windows: проигрыватель и системная телеметрия](readme_windows_player.ru.md)

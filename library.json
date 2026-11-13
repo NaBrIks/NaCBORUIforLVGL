@@ -1,0 +1,18 @@
+{
+  "name": "NaCBORUIforLVGL",
+  "version": "0.1.0",
+  "description": "CBOR-based UI definitions for LVGL",
+  "keywords": ["lvgl", "cbor", "embedded", "ui"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NaBrIks/NaCBORUIforLVGL.git"
+  },
+  "license": "MIT",
+  "frameworks": ["espidf"],
+  "platforms": ["espressif32"],
+  "build": {
+    "includeDir": "include",
+    "srcDir": "src",
+    "flags": ["-std=gnu++17", "-DLVGL_CBOR_NUMBER_FORMAT=2"]
+  }
+}
