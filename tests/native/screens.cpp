@@ -78,6 +78,29 @@ int main(int argc, char **argv)
 		{"montserrat_28", "const lv_font_t *", &lv_font_montserrat_28},
 		{"montserrat_20", "const lv_font_t *", &lv_font_montserrat_20}};
 	{
+		using namespace lvgl_cbor;
+		using Array = DataValue::Array;
+		auto slider_packet = [](int64_t value) {
+			const Array slider{0, 4, Array{Array{1, "slider"}, Array{256, Array{0, 100}}, Array{257, value}}};
+			return encode_data_value(DataValue::Object{
+				{"v", screen_contract_version}, {"kind", "screen"}, {"id", "integer-range"},
+				{"name", "integer-range"}, {"abi", screen_contract_sha256}, {"style_abi", contract_sha256},
+				{"size", Array{800, 480}}, {"root", Array{0, 0, Array{DataValue(slider)}}}});
+		};
+		ScreenRuntime runtime(resources, 2);
+		ScreenReply reply;
+		const auto in_int32 = slider_packet(125);
+		require(runtime.load(in_int32.data(), in_int32.size(), reply), "checked slider accepts int32");
+		require(runtime.find("slider") && lv_slider_get_value(runtime.find("slider")) == 100,
+		    "LVGL clamps an int32 value to the slider range");
+		const auto packet = slider_packet(int64_t{4294967296} + 25);
+		require(!runtime.load(packet.data(), packet.size(), reply), "checked slider rejects an out-of-range int32");
+		require(runtime.load(packet.data(), packet.size(), reply, {}, ScreenValidation::TrustedEmbedded),
+		    "trusted slider value skips the narrowing range check");
+		require(runtime.find("slider") && lv_slider_get_value(runtime.find("slider")) == 25,
+		    "LVGL sees the narrowed value");
+	}
+	{
 		lvgl_cbor::ScreenRuntime runtime(resources, 2);
 		lvgl_cbor::ScreenReply reply;
 		for(size_t count : {size_t(2), size_t(256)})

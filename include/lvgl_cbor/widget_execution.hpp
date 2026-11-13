@@ -57,6 +57,29 @@ namespace lvgl_cbor
 			return true;
 		}
 
+		inline bool read_text(const CborValue &value, const char *&out, WidgetContext &context,
+		    CborValue *next)
+		{
+			if(!cbor_value_is_text_string(&value))
+				return false;
+
+			size_t size;
+			const auto error = cbor_value_is_length_known(&value) ? cbor_value_get_string_length(&value, &size) :
+			    cbor_value_calculate_string_length(&value, &size);
+			if(error != CborNoError || size >= context.max_bytes - context.storage.bytes)
+				return false;
+
+			std::string text(size, '\0');
+			size_t capacity = size + 1;
+			if(cbor_value_copy_text_string(&value, text.data(), &capacity, next) != CborNoError)
+				return false;
+
+			context.storage.bytes += size + 1;
+			context.storage.strings.push_back(std::move(text));
+			out = context.storage.strings.back().c_str();
+			return true;
+		}
+
 		template <class T> bool read(const CborValue &value, T &out, WidgetContext &context)
 		{
 			if constexpr(std::is_same_v<T, bool>)
@@ -65,22 +88,7 @@ namespace lvgl_cbor
 			}
 			else if constexpr(std::is_same_v<T, const char *>)
 			{
-				size_t size;
-				if(!cbor_value_is_text_string(&value) ||
-				    cbor_value_calculate_string_length(&value, &size) != CborNoError ||
-				    size + 1 > context.max_bytes - context.storage.bytes)
-					return false;
-
-				std::string text(size + 1, '\0');
-				size_t capacity = size + 1;
-				if(cbor_value_copy_text_string(&value, text.data(), &capacity, nullptr) != CborNoError)
-					return false;
-
-				text.resize(size);
-				context.storage.bytes += size + 1;
-				context.storage.strings.push_back(std::move(text));
-				out = context.storage.strings.back().c_str();
-				return true;
+				return read_text(value, out, context, nullptr);
 			}
 			else if constexpr(std::is_same_v<T, const void *>)
 			{
@@ -138,6 +146,21 @@ namespace lvgl_cbor
 			}
 			else
 			{
+				if(context.trusted_embedded)
+				{
+					if(!cbor_value_is_integer(&value))
+						return false;
+
+					uint64_t bits;
+					cbor_value_get_raw_integer(&value, &bits);
+					// CBOR stores negative n as -1 - n. Complement avoids signed overflow.
+					if(cbor_value_is_negative_integer(&value))
+						bits = ~bits;
+
+					out = static_cast<T>(bits);
+					return true;
+				}
+
 				int64_t number;
 				if(!read_integer(value, number))
 					return false;
@@ -174,6 +197,8 @@ namespace lvgl_cbor
 		{
 			if constexpr(std::is_same_v<T, PointSpan>)
 				return consume_points(value, out, context);
+			else if constexpr(std::is_same_v<T, const char *>)
+				return read_text(value, out, context, &value);
 			else
 				return read(value, out, context) && cbor_value_advance(&value) == CborNoError;
 		}

@@ -309,7 +309,8 @@ namespace lvgl_cbor
 				return fail("display_size_mismatch");
 		}
 
-		detail::DecodeContext execution{plan, resources_, resource_count_, limits_, reply};
+		detail::DecodeContext execution{plan, resources_, resource_count_, limits_, reply,
+		    validation == ScreenValidation::TrustedEmbedded};
 		if(!LVGL_CBOR_MEASURE_PHASE("objects", detail::execute_screen(plan.program, parent, execution, activate)))
 		{
 			if(!reply.error[0])

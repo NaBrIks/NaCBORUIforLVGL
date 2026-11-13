@@ -29,6 +29,7 @@ namespace lvgl_cbor
 		size_t resource_count;
 		WidgetStorage &storage;
 		size_t max_bytes;
+		bool trusted_embedded{}; // Only for static arguments in an explicitly trusted screen.
 	};
 // A handler consumes exactly one CBOR argument value; cursor then points past it.
 	using WidgetExecutor = bool (*)(lv_obj_t *, uint16_t, CborValue &, WidgetContext &);

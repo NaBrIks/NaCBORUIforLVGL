@@ -46,6 +46,7 @@ namespace lvgl_cbor::detail
 		size_t resource_count;
 		ScreenLimits limits;
 		ScreenReply &reply;
+		bool trusted_embedded{};
 		const ScreenNode *failed_node{};
 	};
 	WidgetFactory widget_factory(unsigned id);

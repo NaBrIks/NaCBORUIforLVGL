@@ -122,7 +122,7 @@ namespace lvgl_cbor::detail
 		    WidgetExecutor handler, DecodeContext &ctx)
 		{
 			WidgetContext values{ctx.resources, ctx.resource_count, ctx.plan.widget_storage,
-				                 ctx.limits.text_bytes};
+				                 ctx.limits.text_bytes, ctx.trusted_embedded};
 			if(method == screen_command_set_id)
 			{
 				char id[64];
