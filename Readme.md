@@ -11,6 +11,22 @@ can load different UI projects.
 
 ![Web Editor and Designer produce one UI project for the shared LVGL runtime on ESP32 and Windows](docs/images/readme-overview.png)
 
+## Two interfaces on one board
+
+**Hardware** — Waveshare ESP32-S3-Touch-LCD-7 Rev 1.2, 7-inch RGB touchscreen, 800 × 480.
+
+An AI agent built the cockpit and loaded it onto the running board through the
+project API. **Only the UI project changed. The firmware stayed the same.**
+Press **FLT** to switch the entire interface to the cockpit, or **STD** to return
+to the stock dashboard. **LCD / LED** changes the pressure readout style.
+
+| Stock TPMS / GPS dashboard | Cockpit added live by the agent |
+| --- | --- |
+| ![Stock TPMS / GPS dashboard rendered by LVGL on the S3](docs/images/readme-s3-classic.png) | ![Cockpit with pressure instruments, radar and radio panel rendered by LVGL on the same S3](docs/images/readme-s3-cockpit.png) |
+
+Both frames came directly from LVGL on the board. Local IP addresses are hidden.
+[How the demo works](examples/s3_style_lab/cockpit.md)
+
 ## Capabilities and selection
 
 | Feature | What it provides |
